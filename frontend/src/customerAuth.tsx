@@ -53,9 +53,11 @@ export function CustomerAuthProvider({ children }: { children: React.ReactNode }
     if (token === "demo_customer_token") {
       setCustomer({
         id: 1,
+        customerCode: "MDX-1",
         name: "Dr. Jamshid Aliyev",
         phone: "+998 90 123 45 67",
         organization: "Shifo Medikal Servis MCHJ",
+        balance: 1500000,
         hasPassword: true,
       });
       setLoading(false);

@@ -52,9 +52,8 @@ class BankEmailParser:
     # Masalan: "*1234", "karta: 8600 **** 5678"
     CARD_PATTERN = r"(?:karta|card|schet|pan)[^\d]*(\*{2,4}\d{4}|\d{4}\*{4,8}\d{4}|\*{0,4}\d{4})"
 
-    # Medax buyurtma kodi (agar mijoz izohda yozgan bo'lsa):
-    # Masalan: "MDX-8392", "Buyurtma: 8392"
-    ORDER_CODE_PATTERN = r"\b(MDX-[A-Z0-9]{4,8})\b"
+    # Medax kodi (Mijoz ID kodi: MDX-1, Sessiya kodi: MDX-T1029 yoki Buyurtma kodi: MDX-PAYTEST1)
+    ORDER_CODE_PATTERN = r"\b(MDX-(?:T\d{4,8}|\d{1,8}|[A-Z0-9]{4,10}))\b"
 
     @classmethod
     def clean_amount(cls, raw: str) -> Optional[float]:

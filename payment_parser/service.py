@@ -103,18 +103,18 @@ def process_payment(payment: dict):
     print(f"   Karta    : {payment.get('card_last4') or 'Noma\'lum'}")
     print(f"   Buyurtma : {code or 'Topilmadi'}")
 
-    if not code:
-        print("⚠️ Ogohlantirish: Xat matnida Medax buyurtma kodi (MDX-...) topilmadi. Avto-tasdiqlash o'tkazib yuborildi.")
+    if not code and not amount:
+        print("⚠️ Ogohlantirish: Xat matnida summa ham, Medax kodi ham topilmadi. O'tkazib yuborildi.")
         return
 
     print(f"🚀 Medax serveriga so'rov yuborilmoqda: {MEDAX_API_URL} ...")
     res = notify_medax_backend(payment)
 
     if res.get("ok"):
-        print(f"✅ MUVAFFAQIShIYAT: Buyurtma {code} avtomatik to'landi va tasdiqlandi!")
-        print(f"   Mijoz: {res.get('customerName')} | Yangi holati: {res.get('status')}")
+        print(f"✅ MUVAFFAQIYAT: To'lov muvaffaqiyatli qabul qilindi!")
+        print(f"   Xabar: {res.get('message')} | Mijoz: {res.get('customerName') or '-'}")
     else:
-        print(f"❌ Xatolik: {res.get('error') or res.get('message') or res}")
+        print(f"ℹ️ Natija: {res.get('message') or res.get('error') or res}")
 
 
 def run_live_loop():
