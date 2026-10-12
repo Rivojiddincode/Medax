@@ -45,8 +45,10 @@ export function Layout() {
   const { theme, toggleTheme } = useTheme();
   const { lang, setLang, t } = useI18n();
   const isApp = useIsAppMode();
-  const [onboardingDone, setOnboardingDone] = useState(() => {
-    return localStorage.getItem("medax_onboarding_completed") === "1";
+  // Ilovada kirmagan foydalanuvchiga BIRINCHI BO'LIB Onboarding chiqadi!
+  // Onboarding tugagach yoki o'tkazib yuborilgach, KEYIN Kirish oynasi ochiladi.
+  const [onboardStep, setOnboardStep] = useState<"onboard" | "login">(() => {
+    return sessionStorage.getItem("medax_onboard_step") === "login" ? "login" : "onboard";
   });
 
   if (loading) {
@@ -58,22 +60,29 @@ export function Layout() {
     );
   }
 
-  // 1. FAQAT ILOVADA: Yangi foydalanuvchi birinchi marta kirganda 4 sahifalik premium onboarding
-  if (isApp && !onboardingDone && !customer) {
+  // 1. FAQAT ILOVADA: Kirmagan foydalanuvchiga BIRINCHI BO'LIB 4 sahifalik Onboarding chiqadi
+  if (isApp && !customer && onboardStep === "onboard") {
     return (
       <AppOnboarding
         onComplete={() => {
-          localStorage.setItem("medax_onboarding_completed", "1");
-          setOnboardingDone(true);
+          sessionStorage.setItem("medax_onboard_step", "login");
+          setOnboardStep("login");
         }}
       />
     );
   }
 
-  // 2. FAQAT ILOVADA: Ilovaga faqat ro'yxatdan o'tib / kirib kiriladi.
+  // 2. FAQAT ILOVADA: Onboardingdan so'ng KEYIN Kirish / Ro'yxatdan o'tish oynasi chiqadi.
   // Saytga (kompyuter / veb brauzer) kirganda esa mehmonlar xohlagancha bemalol ko'rishi mumkin!
   if (isApp && !customer) {
-    return <CustomerAuthGate />;
+    return (
+      <CustomerAuthGate
+        onShowOnboarding={() => {
+          sessionStorage.removeItem("medax_onboard_step");
+          setOnboardStep("onboard");
+        }}
+      />
+    );
   }
 
   return (

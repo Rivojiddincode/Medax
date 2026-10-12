@@ -8,7 +8,11 @@ import { TurnstileWidget } from "./TurnstileWidget";
 
 type GateMode = "login" | "register" | "forgot_sms";
 
-export function CustomerAuthGate() {
+interface CustomerAuthGateProps {
+  onShowOnboarding?: () => void;
+}
+
+export function CustomerAuthGate({ onShowOnboarding }: CustomerAuthGateProps = {}) {
   const { sendOtp, verifyOtp, loginWithPassword } = useCustomerAuth();
   const { lang } = useI18n();
 
@@ -593,11 +597,16 @@ export function CustomerAuthGate() {
             className="link-btn"
             style={{ fontSize: 13, opacity: 0.88 }}
             onClick={() => {
-              localStorage.removeItem("medax_onboarding_completed");
-              window.location.reload();
+              if (onShowOnboarding) {
+                onShowOnboarding();
+              } else {
+                localStorage.removeItem("medax_onboarding_completed");
+                sessionStorage.removeItem("medax_onboard_step");
+                window.location.reload();
+              }
             }}
           >
-            ✦ Medax afzalliklari va ilova haqida tanishuv (Onboarding) →
+            ✦ Medax ilova tanishtiruvini qayta ko'rish (Onboarding) →
           </button>
         </div>
       </div>
