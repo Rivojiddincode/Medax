@@ -572,13 +572,18 @@ export default function Cart() {
                 </div>
 
                 <div className="field">
-                  <label htmlFor="ord-org">Tibbiy muassasa / Klinika / Tashkilot (ixtiyoriy)</label>
+                  <label htmlFor="ord-org">
+                    Tashkilot / Klinika yoki Shaxs turi{" "}
+                    <span style={{ fontSize: 12, fontWeight: "normal", color: "var(--ink2)" }}>
+                      (Ixtiyoriy — Jismoniy shaxs bo'lsangiz bo'sh qoldiring)
+                    </span>
+                  </label>
                   <input
                     id="ord-org"
                     type="text"
                     value={organization}
                     onChange={(e) => setOrganization(e.target.value)}
-                    placeholder="Masalan: City Med Markazi MCHJ"
+                    placeholder="Masalan: Jismoniy shaxs (yoki City Med MCHJ)"
                   />
                 </div>
 

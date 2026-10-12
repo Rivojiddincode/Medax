@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 
 interface DepositItem {
   id: number;
@@ -34,7 +34,19 @@ interface CustomerItem {
 }
 
 export default function AdminPaymentsPage() {
-  const [tab, setTab] = useState<"deposits" | "customers">("deposits");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialTab = searchParams.get("tab") === "customers" ? "customers" : "deposits";
+  const [tab, setTab] = useState<"deposits" | "customers">(initialTab);
+
+  useEffect(() => {
+    const currentTab = searchParams.get("tab") === "customers" ? "customers" : "deposits";
+    setTab(currentTab);
+  }, [searchParams]);
+
+  const switchTab = (newTab: "deposits" | "customers") => {
+    setTab(newTab);
+    setSearchParams(newTab === "customers" ? { tab: "customers" } : {});
+  };
 
   // Deposits state
   const [deposits, setDeposits] = useState<DepositItem[]>([]);
@@ -186,16 +198,16 @@ export default function AdminPaymentsPage() {
           <button
             type="button"
             className={`btn sm ${tab === "deposits" ? "btn-primary-sheen" : "ghost"}`}
-            onClick={() => setTab("deposits")}
+            onClick={() => switchTab("deposits")}
           >
             💳 To'ldirish so'rovlari
           </button>
           <button
             type="button"
             className={`btn sm ${tab === "customers" ? "btn-primary-sheen" : "ghost"}`}
-            onClick={() => setTab("customers")}
+            onClick={() => switchTab("customers")}
           >
-            👥 Mijozlar & Balanslar
+            👥 Ro'yxatdan o'tgan mijozlar & Balanslar
           </button>
         </div>
       </div>
