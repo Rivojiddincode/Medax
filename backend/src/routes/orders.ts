@@ -145,17 +145,24 @@ ordersRouter.post("/", orderIpLimiter, optionalCustomerAuth, async (req, res) =>
   for (const i of body.items) merged.set(i.productId, Math.min(100, (merged.get(i.productId) || 0) + i.quantity));
   const items = [...merged].map(([productId, quantity]) => ({ productId, quantity }));
 
-  // Mahsulotlar mavjudligini tekshiramiz
+  // Mahsulotlar mavjudligini tekshiramiz (narxlari bilan birga)
   const products = await prisma.product.findMany({
     where: { id: { in: items.map((i) => i.productId) }, isActive: true },
-    select: { id: true, name: true },
+    select: { id: true, name: true, priceFrom: true },
   });
   if (products.length !== items.length) throw new HttpError(400, "Baʻzi mahsulotlar endi mavjud emas. Roʻyxatni yangilang.");
   const names = new Map(products.map((p) => [p.id, p.name]));
+  const prices = new Map(products.map((p) => [p.id, p.priceFrom ? Number(p.priceFrom) : 0]));
+
+  // Jami buyurtma summasini hisoblaymiz
+  const totalAmount = items.reduce((sum, item) => sum + (prices.get(item.productId) || 0) * item.quantity, 0);
 
   // Mehmon bo'lsa, OTP kodini tekshiramiz
   let otpRecordId: number | null = null;
   if (!req.customer) {
+    if (body.paymentMethod === "wallet_balance") {
+      throw new HttpError(400, "Ichki balansdan to'lash uchun avval tizimga kiring.");
+    }
     if (!body.code) throw new HttpError(400, "SMS tasdiqlash kodini kiriting.");
     const otp = await prisma.otpCode.findFirst({
       where: { phone, usedAt: null, expiresAt: { gt: new Date() } },
@@ -172,7 +179,7 @@ ordersRouter.post("/", orderIpLimiter, optionalCustomerAuth, async (req, res) =>
 
   const orderCode = "MDX-" + crypto.randomBytes(3).toString("hex").toUpperCase();
 
-  // ATOMAR TRANZAKSIYA: Limit tekshirish, OTP sarflash va Buyurtma yaratish bir vaqtda poygasiz (race-condition free) bajariladi
+  // ATOMAR TRANZAKSIYA: Limit tekshirish, Balans yechish, OTP sarflash va Buyurtma yaratish bir vaqtda bajariladi
   await prisma.$transaction(async (tx) => {
     // 1. Atomar limit tekshiruvi
     await checkOrderLimits(phone, items, tx);
@@ -190,26 +197,56 @@ ordersRouter.post("/", orderIpLimiter, optionalCustomerAuth, async (req, res) =>
             organization: body.organization || "",
           },
         });
+        cust = await tx.customer.update({
+          where: { id: cust.id },
+          data: { customerCode: `MDX-${cust.id}` },
+        });
       }
       customerId = cust.id;
     }
 
-    // 3. OTP kodni ishlatilgan deb belgilaymiz
+    // 3. Agar to'lov usuli "Ichki balans" bo'lsa, mijoz balansini tekshiramiz va yechamiz
+    let orderStatus: "NEW" | "CONFIRMED" = "NEW";
+    let managerNote = "";
+
+    if (body.paymentMethod === "wallet_balance") {
+      const currentCust = await tx.customer.findUnique({ where: { id: customerId } });
+      if (!currentCust) throw new HttpError(404, "Mijoz topilmadi");
+
+      if (currentCust.balance < totalAmount) {
+        throw new HttpError(
+          400,
+          `Balansingizda mablag' yetarli emas. Kerakli summa: ${totalAmount.toLocaleString("ru-RU")} so'm, Sizning balansingiz: ${currentCust.balance.toLocaleString("ru-RU")} so'm.`
+        );
+      }
+
+      await tx.customer.update({
+        where: { id: customerId },
+        data: { balance: { decrement: totalAmount } },
+      });
+
+      orderStatus = "CONFIRMED";
+      managerNote = `[HAMYON-TO'LOVI]: Ichki balansdan to'liq to'landi. Yechilgan summa: ${totalAmount.toLocaleString("ru-RU")} UZS. Vaqt: ${new Date().toISOString()}`;
+    }
+
+    // 4. OTP kodni ishlatilgan deb belgilaymiz
     if (otpRecordId) {
       await tx.otpCode.update({ where: { id: otpRecordId }, data: { usedAt: new Date() } });
     }
 
     const flags = await customerFlags(phone, tx);
 
-    // 4. Buyurtmani alohida manzillar va to'lov usuli maydonlari bilan saqlaymiz
+    // 5. Buyurtmani saqlaymiz
     await tx.order.create({
       data: {
         code: orderCode,
         customerName: body.name,
         phone,
+        status: orderStatus,
         organization: body.organization,
         deliveryAddress: body.deliveryAddress,
-        paymentMethod: body.paymentMethod,
+        paymentMethod: body.paymentMethod === "wallet_balance" ? "Ichki hamyon (Balansdan to'landi)" : body.paymentMethod,
+        managerNote: managerNote || undefined,
         comment: body.comment,
         ip,
         flags,

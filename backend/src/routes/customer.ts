@@ -462,8 +462,8 @@ customerRouter.post("/deposit/create", requireCustomerAuth, async (req, res) => 
       status: deposit.status,
       expiresAt: deposit.expiresAt,
       // To'lov uchun rekvizitlar (foydalanuvchi bevosita ko'radi)
-      cardNumber: "8600 5704 1234 5678", // Medax hisob kartasi
-      cardHolder: "MEDAX MCHJ (P. RIVOJIDDIN)",
+      cardNumber: config.paymentCardNumber,
+      cardHolder: config.paymentCardHolder,
     },
   });
 });

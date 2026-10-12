@@ -13,7 +13,7 @@ type CheckoutStage = "cart" | "phone" | "otp" | "checkout" | "done";
 export default function Cart() {
   const { lang, t } = useI18n();
   const cart = useCart();
-  const { customer, token, sendOtp, verifyOtp } = useCustomerAuth();
+  const { customer, token, sendOtp, verifyOtp, refreshCustomer } = useCustomerAuth();
   const startedAt = useRef(Date.now());
 
   // Stages: cart -> (if not logged in: phone -> otp -> checkout) -> (if logged in: checkout) -> done
@@ -170,6 +170,7 @@ export default function Cart() {
 
       setOrderCode(res.code);
       cart.clear();
+      refreshCustomer();
       setStage("done");
     } catch (err) {
       setError((err as ApiError).message || "Buyurtmani rasmiylashtirishda xatolik yuz berdi");
@@ -612,6 +613,48 @@ export default function Cart() {
 
                 <h3 className="section-subhead" style={{ marginTop: 24 }}>3. To'lov usuli</h3>
                 <div className="payment-options-grid">
+                  {/* 1. Ichki hamyon (Balansdan to'lash) */}
+                  {customer && (
+                    <label
+                      className={`payment-card ${paymentMethod === "wallet_balance" ? "active" : ""}`}
+                      style={{
+                        border: paymentMethod === "wallet_balance" ? "2px solid #0284c7" : "1px solid var(--line)",
+                        background: paymentMethod === "wallet_balance" ? "#f0f9ff" : undefined,
+                      }}
+                    >
+                      <input
+                        type="radio"
+                        name="payment_opt"
+                        value="wallet_balance"
+                        checked={paymentMethod === "wallet_balance"}
+                        onChange={(e) => setPaymentMethod(e.target.value)}
+                      />
+                      <div className="pay-card-icon">💳</div>
+                      <div className="pay-card-text">
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <strong>Shaxsiy hamyon (Balansdan to'lash)</strong>
+                          <span
+                            style={{
+                              fontSize: 12,
+                              fontWeight: 700,
+                              background: (customer.balance || 0) >= totalAmount ? "#dcfce7" : "#fee2e2",
+                              color: (customer.balance || 0) >= totalAmount ? "#15803d" : "#b91c1c",
+                              padding: "2px 8px",
+                              borderRadius: 6,
+                            }}
+                          >
+                            Balans: {(customer.balance || 0).toLocaleString("ru-RU")} so'm
+                          </span>
+                        </div>
+                        <span>
+                          {(customer.balance || 0) >= totalAmount
+                            ? "Balansingiz yetarli! Buyurtma to'lovi darhol avtomatik tasdiqlanadi ✓"
+                            : `Mablag' yetarli emas (Yetishmayotgan: ${(totalAmount - (customer.balance || 0)).toLocaleString("ru-RU")} so'm)`}
+                        </span>
+                      </div>
+                    </label>
+                  )}
+
                   <label className={`payment-card ${paymentMethod === "bank_transfer" ? "active" : ""}`}>
                     <input
                       type="radio"
