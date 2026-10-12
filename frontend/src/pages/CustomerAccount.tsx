@@ -302,7 +302,43 @@ export default function CustomerAccount() {
             )}
           </div>
           <div>
-            <h1>{customer?.name}</h1>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+              <h1>{customer?.name}</h1>
+              {customer && (
+                <span
+                  style={{
+                    background: "var(--brand, #0284c7)",
+                    color: "#fff",
+                    padding: "3px 10px",
+                    borderRadius: 8,
+                    fontSize: 12,
+                    fontWeight: 700,
+                    letterSpacing: 0.5,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 6,
+                  }}
+                  title="Sizning shaxsiy Medax hisob ID raqamingiz"
+                >
+                  ID: {customer.customerCode || `MDX-${customer.id}`}
+                  <button
+                    type="button"
+                    onClick={() => copyToClipboard(customer.customerCode || `MDX-${customer.id}`, "cid")}
+                    style={{
+                      background: "transparent",
+                      border: "none",
+                      color: "#fff",
+                      cursor: "pointer",
+                      padding: 0,
+                      fontSize: 11,
+                      opacity: 0.9,
+                    }}
+                  >
+                    {copiedField === "cid" ? "✓" : "📋"}
+                  </button>
+                </span>
+              )}
+            </div>
             <div className="account-meta">
               {customer?.organization && (
                 <span className="meta-item">
@@ -557,6 +593,42 @@ export default function CustomerAccount() {
               }}
             >
               🔄 Balansni yangilash
+            </button>
+          </div>
+
+          {/* Doimiy Shaxsiy ID bilan tezkor to'ldirish info-bloki */}
+          <div
+            style={{
+              background: "var(--card, #fff)",
+              border: "1.5px dashed var(--brand, #0284c7)",
+              borderRadius: 16,
+              padding: "18px 24px",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: 14,
+            }}
+          >
+            <div>
+              <div style={{ fontSize: 13, color: "var(--ink2)", fontWeight: 600 }}>
+                💡 Doimiy Shaxsiy ID orqali to'g'ridan-to'g'ri to'ldirish:
+              </div>
+              <div style={{ fontSize: 14, color: "var(--ink)", marginTop: 4 }}>
+                Sizning doimiy ID kodingiz:{" "}
+                <b style={{ color: "var(--brand, #0284c7)", fontSize: 16 }}>
+                  {customer?.customerCode || `MDX-${customer?.id}`}
+                </b>
+                . Istalgan vaqtda kartaga pul o'tkazganda izohga shu kodni yozsangiz, balansingiz avtomatik to'ldiriladi!
+              </div>
+            </div>
+            <button
+              type="button"
+              className="btn sm ghost"
+              onClick={() => copyToClipboard(customer?.customerCode || `MDX-${customer?.id}`, "cid2")}
+              style={{ borderRadius: 10, fontWeight: 700 }}
+            >
+              {copiedField === "cid2" ? "Nusxalandi ✓" : "ID dan nusxa olish 📋"}
             </button>
           </div>
 

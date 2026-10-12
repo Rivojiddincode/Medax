@@ -24,6 +24,7 @@ interface DepositItem {
 
 interface CustomerItem {
   id: number;
+  customerCode?: string;
   name: string;
   phone?: string;
   organization?: string;
@@ -356,7 +357,11 @@ export default function AdminPaymentsPage() {
                 ) : (
                   customers.map((c) => (
                     <tr key={c.id}>
-                      <td>#{c.id}</td>
+                      <td>
+                        <span style={{ fontWeight: 800, color: "var(--brand, #0284c7)" }}>
+                          {c.customerCode || `MDX-${c.id}`}
+                        </span>
+                      </td>
                       <td>
                         <b>{c.name}</b>
                       </td>

@@ -179,13 +179,19 @@ customerRouter.post("/auth/verify-otp", authLimiter, async (req, res) => {
         ...(passwordHash ? { passwordHash } : {}),
       },
     });
-  } else if (passwordHash || name || organization) {
+    // MDX-1, MDX-2... ketma-ketlikda ID biriktiramiz
+    customer = await prisma.customer.update({
+      where: { id: customer.id },
+      data: { customerCode: `MDX-${customer.id}` },
+    });
+  } else if (passwordHash || name || organization || !customer.customerCode) {
     customer = await prisma.customer.update({
       where: { id: customer.id },
       data: {
         ...(passwordHash ? { passwordHash } : {}),
         ...(name ? { name } : {}),
         ...(organization !== undefined ? { organization } : {}),
+        ...(!customer.customerCode ? { customerCode: `MDX-${customer.id}` } : {}),
       },
     });
   }
@@ -196,10 +202,12 @@ customerRouter.post("/auth/verify-otp", authLimiter, async (req, res) => {
     token,
     customer: {
       id: customer.id,
+      customerCode: customer.customerCode || `MDX-${customer.id}`,
       name: customer.name,
       phone: customer.phone,
       organization: customer.organization,
       avatar: customer.avatar,
+      balance: customer.balance,
       hasPassword: Boolean(customer.passwordHash),
     },
   });
@@ -240,10 +248,12 @@ customerRouter.post("/auth/login", authLimiter, async (req, res) => {
     token,
     customer: {
       id: customer.id,
+      customerCode: customer.customerCode || `MDX-${customer.id}`,
       name: customer.name,
       phone: customer.phone,
       organization: customer.organization,
       avatar: customer.avatar,
+      balance: customer.balance,
       hasPassword: true,
     },
   });
@@ -251,10 +261,11 @@ customerRouter.post("/auth/login", authLimiter, async (req, res) => {
 
 // 4. Joriy mijoz ma'lumotlari
 customerRouter.get("/auth/me", requireCustomerAuth, async (req, res) => {
-  const customer = await prisma.customer.findUnique({
+  let customer = await prisma.customer.findUnique({
     where: { id: req.customer!.id },
     select: {
       id: true,
+      customerCode: true,
       name: true,
       phone: true,
       organization: true,
@@ -265,6 +276,16 @@ customerRouter.get("/auth/me", requireCustomerAuth, async (req, res) => {
     },
   });
   if (!customer) throw new HttpError(404, "Mijoz topilmadi");
+
+  // Agar mavjud mijozda hali customerCode bo'lmasa, darhol MDX-{id} qilib biriktiramiz
+  if (!customer.customerCode) {
+    const updated = await prisma.customer.update({
+      where: { id: customer.id },
+      data: { customerCode: `MDX-${customer.id}` },
+    });
+    customer.customerCode = updated.customerCode;
+  }
+
   const { passwordHash, ...rest } = customer;
   res.json({ customer: { ...rest, hasPassword: Boolean(passwordHash) } });
 });

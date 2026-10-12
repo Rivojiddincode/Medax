@@ -551,6 +551,7 @@ adminRouter.get("/customers", async (req, res) => {
   const where: Prisma.CustomerWhereInput = {};
   if (q.search) {
     where.OR = [
+      { customerCode: { contains: q.search, mode: "insensitive" } },
       { name: { contains: q.search, mode: "insensitive" } },
       { phone: { contains: q.search, mode: "insensitive" } },
       { organization: { contains: q.search, mode: "insensitive" } },
@@ -566,6 +567,7 @@ adminRouter.get("/customers", async (req, res) => {
       take: 30,
       select: {
         id: true,
+        customerCode: true,
         name: true,
         phone: true,
         organization: true,

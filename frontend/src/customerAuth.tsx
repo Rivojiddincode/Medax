@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 
 export interface Customer {
   id: number;
+  customerCode?: string;
   name: string;
   phone?: string | null;
   organization?: string | null;

@@ -133,6 +133,7 @@ model Customer {
   organization String?   @default("")
   avatar       String?
   passwordHash String?
+  customerCode String?   @unique // Masalan: MDX-1, MDX-2, ...
   balance      Int       @default(0)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
@@ -140,6 +141,7 @@ model Customer {
   deposits     DepositRequest[]
 
   @@index([phone])
+  @@index([customerCode])
 }
 
 enum DepositStatus {

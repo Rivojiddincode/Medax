@@ -239,7 +239,32 @@ ordersRouter.post("/payment-webhook", async (req, res) => {
   const numericAmount = amount ? parseInt(String(amount).replace(/\D/g, ""), 10) : 0;
   const note = `[AVTO-TO'LOV]: Bank orqali to'lov qabul qilindi. Summa: ${amount || numericAmount} ${currency || "UZS"}, Vaqt: ${paidAt || new Date().toISOString()}, Karta: ${cardLast4 || "Noma'lum"}, Manba: ${rawSender || "Bank"}`;
 
-  // 1. Agar kod bor bo'lsa va MDX-T bilan boshlansa (Balans to'ldirish)
+  // 1. Agar to'lov izohida doimiy mijoz ID kodi bo'lsa (Masalan: MDX-1, MDX-2...)
+  if (orderCode && String(orderCode).toUpperCase().match(/^MDX-\d+$/)) {
+    const custCode = String(orderCode).toUpperCase();
+    const customer = await prisma.customer.findUnique({
+      where: { customerCode: custCode },
+    });
+
+    if (customer && numericAmount > 0) {
+      await prisma.customer.update({
+        where: { id: customer.id },
+        data: { balance: { increment: numericAmount } },
+      });
+
+      return res.json({
+        ok: true,
+        type: "CUSTOMER_DIRECT_TOPUP",
+        matched: true,
+        customerCode: custCode,
+        customerName: customer.name,
+        creditedAmount: numericAmount,
+        message: `Mijoz (${custCode}) balansi ${numericAmount} so'mga to'ldirildi ✓`,
+      });
+    }
+  }
+
+  // 2. Agar kod bor bo'lsa va MDX-T bilan boshlansa (Sessiyali balans to'ldirish)
   if (orderCode && String(orderCode).toUpperCase().startsWith("MDX-T")) {
     const deposit = await prisma.depositRequest.findUnique({
       where: { code: String(orderCode).toUpperCase() },
