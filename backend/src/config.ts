@@ -61,4 +61,5 @@ export const config = {
   dailySmsBudget: Number(process.env.DAILY_SMS_BUDGET || 250), // butun server bo'yicha kunlik max SMS
   dailyIpSmsLimit: Number(process.env.DAILY_IP_SMS_LIMIT || 8), // 1 ta IP dan kunlik max SMS
   hourlyPhoneOtpLimit: Number(process.env.HOURLY_PHONE_OTP_LIMIT || 4), // 1 ta raqamga soatlik max OTP
+  paymentWebhookSecret: process.env.PAYMENT_WEBHOOK_SECRET || "medax_payment_secret_2026",
 };

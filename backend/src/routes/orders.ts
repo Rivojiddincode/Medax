@@ -227,3 +227,49 @@ ordersRouter.post("/", orderIpLimiter, optionalCustomerAuth, async (req, res) =>
 
   res.status(201).json({ ok: true, code: orderCode });
 });
+
+// Bank/Email to'lov xabarnomasi qabul qilish va buyurtmani avtomat tasdiqlash
+ordersRouter.post("/payment-webhook", async (req, res) => {
+  const { secret, orderCode, amount, currency, paidAt, cardLast4, rawSender } = req.body;
+
+  if (secret !== config.paymentWebhookSecret) {
+    throw new HttpError(403, "Noto'g'ri maxfiy webhook kaliti.");
+  }
+
+  if (!orderCode) {
+    throw new HttpError(400, "Buyurtma kodi talab qilinadi.");
+  }
+
+  const order = await prisma.order.findUnique({
+    where: { code: String(orderCode).toUpperCase() },
+    include: { items: true },
+  });
+
+  if (!order) {
+    throw new HttpError(404, `Buyurtma topilmadi: ${orderCode}`);
+  }
+
+  if (order.status === "DONE") {
+    return res.json({ ok: false, message: "Buyurtma allaqachon yetkazib berilgan." });
+  }
+
+  const note = `[AVTO-TO'LOV]: Bank pochtasi orqali to'lov tasdiqlandi. Summa: ${amount} ${currency || "UZS"}, Vaqt: ${paidAt || new Date().toISOString()}, Karta: ${cardLast4 || "Noma'lum"}, Manba: ${rawSender || "Bank"}`;
+
+  const updated = await prisma.order.update({
+    where: { id: order.id },
+    data: {
+      status: "CONFIRMED",
+      paymentMethod: order.paymentMethod || "Bank o'tkazmasi (Avtomatlashtirilgan)",
+      managerNote: order.managerNote ? `${order.managerNote}\n${note}` : note,
+    },
+  });
+
+  res.json({
+    ok: true,
+    matched: true,
+    code: updated.code,
+    status: updated.status,
+    customerName: updated.customerName,
+    message: "Buyurtma to'lovi muvaffaqiyatli qabul qilindi va tasdiqlandi ✓",
+  });
+});
