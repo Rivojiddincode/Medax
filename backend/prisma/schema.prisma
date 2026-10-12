@@ -133,11 +133,41 @@ model Customer {
   organization String?   @default("")
   avatar       String?
   passwordHash String?
+  balance      Int       @default(0)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   orders       Order[]
+  deposits     DepositRequest[]
 
   @@index([phone])
+}
+
+enum DepositStatus {
+  PENDING
+  CONFIRMED
+  EXPIRED
+  CANCELED
+}
+
+model DepositRequest {
+  id           Int           @id @default(autoincrement())
+  code         String        @unique // e.g. MDX-T1001
+  customerId   Int
+  customer     Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  baseAmount   Int           // Foydalanuvchi kiritgan summa: 100000
+  diffAmount   Int           @default(0) // 10..99 so'mlik unikal farq (masalan 27)
+  finalAmount  Int           // To'lanishi kerak bo'lgan aniq summa: 100027
+  status       DepositStatus @default(PENDING)
+  expiresAt    DateTime      // 10 daqiqadan so'ng expire bo'ladi
+  paidAt       DateTime?
+  cardLast4    String?
+  rawEmailNote String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([status, expiresAt])
+  @@index([finalAmount, status])
+  @@index([customerId])
 }
 
 model OrderItem {

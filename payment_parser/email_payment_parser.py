@@ -149,11 +149,14 @@ class EmailPaymentFetcher:
             return []
 
         email_ids = response[0].split()
-        print(f"Topilgan yangi to'lov xatlari soni: {len(email_ids)}")
+        total_unseen = len(email_ids)
+        # So'nggi 15 ta o'qilmagan xatni tekshiramiz (eski xatlarni tekshirib qotib qolmasligi uchun)
+        recent_ids = email_ids[-15:]
+        print(f"O'qilmagan xatlar: jami {total_unseen} ta, eng so'nggi {len(recent_ids)} tasi tekshirilmoqda...")
 
         parsed_payments = []
 
-        for e_id in email_ids:
+        for e_id in recent_ids:
             _, msg_data = mail.fetch(e_id, "(RFC822)")
             for response_part in msg_data:
                 if isinstance(response_part, tuple):

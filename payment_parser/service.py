@@ -133,8 +133,8 @@ def run_live_loop():
         return
 
     fetcher = EmailPaymentFetcher(IMAP_HOST, EMAIL_USER, EMAIL_PASS, IMAP_PORT)
-    print(f"\n[INFO] Medax To'lov Qorovuli ishga tushdi! Har {POLL_INTERVAL}s da pochtani tekshiradi.")
-    print("To'xtatish uchun: Ctrl + C bosing.\n")
+    print(f"\n[INFO] Medax To'lov Qorovuli ishga tushdi ({EMAIL_USER})!")
+    print(f"Har {POLL_INTERVAL}s da pochtani tekshiradi. To'xtatish uchun: Ctrl + C bosing.\n")
 
     while True:
         try:
@@ -145,6 +145,17 @@ def run_live_loop():
             print(f"[XATO] Pochtani tekshirishda xatolik: {e}")
 
         time.sleep(POLL_INTERVAL)
+
+
+def run_once():
+    """Bitta tekshirish o'tkazib natijani chiqaradi"""
+    fetcher = EmailPaymentFetcher(IMAP_HOST, EMAIL_USER, EMAIL_PASS, IMAP_PORT)
+    print(f"\n[INFO] Pochta tekshirilmoqda ({EMAIL_USER})...")
+    payments = fetcher.fetch_unseen_emails()
+    if not payments:
+        print("[OK] Hozircha o'qilmagan yangi to'lov xatlari yo'q.")
+    for p in payments:
+        process_payment(p)
 
 
 def run_demo_simulation():
@@ -192,6 +203,7 @@ Kapitalbank xizmati.
 if __name__ == "__main__":
     if "--demo" in sys.argv or "--test" in sys.argv:
         run_demo_simulation()
+    elif "--once" in sys.argv:
+        run_once()
     else:
-        # Agar argument berilmasa, avval demo natijani ko'rsatadi, so'ng pochtani tekshirishga o'tadi
-        run_demo_simulation()
+        run_live_loop()

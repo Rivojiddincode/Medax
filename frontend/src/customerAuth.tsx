@@ -6,6 +6,7 @@ export interface Customer {
   phone?: string | null;
   organization?: string | null;
   avatar?: string | null;
+  balance?: number;
   hasPassword?: boolean;
 }
 
@@ -16,6 +17,7 @@ interface CustomerAuthContextType {
   isAuthModalOpen: boolean;
   openAuthModal: () => void;
   closeAuthModal: () => void;
+  refreshCustomer: () => Promise<void>;
   sendOtp: (phone: string, captchaToken?: string) => Promise<{ ok: boolean; resendIn: number; devCode?: string }>;
   verifyOtp: (data: { phone: string; code: string; name?: string; organization?: string; password?: string }) => Promise<{ ok: boolean; token: string; customer: Customer }>;
   loginWithPassword: (phone: string, password: string) => Promise<{ ok: boolean; token: string; customer: Customer }>;
@@ -75,6 +77,19 @@ export function CustomerAuthProvider({ children }: { children: React.ReactNode }
       })
       .finally(() => setLoading(false));
   }, [token]);
+
+  const refreshCustomer = async () => {
+    if (!token) return;
+    try {
+      const res = await fetch("/api/customer/auth/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.customer) setCustomer(data.customer);
+      }
+    } catch {}
+  };
 
   const openAuthModal = () => setIsAuthModalOpen(true);
   const closeAuthModal = () => setIsAuthModalOpen(false);
@@ -201,6 +216,7 @@ export function CustomerAuthProvider({ children }: { children: React.ReactNode }
         isAuthModalOpen,
         openAuthModal,
         closeAuthModal,
+        refreshCustomer,
         sendOtp,
         verifyOtp,
         loginWithPassword,

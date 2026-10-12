@@ -228,7 +228,7 @@ ordersRouter.post("/", orderIpLimiter, optionalCustomerAuth, async (req, res) =>
   res.status(201).json({ ok: true, code: orderCode });
 });
 
-// Bank/Email to'lov xabarnomasi qabul qilish va buyurtmani avtomat tasdiqlash
+// Bank/Email to'lov xabarnomasi qabul qilish (Buyurtma yoki Balansni to'ldirish)
 ordersRouter.post("/payment-webhook", async (req, res) => {
   const { secret, orderCode, amount, currency, paidAt, cardLast4, rawSender } = req.body;
 
@@ -236,40 +236,121 @@ ordersRouter.post("/payment-webhook", async (req, res) => {
     throw new HttpError(403, "Noto'g'ri maxfiy webhook kaliti.");
   }
 
-  if (!orderCode) {
-    throw new HttpError(400, "Buyurtma kodi talab qilinadi.");
+  const numericAmount = amount ? parseInt(String(amount).replace(/\D/g, ""), 10) : 0;
+  const note = `[AVTO-TO'LOV]: Bank orqali to'lov qabul qilindi. Summa: ${amount || numericAmount} ${currency || "UZS"}, Vaqt: ${paidAt || new Date().toISOString()}, Karta: ${cardLast4 || "Noma'lum"}, Manba: ${rawSender || "Bank"}`;
+
+  // 1. Agar kod bor bo'lsa va MDX-T bilan boshlansa (Balans to'ldirish)
+  if (orderCode && String(orderCode).toUpperCase().startsWith("MDX-T")) {
+    const deposit = await prisma.depositRequest.findUnique({
+      where: { code: String(orderCode).toUpperCase() },
+      include: { customer: true },
+    });
+
+    if (deposit && deposit.status === "PENDING") {
+      await prisma.$transaction([
+        prisma.depositRequest.update({
+          where: { id: deposit.id },
+          data: {
+            status: "CONFIRMED",
+            paidAt: new Date(),
+            cardLast4: cardLast4 ? String(cardLast4) : null,
+            rawEmailNote: note,
+          },
+        }),
+        prisma.customer.update({
+          where: { id: deposit.customerId },
+          data: { balance: { increment: deposit.baseAmount } },
+        }),
+      ]);
+
+      return res.json({
+        ok: true,
+        type: "DEPOSIT",
+        matched: true,
+        code: deposit.code,
+        customerName: deposit.customer.name,
+        creditedAmount: deposit.baseAmount,
+        message: `Mijoz balansi ${deposit.baseAmount} so'mga to'ldirildi ✓`,
+      });
+    }
   }
 
-  const order = await prisma.order.findUnique({
-    where: { code: String(orderCode).toUpperCase() },
-    include: { items: true },
-  });
+  // 2. Agar aniq summa orqali hozir aktiv (PENDING) bo'lgan deposit topilsa (Dynamic micro-amount)
+  if (numericAmount > 0) {
+    const activeDeposit = await prisma.depositRequest.findFirst({
+      where: {
+        finalAmount: numericAmount,
+        status: "PENDING",
+        expiresAt: { gte: new Date() },
+      },
+      include: { customer: true },
+    });
 
-  if (!order) {
-    throw new HttpError(404, `Buyurtma topilmadi: ${orderCode}`);
+    if (activeDeposit) {
+      await prisma.$transaction([
+        prisma.depositRequest.update({
+          where: { id: activeDeposit.id },
+          data: {
+            status: "CONFIRMED",
+            paidAt: new Date(),
+            cardLast4: cardLast4 ? String(cardLast4) : null,
+            rawEmailNote: note,
+          },
+        }),
+        prisma.customer.update({
+          where: { id: activeDeposit.customerId },
+          data: { balance: { increment: activeDeposit.baseAmount } },
+        }),
+      ]);
+
+      return res.json({
+        ok: true,
+        type: "DEPOSIT",
+        matched: true,
+        code: activeDeposit.code,
+        customerName: activeDeposit.customer.name,
+        creditedAmount: activeDeposit.baseAmount,
+        message: `Aynan summa bo'yicha (${numericAmount} so'm) mijoz balansi muvaffaqiyatli to'ldirildi ✓`,
+      });
+    }
   }
 
-  if (order.status === "DONE") {
-    return res.json({ ok: false, message: "Buyurtma allaqachon yetkazib berilgan." });
+  // 3. Agar oddiy buyurtma kodi berilgan bo'lsa (MDX-...)
+  if (orderCode) {
+    const order = await prisma.order.findUnique({
+      where: { code: String(orderCode).toUpperCase() },
+      include: { items: true },
+    });
+
+    if (order) {
+      if (order.status === "DONE") {
+        return res.json({ ok: false, message: "Buyurtma allaqachon yetkazib berilgan." });
+      }
+
+      const updated = await prisma.order.update({
+        where: { id: order.id },
+        data: {
+          status: "CONFIRMED",
+          paymentMethod: order.paymentMethod || "Bank o'tkazmasi (Avtomatlashtirilgan)",
+          managerNote: order.managerNote ? `${order.managerNote}\n${note}` : note,
+        },
+      });
+
+      return res.json({
+        ok: true,
+        type: "ORDER",
+        matched: true,
+        code: updated.code,
+        status: updated.status,
+        customerName: updated.customerName,
+        message: "Buyurtma to'lovi muvaffaqiyatli qabul qilindi va tasdiqlandi ✓",
+      });
+    }
   }
 
-  const note = `[AVTO-TO'LOV]: Bank pochtasi orqali to'lov tasdiqlandi. Summa: ${amount} ${currency || "UZS"}, Vaqt: ${paidAt || new Date().toISOString()}, Karta: ${cardLast4 || "Noma'lum"}, Manba: ${rawSender || "Bank"}`;
-
-  const updated = await prisma.order.update({
-    where: { id: order.id },
-    data: {
-      status: "CONFIRMED",
-      paymentMethod: order.paymentMethod || "Bank o'tkazmasi (Avtomatlashtirilgan)",
-      managerNote: order.managerNote ? `${order.managerNote}\n${note}` : note,
-    },
-  });
-
-  res.json({
-    ok: true,
-    matched: true,
-    code: updated.code,
-    status: updated.status,
-    customerName: updated.customerName,
-    message: "Buyurtma to'lovi muvaffaqiyatli qabul qilindi va tasdiqlandi ✓",
+  res.status(404).json({
+    ok: false,
+    matched: false,
+    message: `Mos keladigan faol buyurtma yoki to'ldirish so'rovi topilmadi (Kod: ${orderCode || "Yo'q"}, Summa: ${numericAmount}).`,
   });
 });
