@@ -64,7 +64,7 @@ export default function Home() {
     }, 4500);
   };
 
-  const list = data ? data[tab] : [];
+  const list = data && data[tab] ? data[tab] : [];
 
   return (
     <main>
@@ -77,9 +77,9 @@ export default function Home() {
 
               {/* Aniq va ishonchli raqamlar qatori */}
               <div className="hero-metrics-row">
-                <span><strong>{data ? data.brands.length : 15}</strong> {t("hero_brands_metric")}</span>
+                <span><strong>{data?.brands?.length || 15}</strong> {t("hero_brands_metric")}</span>
                 <span className="metric-sep">·</span>
-                <span><strong>{data ? data.total : 23}</strong> {t("hero_equip_metric")}</span>
+                <span><strong>{data?.total || 23}</strong> {t("hero_equip_metric")}</span>
                 <span className="metric-sep">·</span>
                 <span><strong>{t("hero_delivery_metric")}</strong></span>
               </div>
@@ -105,7 +105,7 @@ export default function Home() {
 
               <div className="hero-quick-cats">
                 <span className="quick-cats-label">{t("popular_cats")}</span>
-                {data?.categories.slice(0, 4).map((c) => (
+                {data?.categories?.slice(0, 4).map((c) => (
                   <Link key={c.id} className="quick-cat-link" to={`/catalog?category=${c.slug}`}>
                     {c.name}
                   </Link>
@@ -200,7 +200,7 @@ export default function Home() {
             <span className="sec-sub">{t("categories_sub")}</span>
           </div>
           <div className="cats stagger-items">
-            {data?.categories.map((c) => (
+            {data?.categories?.map((c) => (
               <Link key={c.id} className="cat reveal" to={`/catalog?category=${c.slug}`}>
                 <div className="cat-content">
                   <h3>{c.name}</h3>
@@ -398,7 +398,7 @@ export default function Home() {
           </div>
 
           <div className="brands-clean-grid stagger-items">
-            {data?.brands.map((b) => {
+            {data?.brands?.map((b) => {
               const logoMap: Record<string, string> = {
                 mindray: "/brands/mindray.png",
                 dirui: "/brands/dirui.png",

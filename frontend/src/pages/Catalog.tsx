@@ -94,8 +94,8 @@ export default function Catalog() {
 
   const hasAnyFilter = Boolean(category || brand || flag || minPrice || maxPrice || qs);
 
-  const activeCat = cats.find((c) => c.slug === category);
-  const activeBrand = brands.find((b) => b.slug === brand);
+  const activeCat = Array.isArray(cats) ? cats.find((c) => c.slug === category) : undefined;
+  const activeBrand = Array.isArray(brands) ? brands.find((b) => b.slug === brand) : undefined;
 
   return (
     <main className="wrap">
@@ -135,10 +135,10 @@ export default function Catalog() {
                   }}
                 >
                   <span className="cat-name">{lang === "ru" ? "Все категории" : lang === "en" ? "All categories" : "Barcha kategoriyalar"}</span>
-                  <span className="cat-count-badge">{cats.reduce((s, c) => s + c.count, 0)}</span>
+                  <span className="cat-count-badge">{(Array.isArray(cats) ? cats : []).reduce((s, c) => s + (c.count || 0), 0)}</span>
                 </a>
               </li>
-              {cats.map((c) => (
+              {(Array.isArray(cats) ? cats : []).map((c) => (
                 <li key={c.id}>
                   <a
                     href="#"
@@ -262,10 +262,10 @@ export default function Catalog() {
                   }}
                 >
                   <span>{lang === "ru" ? "Все бренды" : lang === "en" ? "All brands" : "Barcha brendlar"}</span>
-                  <span className="cat-count-badge">{brands.reduce((s, b) => s + b.count, 0)}</span>
+                  <span className="cat-count-badge">{(Array.isArray(brands) ? brands : []).reduce((s, b) => s + (b.count || 0), 0)}</span>
                 </a>
               </li>
-              {brands.map((b) => (
+              {(Array.isArray(brands) ? brands : []).map((b) => (
                 <li key={b.id}>
                   <a
                     href="#"
