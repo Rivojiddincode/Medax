@@ -13,6 +13,7 @@ import { ProductForm, ProductList } from "./admin/Products";
 import Taxonomy from "./admin/Taxonomy";
 import Orders from "./admin/Orders";
 import { Blocklist, ContactMessagesPage, ImportPage, Users } from "./admin/Misc";
+import AdminPaymentsPage from "./admin/Payments";
 import { ThemeProvider } from "./context/ThemeContext";
 import { I18nProvider } from "./context/I18nContext";
 
@@ -47,6 +48,7 @@ export default function App() {
             <Route path="admin" element={<AdminLayout />}>
               <Route index element={<Dashboard />} />
               <Route path="orders" element={<Orders />} />
+              <Route path="payments" element={<AdminPaymentsPage />} />
               <Route path="products" element={<ProductList />} />
               <Route path="products/:id" element={<ProductForm />} />
               <Route path="taxonomy" element={<Taxonomy />} />
