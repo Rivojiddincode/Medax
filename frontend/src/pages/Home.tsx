@@ -1,0 +1,434 @@
+import { FormEvent, useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { api, Brand, Category, Product } from "../api";
+import { ProductCard } from "../components/Shell";
+import { useI18n } from "../context/I18nContext";
+
+interface HomeData {
+  total: number;
+  categories: Category[];
+  brands: Brand[];
+  hits: Product[];
+  news: Product[];
+  latest: Product[];
+}
+
+export default function Home() {
+  const nav = useNavigate();
+  const { lang, t } = useI18n();
+  const [data, setData] = useState<HomeData | null>(null);
+  const [tab, setTab] = useState<"latest" | "hits">("latest");
+  const [q, setQ] = useState("");
+  const [error, setError] = useState("");
+
+  // B2B tezkor so'rov formasi holati
+  const [inquiryName, setInquiryName] = useState("");
+  const [inquiryPhone, setInquiryPhone] = useState("");
+  const [inquiryEquipment, setInquiryEquipment] = useState("");
+  const [inquirySent, setInquirySent] = useState(false);
+
+  useEffect(() => {
+    api<HomeData>("/home").then(setData).catch((e) => setError(e.message));
+  }, []);
+
+  useEffect(() => {
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            e.target.classList.add("visible");
+            io.unobserve(e.target);
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: "0px 0px -40px 0px" }
+    );
+    document.querySelectorAll(".reveal, .reveal-scale").forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, [data, tab]);
+
+  const submit = (e: FormEvent) => {
+    e.preventDefault();
+    nav(q.trim() ? `/catalog?q=${encodeURIComponent(q.trim())}` : "/catalog");
+  };
+
+  const handleInquirySubmit = (e: FormEvent) => {
+    e.preventDefault();
+    if (!inquiryName.trim() || !inquiryPhone.trim()) return;
+    setInquirySent(true);
+    setTimeout(() => {
+      setInquirySent(false);
+      setInquiryName("");
+      setInquiryPhone("");
+      setInquiryEquipment("");
+    }, 4500);
+  };
+
+  const list = data ? data[tab] : [];
+
+  return (
+    <main>
+      <section className="hero">
+        <div className="wrap">
+          <div className="box">
+            <div className="hero-content">
+              <h1>{t("hero_title")}</h1>
+              <p className="hero-desc">{t("hero_desc")}</p>
+
+              {/* Aniq va ishonchli raqamlar qatori */}
+              <div className="hero-metrics-row">
+                <span><strong>{data ? data.brands.length : 15}</strong> {t("hero_brands_metric")}</span>
+                <span className="metric-sep">·</span>
+                <span><strong>{data ? data.total : 23}</strong> {t("hero_equip_metric")}</span>
+                <span className="metric-sep">·</span>
+                <span><strong>{t("hero_delivery_metric")}</strong></span>
+              </div>
+
+              <form className="search hero-search-bar" role="search" onSubmit={submit}>
+                <div className="search-icon-box" aria-hidden="true">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                    <circle cx="11" cy="11" r="8" />
+                    <path d="M21 21l-4.35-4.35" />
+                  </svg>
+                </div>
+                <input
+                  type="search"
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                  placeholder={t("search_placeholder")}
+                  aria-label={t("search_placeholder")}
+                />
+                <button className="btn btn-search" type="submit">
+                  {t("btn_search")}
+                </button>
+              </form>
+
+              <div className="hero-quick-cats">
+                <span className="quick-cats-label">{t("popular_cats")}</span>
+                {data?.categories.slice(0, 4).map((c) => (
+                  <Link key={c.id} className="quick-cat-link" to={`/catalog?category=${c.slug}`}>
+                    {c.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            <div className="hero-showcase">
+              <Link to="/catalog?category=jarrohlik" className="hero-photo-frame" title="Operatsiya xonasi jihozlari katalogini ko'rish">
+                <div className="hero-img-wrap">
+                  <img
+                    src="/uploads/products/medical-surgery.jpg"
+                    alt="Operatsiya xonasi jihozlari"
+                    className="hero-device-img active"
+                    loading="eager"
+                  />
+                </div>
+
+                <div className="hero-photo-info">
+                  <span className="photo-tag">Operatsion kompleks</span>
+                  <strong className="photo-title">Operatsiya xonasi jihozlari</strong>
+                  <span className="photo-sub">Zamonaviy jarrohlik stollari, yoritish va integratsiya tizimlari</span>
+                </div>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="wrap">
+        <div className="facts stagger-items">
+          <div className="fact-item reveal">
+            <div className="fact-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="2" y="3" width="20" height="14" rx="2" />
+                <path d="M8 21h8M12 17v4M7 10h2l2-3 2 6 2-3h2" />
+              </svg>
+            </div>
+            <div className="fact-text">
+              <b>{t("trust_1_title")}</b>
+              <span>{t("trust_1_desc")}</span>
+            </div>
+          </div>
+
+          <div className="fact-item reveal">
+            <div className="fact-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1 4-10z" />
+              </svg>
+            </div>
+            <div className="fact-text">
+              <b>{t("trust_2_title")}</b>
+              <span>{t("trust_2_desc")}</span>
+            </div>
+          </div>
+
+          <div className="fact-item reveal">
+            <div className="fact-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                <path d="M9 12l2 2 4-4" />
+              </svg>
+            </div>
+            <div className="fact-text">
+              <b>{t("trust_3_title")}</b>
+              <span>{t("trust_3_desc")}</span>
+            </div>
+          </div>
+
+          <div className="fact-item reveal">
+            <div className="fact-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" />
+              </svg>
+            </div>
+            <div className="fact-text">
+              <b>{t("trust_4_title")}</b>
+              <span>{t("trust_4_desc")}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {error && <div className="wrap"><p className="err">{error}</p></div>}
+
+      <section className="sec">
+        <div className="wrap">
+          <div className="sec-head-wrap reveal">
+            <h2>{t("categories_title")}</h2>
+            <span className="sec-sub">{t("categories_sub")}</span>
+          </div>
+          <div className="cats stagger-items">
+            {data?.categories.map((c) => (
+              <Link key={c.id} className="cat reveal" to={`/catalog?category=${c.slug}`}>
+                <div className="cat-content">
+                  <h3>{c.name}</h3>
+                  <div className="cat-meta">
+                    <small>{c.count} {t("items_count")}</small>
+                    <span className="cat-arrow" aria-hidden="true">→</span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="sec products-sec">
+        <div className="wrap">
+          <div className="bar reveal">
+            <h2>{t("products_title")}</h2>
+            <div role="tablist" aria-label="Mahsulot turi">
+              {([["latest", t("tab_latest")], ["hits", t("tab_hits")]] as const).map(([k, label]) => (
+                <button
+                  key={k}
+                  className="tab"
+                  role="tab"
+                  aria-selected={tab === k}
+                  onClick={() => setTab(k)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <Link className="catalog-text-link" to="/catalog">
+              <span>{t("view_all_catalog")}</span>
+              <span className="link-arrow">→</span>
+            </Link>
+          </div>
+          <div className="grid stagger-items">
+            {list.map((p) => <ProductCard key={p.id} p={p} />)}
+            {data && list.length === 0 && <div className="empty">{t("not_found_products")}</div>}
+          </div>
+        </div>
+      </section>
+
+      {/* Qanday buyurtma beriladi? (4 bosqich) */}
+      <section className="sec order-steps-sec" id="buyurtma">
+        <div className="wrap">
+          <div className="sec-head-wrap text-center reveal">
+            <h2>{t("how_to_order")}</h2>
+            <span className="sec-sub">
+              {lang === "ru"
+                ? "Поэтапный процесс для медицинских учреждений и клиник"
+                : lang === "en"
+                ? "Step-by-step process for healthcare institutions and clinics"
+                : "Tibbiy muassasalar va klinikalar uchun bosqichma-bosqich jarayon"}
+            </span>
+          </div>
+
+          <div className="order-steps-grid stagger-items">
+            <div className="order-step-card reveal">
+              <span className="step-num-pill">01</span>
+              <h3>{lang === "ru" ? "Подача заявки" : lang === "en" ? "Submit Request" : "So'rov qoldirish"}</h3>
+              <p>
+                {lang === "ru"
+                  ? "Отправьте заявку через сайт или укажите требуемое оборудование и ТЗ."
+                  : lang === "en"
+                  ? "Submit a request online or specify the required equipment specifications."
+                  : "Sayt orqali so'rov yuborasiz yoki kerakli uskuna va texnik topshiriqni bildirasiz."}
+              </p>
+            </div>
+
+            <div className="order-step-card reveal">
+              <span className="step-num-pill">02</span>
+              <h3>{lang === "ru" ? "Коммерческое предложение (КП)" : lang === "en" ? "Commercial Offer" : "Tijoriy taklif (KP)"}</h3>
+              <p>
+                {lang === "ru"
+                  ? "В течение 24 часов наш специалист предоставит официальные цены, спецификации и сроки."
+                  : lang === "en"
+                  ? "Within 24 hours, our specialist provides official pricing, specs, and delivery timelines."
+                  : "24 soat ichida mutaxassisimiz rasmiy narx, spetsifikatsiya va muddatlarni taqdim etadi."}
+              </p>
+            </div>
+
+            <div className="order-step-card reveal">
+              <span className="step-num-pill">03</span>
+              <h3>{lang === "ru" ? "Официальный договор" : lang === "en" ? "Official Contract" : "Rasmiy shartnoma"}</h3>
+              <p>
+                {lang === "ru"
+                  ? "Юридический договор, условия оплаты и гарантийные обязательства согласовываются сторонами."
+                  : lang === "en"
+                  ? "Legal contract, payment terms, and warranty obligations are verified and signed."
+                  : "Yuridik shartnoma, to'lov shartlari va kafolat majburiyatlari tasdiqlanadi."}
+              </p>
+            </div>
+
+            <div className="order-step-card reveal">
+              <span className="step-num-pill">04</span>
+              <h3>{lang === "ru" ? "Доставка и наладка" : lang === "en" ? "Delivery & Setup" : "Yetkazish va sozlash"}</h3>
+              <p>
+                {lang === "ru"
+                  ? "Доставка по всему Узбекистану, монтаж и обучение персонала нашими инженерами."
+                  : lang === "en"
+                  ? "Delivery across Uzbekistan, installation, calibration, and training by certified engineers."
+                  : "O'zbekiston bo'ylab yetkazib berish, muhandislar tomonidan o'rnatish va o'rgatish."}
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Tezkor so'rov formasi (B2B narx va tijoriy taklif so'rash) */}
+      <section className="sec inquiry-sec">
+        <div className="wrap">
+          <div className="inquiry-card reveal-scale">
+            <div className="inquiry-info">
+              <span className="inquiry-badge">{lang === "ru" ? "Быстрая связь" : lang === "en" ? "Fast Support" : "Tezkor aloqa"}</span>
+              <h2>{t("inquiry_title")}</h2>
+              <p className="inquiry-desc">{t("inquiry_sub")}</p>
+
+              <div className="inquiry-points">
+                <div className="inquiry-point">
+                  <span className="point-check">✓</span>
+                  <span>{lang === "ru" ? "Быстрый ответ за 15 минут" : lang === "en" ? "Fast response in 15 mins" : "15 daqiqada tezkor javob"}</span>
+                </div>
+                <div className="inquiry-point">
+                  <span className="point-check">✓</span>
+                  <span>{lang === "ru" ? "Прямые заводские цены" : lang === "en" ? "Direct factory prices" : "To'g'ridan-to'g'ri rasmiy zavod narxi"}</span>
+                </div>
+                <div className="inquiry-point">
+                  <span className="point-check">✓</span>
+                  <span>{lang === "ru" ? "Полный комплект сертификатов" : lang === "en" ? "Complete certifications" : "To'liq sertifikat va texnik pasport"}</span>
+                </div>
+              </div>
+            </div>
+
+            <form className="inquiry-form" onSubmit={handleInquirySubmit}>
+              {inquirySent ? (
+                <div className="inquiry-success-msg">
+                  <span className="success-badge">✓</span>
+                  <h3>{t("inquiry_sent_title")}</h3>
+                  <p>{t("inquiry_sent_desc")}</p>
+                </div>
+              ) : (
+                <>
+                  <div className="inquiry-input-field">
+                    <label htmlFor="inq-name">{t("inquiry_name")}</label>
+                    <input
+                      id="inq-name"
+                      type="text"
+                      required
+                      placeholder={lang === "ru" ? "Например, Др. Азиз Каримов" : lang === "en" ? "E.g., Dr. Aziz Karimov" : "Masalan, Dr. Aziz Karimov"}
+                      value={inquiryName}
+                      onChange={(e) => setInquiryName(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="inquiry-input-field">
+                    <label htmlFor="inq-phone">{t("inquiry_phone")}</label>
+                    <input
+                      id="inq-phone"
+                      type="tel"
+                      required
+                      placeholder="+998 90 123 45 67"
+                      value={inquiryPhone}
+                      onChange={(e) => setInquiryPhone(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="inquiry-input-field">
+                    <label htmlFor="inq-eq">{t("inquiry_equip")}</label>
+                    <input
+                      id="inq-eq"
+                      type="text"
+                      placeholder={lang === "ru" ? "Например, аппарат УЗИ или операционный стол" : lang === "en" ? "E.g., Ultrasound or Surgical table" : "Masalan, UZI apparati yoki Jarrohlik stoli"}
+                      value={inquiryEquipment}
+                      onChange={(e) => setInquiryEquipment(e.target.value)}
+                    />
+                  </div>
+
+                  <button type="submit" className="btn btn-inquiry-submit">
+                    {t("inquiry_submit")}
+                  </button>
+                </>
+              )}
+            </form>
+          </div>
+        </div>
+      </section>
+
+      {/* Rasmiy hamkor brendlar */}
+      <section className="sec brands-sec" id="brend">
+        <div className="wrap">
+          <div className="sec-head-wrap text-center reveal">
+            <h2>{t("brands_title")}</h2>
+            <span className="sec-sub">{t("brands_sub")}</span>
+          </div>
+
+          <div className="brands-clean-grid stagger-items">
+            {data?.brands.map((b) => {
+              const logoMap: Record<string, string> = {
+                mindray: "/brands/mindray.png",
+                dirui: "/brands/dirui.png",
+                rayto: "/brands/rayto.png",
+                chison: "/brands/chison.png",
+                human: "/brands/human.png",
+                cypress: "/brands/cypress.png",
+              };
+              const logoSrc = logoMap[b.slug];
+
+              return (
+                <Link
+                  key={b.id}
+                  className="brand-clean-card reveal"
+                  to={`/catalog?brand=${b.slug}`}
+                  title={`${b.name} (${b.country || ""})`}
+                >
+                  {logoSrc ? (
+                    <div className="brand-logo-box">
+                      <img src={logoSrc} alt={b.name} loading="lazy" />
+                    </div>
+                  ) : null}
+                  <strong className="brand-clean-name">{b.name}</strong>
+                  {b.country && <span className="brand-clean-country">{b.country}</span>}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+    </main>
+  );
+}

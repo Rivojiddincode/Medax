@@ -1,0 +1,187 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+}
+
+enum OrderStatus {
+  NEW
+  CONFIRMED
+  DONE
+  CANCELED
+  FAKE
+}
+
+enum BlockType {
+  PHONE
+  IP
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  name         String
+  passwordHash String
+  role         Role     @default(MANAGER)
+  createdAt    DateTime @default(now())
+}
+
+model Category {
+  id        Int       @id @default(autoincrement())
+  name      String
+  slug      String    @unique
+  sortOrder Int       @default(0)
+  products  Product[]
+}
+
+model Brand {
+  id       Int       @id @default(autoincrement())
+  name     String
+  slug     String    @unique
+  country  String?
+  products Product[]
+}
+
+model Product {
+  id          Int               @id @default(autoincrement())
+  slug        String            @unique
+  sku         String?           @unique
+  name        String
+  description String            @default("")
+  specs       Json              @default("[]")
+  country     String?
+  priceFrom       Decimal?          @db.Decimal(14, 2)
+  oldPrice        Decimal?          @db.Decimal(14, 2)
+  discountPercent Int?
+  unit            String?           @default("dona")
+  packageQty      Int?              @default(1)
+  mfdDate         String?
+  expDate         String?
+  isHit           Boolean           @default(false)
+  isNew           Boolean           @default(false)
+  isActive        Boolean           @default(true)
+  categoryId      Int
+  category        Category          @relation(fields: [categoryId], references: [id])
+  brandId         Int?
+  brand           Brand?            @relation(fields: [brandId], references: [id])
+  images          ProductImage[]
+  documents       ProductDocument[]
+  orderItems      OrderItem[]
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@index([categoryId, isActive])
+  @@index([brandId])
+  @@index([isActive, createdAt])
+}
+
+model ProductImage {
+  id        Int     @id @default(autoincrement())
+  productId Int
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+  thumbUrl  String
+  sortOrder Int     @default(0)
+
+  @@index([productId, sortOrder])
+}
+
+model ProductDocument {
+  id        Int     @id @default(autoincrement())
+  productId Int
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  title     String
+  url       String
+}
+
+model Order {
+  id              Int         @id @default(autoincrement())
+  code            String      @unique
+  customerName    String
+  phone           String
+  organization    String      @default("")
+  deliveryAddress String      @default("")
+  paymentMethod   String      @default("")
+  comment         String      @default("")
+  status          OrderStatus @default(NEW)
+  managerNote     String      @default("")
+  ip              String?
+  flags           String[]    @default([])
+  items           OrderItem[]
+  customerId      Int?
+  customer        Customer?   @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@index([phone])
+  @@index([status, createdAt])
+  @@index([customerId])
+}
+
+model Customer {
+  id           Int       @id @default(autoincrement())
+  phone        String?   @unique
+  name         String
+  organization String?   @default("")
+  avatar       String?
+  passwordHash String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  orders       Order[]
+
+  @@index([phone])
+}
+
+model OrderItem {
+  id          Int     @id @default(autoincrement())
+  orderId     Int
+  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId   Int
+  product     Product @relation(fields: [productId], references: [id])
+  productName String
+  quantity    Int
+}
+
+model OtpCode {
+  id        Int       @id @default(autoincrement())
+  phone     String
+  codeHash  String
+  attempts  Int       @default(0)
+  ip        String?
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([phone, createdAt])
+}
+
+model Blocked {
+  id        Int       @id @default(autoincrement())
+  type      BlockType
+  value     String
+  reason    String    @default("")
+  createdAt DateTime  @default(now())
+
+  @@unique([type, value])
+}
+
+model ContactMessage {
+  id        Int      @id @default(autoincrement())
+  name      String
+  phone     String
+  subject   String   @default("")
+  message   String
+  isRead    Boolean  @default(false)
+  ip        String?
+  createdAt DateTime @default(now())
+
+  @@index([isRead, createdAt])
+}

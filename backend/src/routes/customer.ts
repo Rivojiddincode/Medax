@@ -1,0 +1,385 @@
+import { Router, Request, Response, NextFunction } from "express";
+import rateLimit from "express-rate-limit";
+import jwt from "jsonwebtoken";
+import crypto from "crypto";
+import bcrypt from "bcryptjs";
+import { z } from "zod";
+import { prisma } from "../db";
+import { config } from "../config";
+import { HttpError } from "../errors";
+import { sendSms } from "../sms";
+import {
+  assertNotBlocked,
+  assertSmsBudgetAvailable,
+  hashCode,
+  normalizePhone,
+  verifyTurnstile,
+} from "../antispam";
+import { getClientIp } from "../ip";
+
+export interface CustomerAuthPayload {
+  id: number;
+  type: "CUSTOMER";
+  phone: string;
+  name: string;
+}
+
+declare module "express-serve-static-core" {
+  interface Request {
+    customer?: CustomerAuthPayload;
+  }
+}
+
+export function requireCustomerAuth(req: Request, _res: Response, next: NextFunction) {
+  const h = req.headers.authorization || "";
+  const token = h.startsWith("Bearer ") ? h.slice(7) : "";
+  if (!token) return next(new HttpError(401, "Iltimos, tizimga kiring"));
+
+  try {
+    const decoded = jwt.verify(token, config.customerJwtSecret) as CustomerAuthPayload;
+    if (decoded.type !== "CUSTOMER") throw new Error("Invalid token type");
+    req.customer = decoded;
+    next();
+  } catch {
+    next(new HttpError(401, "Sessiya eskirgan. Qayta kiring"));
+  }
+}
+
+export function optionalCustomerAuth(req: Request, _res: Response, next: NextFunction) {
+  const h = req.headers.authorization || "";
+  const token = h.startsWith("Bearer ") ? h.slice(7) : "";
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, config.customerJwtSecret) as CustomerAuthPayload;
+      if (decoded.type === "CUSTOMER") req.customer = decoded;
+    } catch {}
+  }
+  next();
+}
+
+export const customerRouter = Router();
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => getClientIp(req),
+  message: { error: "Juda ko'p urinish. 15 daqiqadan keyin qayta urinib ko'ring." },
+});
+
+function createCustomerToken(c: { id: number; phone: string; name: string }) {
+  const payload: CustomerAuthPayload = {
+    id: c.id,
+    type: "CUSTOMER",
+    phone: c.phone,
+    name: c.name,
+  };
+  return jwt.sign(payload, config.customerJwtSecret, { expiresIn: "30d" });
+}
+
+// 1. Telefon raqamiga OTP SMS yuborish
+customerRouter.post("/auth/send-otp", authLimiter, async (req, res) => {
+  const { phone: raw, captchaToken } = z
+    .object({
+      phone: z.string().max(30),
+      captchaToken: z.string().optional(),
+    })
+    .parse(req.body);
+
+  const phone = normalizePhone(raw);
+  if (!phone) throw new HttpError(400, "Telefon raqami noto'g'ri. Misol: +998 90 123 45 67");
+
+  const ip = getClientIp(req);
+  await assertNotBlocked(phone, ip);
+
+  // 1. Cloudflare Turnstile captcha (agar sozlangan bo'lsa)
+  await verifyTurnstile(captchaToken, ip);
+
+  // 2. Eskiz SMS balansi va IP kunlik limiti
+  await assertSmsBudgetAvailable(ip);
+
+  // 3. Qayta yuborish oralig'i (60s) va 1 soatlik telefon limiti
+  const last = await prisma.otpCode.findFirst({ where: { phone }, orderBy: { createdAt: "desc" } });
+  if (last && Date.now() - last.createdAt.getTime() < 60_000) {
+    throw new HttpError(429, "Kodni qayta yuborish uchun 1 daqiqa kuting.");
+  }
+
+  const hourly = await prisma.otpCode.count({
+    where: { phone, createdAt: { gt: new Date(Date.now() - 3600_000) } },
+  });
+  if (hourly >= config.hourlyPhoneOtpLimit) {
+    throw new HttpError(
+      429,
+      `Bir soatda ${config.hourlyPhoneOtpLimit} tadan ortiq kod so'rab bo'lmaydi. Keyinroq urinib ko'ring.`
+    );
+  }
+
+  const code = String(crypto.randomInt(100000, 1000000));
+
+  // SMS jo'natish (agar SMS provayderda nosozlik bo'lsa, kod bazada chala qolmaydi)
+  try {
+    await sendSms(phone, `Medax: kirish kodi ${code}. Kodni hech kimga bermang.`);
+  } catch (err: any) {
+    console.error("SMS jo'natishda xatolik:", err);
+    throw new HttpError(503, "SMS xizmatida vaqtinchalik nosozlik. Iltimos, birozdan so'ng qayta urinib ko'ring.");
+  }
+
+  await prisma.otpCode.create({
+    data: {
+      phone,
+      codeHash: hashCode(phone, code),
+      ip,
+      expiresAt: new Date(Date.now() + config.otpTtlMin * 60_000),
+    },
+  });
+
+  res.json({ ok: true, resendIn: 60, ...(config.exposeOtp ? { devCode: code } : {}) });
+});
+
+// 2. Telefon raqam + OTP orqali kirish / ro'yxatdan o'tish (parol bilan yoki parolsiz)
+customerRouter.post("/auth/verify-otp", authLimiter, async (req, res) => {
+  const { phone: raw, code, name, organization, password } = z
+    .object({
+      phone: z.string().max(30),
+      code: z.string().regex(/^\d{6}$/, "Kod 6 ta raqamdan iborat"),
+      name: z.string().trim().max(80).optional(),
+      organization: z.string().trim().max(120).optional(),
+      password: z.string().min(6, "Parol kamida 6 belgidan iborat bo'lishi kerak").max(100).optional(),
+    })
+    .parse(req.body);
+
+  const phone = normalizePhone(raw);
+  if (!phone) throw new HttpError(400, "Telefon raqami noto'g'ri.");
+
+  const otp = await prisma.otpCode.findFirst({
+    where: { phone, usedAt: null, expiresAt: { gt: new Date() } },
+    orderBy: { createdAt: "desc" },
+  });
+
+  if (!otp) throw new HttpError(400, "Kod eskirgan. Yangi kod so'rang.");
+  if (otp.attempts >= 5) throw new HttpError(429, "Kod ko'p marta noto'g'ri kiritildi.");
+  if (otp.codeHash !== hashCode(phone, code)) {
+    await prisma.otpCode.update({ where: { id: otp.id }, data: { attempts: { increment: 1 } } });
+    throw new HttpError(400, "Kod noto'g'ri.");
+  }
+
+  await prisma.otpCode.update({ where: { id: otp.id }, data: { usedAt: new Date() } });
+
+  const passwordHash = password ? await bcrypt.hash(password, 10) : undefined;
+
+  // Mijozni topamiz yoki yangi ro'yxatdan o'tkazamiz
+  let customer = await prisma.customer.findUnique({ where: { phone } });
+  if (!customer) {
+    customer = await prisma.customer.create({
+      data: {
+        phone,
+        name: name || `Mijoz (${phone.slice(-4)})`,
+        organization: organization || "",
+        ...(passwordHash ? { passwordHash } : {}),
+      },
+    });
+  } else if (passwordHash || name || organization) {
+    customer = await prisma.customer.update({
+      where: { id: customer.id },
+      data: {
+        ...(passwordHash ? { passwordHash } : {}),
+        ...(name ? { name } : {}),
+        ...(organization !== undefined ? { organization } : {}),
+      },
+    });
+  }
+
+  const token = createCustomerToken({ id: customer.id, phone: customer.phone || phone, name: customer.name });
+  res.json({
+    ok: true,
+    token,
+    customer: {
+      id: customer.id,
+      name: customer.name,
+      phone: customer.phone,
+      organization: customer.organization,
+      avatar: customer.avatar,
+      hasPassword: Boolean(customer.passwordHash),
+    },
+  });
+});
+
+// 3. Telefon raqam + Parol orqali kirish (SMS siz tezkor kirish)
+customerRouter.post("/auth/login", authLimiter, async (req, res) => {
+  const { phone: raw, password } = z
+    .object({
+      phone: z.string().trim().min(3, "Telefon raqamini kiriting").max(30),
+      password: z.string().min(1, "Parolni kiriting"),
+    })
+    .parse(req.body);
+
+  const phone = normalizePhone(raw);
+  if (!phone) throw new HttpError(400, "Telefon raqami noto'g'ri formatda.");
+
+  const customer = await prisma.customer.findUnique({ where: { phone } });
+  if (!customer) {
+    throw new HttpError(400, "Ushbu telefon raqamiga ega mijoz topilmadi. Iltimos, ro'yxatdan o'ting.");
+  }
+
+  if (!customer.passwordHash) {
+    throw new HttpError(
+      400,
+      "Ushbu akkauntda hali parol o'rnatilmagan. Iltimos, 'SMS orqali kirish' tugmasidan foydalaning va parolingizni belgilang."
+    );
+  }
+
+  const valid = await bcrypt.compare(password, customer.passwordHash);
+  if (!valid) {
+    throw new HttpError(400, "Telefon raqam yoki parol noto'g'ri.");
+  }
+
+  const token = createCustomerToken({ id: customer.id, phone: customer.phone || phone, name: customer.name });
+  res.json({
+    ok: true,
+    token,
+    customer: {
+      id: customer.id,
+      name: customer.name,
+      phone: customer.phone,
+      organization: customer.organization,
+      avatar: customer.avatar,
+      hasPassword: true,
+    },
+  });
+});
+
+// 4. Joriy mijoz ma'lumotlari
+customerRouter.get("/auth/me", requireCustomerAuth, async (req, res) => {
+  const customer = await prisma.customer.findUnique({
+    where: { id: req.customer!.id },
+    select: {
+      id: true,
+      name: true,
+      phone: true,
+      organization: true,
+      avatar: true,
+      passwordHash: true,
+      createdAt: true,
+    },
+  });
+  if (!customer) throw new HttpError(404, "Mijoz topilmadi");
+  const { passwordHash, ...rest } = customer;
+  res.json({ customer: { ...rest, hasPassword: Boolean(passwordHash) } });
+});
+
+// 5. Profilni tahrirlash (Ism va tashkilot)
+customerRouter.put("/auth/profile", requireCustomerAuth, async (req, res) => {
+  const { name, organization } = z
+    .object({
+      name: z.string().trim().min(2, "Ismni kiriting").max(80),
+      organization: z.string().trim().max(120).optional(),
+    })
+    .parse(req.body);
+
+  const updated = await prisma.customer.update({
+    where: { id: req.customer!.id },
+    data: {
+      name,
+      organization: organization || "",
+    },
+    select: { id: true, name: true, phone: true, organization: true, avatar: true, passwordHash: true },
+  });
+
+  const { passwordHash, ...rest } = updated;
+  res.json({ ok: true, customer: { ...rest, hasPassword: Boolean(passwordHash) } });
+});
+
+// 6. Parolni o'zgartirish yoki yangi parol o'rnatish
+customerRouter.put("/auth/password", requireCustomerAuth, async (req, res) => {
+  const { currentPassword, newPassword } = z
+    .object({
+      currentPassword: z.string().optional(),
+      newPassword: z.string().min(6, "Yangi parol kamida 6 belgidan iborat bo'lishi kerak").max(100),
+    })
+    .parse(req.body);
+
+  const customer = await prisma.customer.findUnique({ where: { id: req.customer!.id } });
+  if (!customer) throw new HttpError(404, "Mijoz topilmadi");
+
+  if (customer.passwordHash && currentPassword) {
+    const match = await bcrypt.compare(currentPassword, customer.passwordHash);
+    if (!match) throw new HttpError(400, "Joriy parol noto'g'ri.");
+  }
+
+  const passwordHash = await bcrypt.hash(newPassword, 10);
+  await prisma.customer.update({
+    where: { id: customer.id },
+    data: { passwordHash },
+  });
+
+  res.json({ ok: true, message: "Parol muvaffaqiyatli saqlandi ✓" });
+});
+
+// 5. Mijozning buyurtmalar tarixi (Faqat o'zining tasdiqlangan ID va telefon raqami bo'yicha)
+customerRouter.get("/orders", requireCustomerAuth, async (req, res) => {
+  const customerId = req.customer!.id;
+  const phone = req.customer!.phone;
+
+  const orders = await prisma.order.findMany({
+    where: {
+      OR: [{ customerId }, ...(phone ? [{ phone }] : [])],
+    },
+    orderBy: { createdAt: "desc" },
+    include: {
+      items: {
+        include: {
+          product: {
+            select: { id: true, name: true, slug: true, images: { take: 1, select: { thumbUrl: true } } },
+          },
+        },
+      },
+    },
+  });
+
+  const mapped = orders.map((o) => ({
+    ...o,
+    cancelReason: o.status === "CANCELED" ? o.managerNote : undefined,
+  }));
+
+  res.json({ orders: mapped });
+});
+
+// 6. Mijoz o'zining yangi buyurtmasini bekor qilishi
+customerRouter.post("/orders/:id/cancel", requireCustomerAuth, async (req, res) => {
+  const orderId = Number(req.params.id);
+  if (!orderId || isNaN(orderId)) throw new HttpError(400, "Noto'g'ri buyurtma ID");
+
+  const { reason } = z
+    .object({
+      reason: z.string().trim().min(3, "Bekor qilish sababini yozing").max(500),
+    })
+    .parse(req.body);
+
+  const customerId = req.customer!.id;
+  const phone = req.customer!.phone;
+
+  const order = await prisma.order.findUnique({ where: { id: orderId } });
+  if (!order) throw new HttpError(404, "Buyurtma topilmadi");
+
+  // Faqat buyurtma egasi bekor qila oladi
+  const isOwner = order.customerId === customerId || (phone && order.phone === phone);
+  if (!isOwner) throw new HttpError(403, "Bu buyurtmaga kirish huquqingiz yo'q");
+
+  if (order.status !== "NEW") {
+    throw new HttpError(
+      400,
+      "Faqat yangi (kutilayotgan) buyurtmani bekor qilish mumkin. Ko'rib chiqilgan buyurtma bo'yicha qo'llab-quvvatlash xizmatiga bog'laning."
+    );
+  }
+
+  const updated = await prisma.order.update({
+    where: { id: orderId },
+    data: {
+      status: "CANCELED",
+      managerNote: `Mijoz tomonidan bekor qilindi. Sababi: ${reason}`,
+    },
+  });
+
+  res.json({ ok: true, order: updated });
+});

@@ -1,0 +1,26 @@
+{
+  "name": "Medax — Tibbiy uskunalar va servis",
+  "short_name": "Medax",
+  "description": "Yaponiya, Germaniya va AQSh tibbiy uskunalarini to'g'ridan-to'g'ri yetkazib berish va rasmiy servisi",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0284c7",
+  "orientation": "portrait",
+  "lang": "uz",
+  "icons": [
+    {
+      "src": "/favicon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["medical", "shopping", "business"]
+}
