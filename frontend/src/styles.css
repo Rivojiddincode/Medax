@@ -158,7 +158,7 @@ input:focus,select:focus,textarea:focus{
 .uz-mainbar {
   padding: 14px 0;
   background: var(--paper);
-  border-bottom: 1px solid var(--line);
+  border-bottom: none;
 }
 .uz-mainbar-wrap {
   display: flex;
@@ -533,7 +533,7 @@ input:focus,select:focus,textarea:focus{
 /* Tier 3: Category Strip */
 .uz-catstrip {
   background: var(--paper);
-  border-bottom: 1px solid var(--line);
+  border: none;
   overflow-x: auto;
   scrollbar-width: none;
 }
