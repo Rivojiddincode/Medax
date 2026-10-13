@@ -14,6 +14,7 @@ import { PwaInstallPrompt } from "./PwaInstallPrompt";
 import { CustomerHeaderMenu } from "./CustomerHeaderMenu";
 import { CustomerAuthGate } from "./CustomerAuthGate";
 import { AppOnboarding } from "./AppOnboarding";
+import { UzumSearchBar } from "./UzumSearchBar";
 import { SITE_CONFIG } from "../siteConfig";
 
 function useIsAppMode(): boolean {
@@ -144,32 +145,8 @@ export function Layout() {
               <span>Katalog</span>
             </Link>
 
-            {/* Central Search Bar */}
-            <form
-              className="uz-search-form"
-              role="search"
-              onSubmit={(e) => {
-                e.preventDefault();
-                const form = e.currentTarget;
-                const input = form.elements.namedItem("search") as HTMLInputElement;
-                const val = input?.value?.trim();
-                window.location.href = val ? `/catalog?q=${encodeURIComponent(val)}` : "/catalog";
-              }}
-            >
-              <input
-                type="search"
-                name="search"
-                className="uz-search-input"
-                placeholder="Mahsulotlar va turkumlar izlash (masalan: UZI, IVL, Jarrohlik)..."
-                aria-label="Mahsulotlar va turkumlar izlash"
-              />
-              <button type="submit" className="uz-search-btn" aria-label="Qidirish">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="11" cy="11" r="8" />
-                  <path d="M21 21l-4.35-4.35" />
-                </svg>
-              </button>
-            </form>
+            {/* Central Uzum Search Bar with Dropdown & Dimming Backdrop */}
+            <UzumSearchBar />
 
             {/* Right Action Icons: Login / Profile, Saralangan & Cart */}
             <div className="uz-actions">
