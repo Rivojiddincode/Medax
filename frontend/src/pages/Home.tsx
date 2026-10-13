@@ -13,6 +13,39 @@ interface HomeData {
   latest: Product[];
 }
 
+const HERO_SLIDES = [
+  {
+    id: 1,
+    badge: "Medax Maxsus Taklif",
+    title: "O'zingizga va bemorlarga g'amxo'rlik bilan",
+    desc: "Klinikalar va shifoxonalar uchun zamonaviy tibbiy uskunalar, laboratoriya jihozlari va rasmiy kafolat.",
+    cta: "Katalogga o'tish →",
+    ctaLink: "/catalog",
+    img: "/uploads/products/medical-surgery.jpg",
+    alt: "Tibbiy jihozlar",
+  },
+  {
+    id: 2,
+    badge: "Kafolatli narxlar",
+    title: "Reanimatsiya va ultratovush diagnostikasi",
+    desc: "Yetakchi brendlarning UZI apparatlari, ko'p parametrli bemor monitorlari va IVL tizimlari kafolat bilan.",
+    cta: "Diagnostika uskunalarini ko'rish →",
+    ctaLink: "/catalog?category=ultratovush-diagnostikasi",
+    img: "/uploads/products/medical-diag.jpg",
+    alt: "Diagnostika uskunalari",
+  },
+  {
+    id: 3,
+    badge: "Do'konda mavjud",
+    title: "Reabilitatsiya va shifoxona mebellari",
+    desc: "Bemorlarning qulay va tez sog'ayishi uchun aravachalar, funksional kravatlar va reabilitatsiya vositalari.",
+    cta: "Mebellarni tanlash →",
+    ctaLink: "/catalog?category=tibbiy-mebel",
+    img: "/uploads/products/medical-bed.jpg",
+    alt: "Tibbiy mebel",
+  },
+];
+
 export default function Home() {
   const nav = useNavigate();
   const { lang, t } = useI18n();
@@ -20,12 +53,21 @@ export default function Home() {
   const [tab, setTab] = useState<"latest" | "hits">("latest");
   const [q, setQ] = useState("");
   const [error, setError] = useState("");
+  const [currentSlide, setCurrentSlide] = useState(0);
 
   // B2B tezkor so'rov formasi holati
   const [inquiryName, setInquiryName] = useState("");
   const [inquiryPhone, setInquiryPhone] = useState("");
   const [inquiryEquipment, setInquiryEquipment] = useState("");
   const [inquirySent, setInquirySent] = useState(false);
+
+  // Carousel autoplay timer (every 5 seconds)
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     api<HomeData>("/home").then(setData).catch((e) => setError(e.message));
@@ -68,69 +110,109 @@ export default function Home() {
 
   return (
     <main>
-      <section className="hero">
+      {/* Uzum-style Big Hero Slider Banner */}
+      <section className="uz-hero-section">
         <div className="wrap">
-          <div className="box">
-            <div className="hero-content">
-              <h1>{t("hero_title")}</h1>
-              <p className="hero-desc">{t("hero_desc")}</p>
+          <div className="uz-banner-carousel">
+            {/* Prev arrow button */}
+            <button
+              type="button"
+              className="uz-carousel-nav prev"
+              onClick={() => setCurrentSlide((prev) => (prev === 0 ? HERO_SLIDES.length - 1 : prev - 1))}
+              aria-label="Oldingi slayd"
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+            </button>
 
-              {/* Aniq va ishonchli raqamlar qatori */}
-              <div className="hero-metrics-row">
-                <span><strong>{data?.brands?.length || 15}</strong> {t("hero_brands_metric")}</span>
-                <span className="metric-sep">·</span>
-                <span><strong>{data?.total || 23}</strong> {t("hero_equip_metric")}</span>
-                <span className="metric-sep">·</span>
-                <span><strong>{t("hero_delivery_metric")}</strong></span>
-              </div>
-
-              <form className="search hero-search-bar" role="search" onSubmit={submit}>
-                <div className="search-icon-box" aria-hidden="true">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-                    <circle cx="11" cy="11" r="8" />
-                    <path d="M21 21l-4.35-4.35" />
-                  </svg>
-                </div>
-                <input
-                  type="search"
-                  value={q}
-                  onChange={(e) => setQ(e.target.value)}
-                  placeholder={t("search_placeholder")}
-                  aria-label={t("search_placeholder")}
-                />
-                <button className="btn btn-search" type="submit">
-                  {t("btn_search")}
-                </button>
-              </form>
-
-              <div className="hero-quick-cats">
-                <span className="quick-cats-label">{t("popular_cats")}</span>
-                {data?.categories?.slice(0, 4).map((c) => (
-                  <Link key={c.id} className="quick-cat-link" to={`/catalog?category=${c.slug}`}>
-                    {c.name}
+            {/* Active Slide */}
+            <div className="uz-carousel-slide active" key={HERO_SLIDES[currentSlide].id}>
+              <div className="uz-slide-content">
+                <span className="uz-slide-badge">{HERO_SLIDES[currentSlide].badge}</span>
+                <h1 className="uz-slide-title">
+                  {HERO_SLIDES[currentSlide].title}
+                </h1>
+                <p className="uz-slide-desc">
+                  {HERO_SLIDES[currentSlide].desc}
+                </p>
+                <div className="uz-slide-actions">
+                  <Link to={HERO_SLIDES[currentSlide].ctaLink} className="btn btn-primary-sheen">
+                    {HERO_SLIDES[currentSlide].cta}
                   </Link>
-                ))}
+                  <Link to="/contact" className="btn ghost">
+                    Menejer bilan bog'lanish
+                  </Link>
+                </div>
+              </div>
+              <div className="uz-slide-visual">
+                <img
+                  src={HERO_SLIDES[currentSlide].img}
+                  alt={HERO_SLIDES[currentSlide].alt}
+                  className="uz-slide-img"
+                />
               </div>
             </div>
 
-            <div className="hero-showcase">
-              <Link to="/catalog?category=jarrohlik" className="hero-photo-frame" title="Operatsiya xonasi jihozlari katalogini ko'rish">
-                <div className="hero-img-wrap">
-                  <img
-                    src="/uploads/products/medical-surgery.jpg"
-                    alt="Operatsiya xonasi jihozlari"
-                    className="hero-device-img active"
-                    loading="eager"
-                  />
-                </div>
+            {/* Next arrow button */}
+            <button
+              type="button"
+              className="uz-carousel-nav next"
+              onClick={() => setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length)}
+              aria-label="Keyingi slayd"
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 18l6-6-6-6" />
+              </svg>
+            </button>
 
-                <div className="hero-photo-info">
-                  <span className="photo-tag">Operatsion kompleks</span>
-                  <strong className="photo-title">Operatsiya xonasi jihozlari</strong>
-                  <span className="photo-sub">Zamonaviy jarrohlik stollari, yoritish va integratsiya tizimlari</span>
-                </div>
-              </Link>
+            {/* Carousel navigation indicator dots */}
+            <div className="uz-carousel-dots">
+              {HERO_SLIDES.map((s, idx) => (
+                <button
+                  key={s.id}
+                  type="button"
+                  className={`dot ${idx === currentSlide ? "active" : ""}`}
+                  onClick={() => setCurrentSlide(idx)}
+                  aria-label={`Slayd ${idx + 1}`}
+                />
+              ))}
             </div>
+          </div>
+
+          {/* Uzum-style 4 Quick Category Cards below banner */}
+          <div className="uz-quick-tiles">
+            <Link to="/catalog?category=reanimatsiya-va-anesteziologiya" className="uz-quick-tile">
+              <div className="tile-icon-wrap">🫁</div>
+              <div className="tile-info">
+                <strong>Reanimatsiya va IVL</strong>
+                <span>Nafas berish va monitoring</span>
+              </div>
+            </Link>
+
+            <Link to="/catalog?category=ultratovush-diagnostikasi" className="uz-quick-tile">
+              <div className="tile-icon-wrap">🩺</div>
+              <div className="tile-info">
+                <strong>UZI Diagnostika</strong>
+                <span>Dopler va 3D/4D datchiklar</span>
+              </div>
+            </Link>
+
+            <Link to="/catalog?category=jarrohlik" className="uz-quick-tile">
+              <div className="tile-icon-wrap">🔬</div>
+              <div className="tile-info">
+                <strong>Jarrohlik jihozlari</strong>
+                <span>Stollar, lampalar va koagulyator</span>
+              </div>
+            </Link>
+
+            <Link to="/catalog?category=tibbiy-mebel" className="uz-quick-tile">
+              <div className="tile-icon-wrap">🛏️</div>
+              <div className="tile-info">
+                <strong>Tibbiy mebel</strong>
+                <span>Funksional kravatlar va aravachalar</span>
+              </div>
+            </Link>
           </div>
         </div>
       </section>

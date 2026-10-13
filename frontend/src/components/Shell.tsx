@@ -87,62 +87,169 @@ export function Layout() {
 
   return (
     <>
-      <header className="top">
-        <div className="wrap">
-          <Link className="logo-link" to="/" aria-label="Medax — Medtexnika markazi">
-            <MedaxLogo size="md" />
-          </Link>
-          <nav aria-label="Asosiy menyu">
-            <NavLink to="/catalog" className={({ isActive }) => (isActive ? "on" : "")}>
-              {t("nav_catalog")}
-            </NavLink>
-            <a href="/#brend">{t("nav_brands")}</a>
-            <NavLink to="/contact" className={({ isActive }) => (isActive ? "on" : "")}>
-              {t("nav_contact")}
-            </NavLink>
-          </nav>
-          <span className="sp" />
+      {/* Uzum-style Header Architecture */}
+      <header className="uz-header">
+        {/* Tier 1: Micro Top Bar (Location, pickup points, language, question/answer) */}
+        <div className="uz-topbar">
+          <div className="wrap uz-topbar-wrap">
+            <div className="uz-topbar-left">
+              <span className="uz-location">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
+                <span>Shahar: <b>Namangan</b></span>
+              </span>
+              <a
+                href={SITE_CONFIG.yandexMapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="uz-topbar-link"
+              >
+                Olib ketish punkti
+              </a>
+            </div>
 
-          {/* Telefon raqami */}
-          <a className="tel" href={`tel:${SITE_CONFIG.phoneRaw}`}>
-            <span className="tel-pulse-dot" />
-            {SITE_CONFIG.phone}
-          </a>
+            <div className="uz-topbar-right">
+              <a href={`tel:${SITE_CONFIG.phoneRaw}`} className="uz-topbar-link uz-topbar-phone">
+                <span className="tel-pulse-dot" />
+                {SITE_CONFIG.phone}
+              </a>
+              <Link to="/contact" className="uz-topbar-link">Savol-javob</Link>
+              <Link to={customer ? "/account" : "/cart"} className="uz-topbar-link">Buyurtmalarim</Link>
+              <div className="uz-topbar-tools">
+                <LanguageSwitcher />
+                <ThemeToggle />
+              </div>
+            </div>
+          </div>
+        </div>
 
-          {/* Til tanlash (Smooth Globe Dropdown Menu) */}
-          <LanguageSwitcher />
+        {/* Tier 2: Main Header (Logo, Big Catalog Button, Live Search Bar, User Profile, Cart) */}
+        <div className="uz-mainbar">
+          <div className="wrap uz-mainbar-wrap">
+            {/* Medax Logo */}
+            <Link className="logo-link" to="/" aria-label="Medax — Tibbiy uskunalar bozori">
+              <MedaxLogo size="md" />
+            </Link>
 
-          {/* Mavzu almashtirish (Sun-to-Moon Morphing SVG) */}
-          <ThemeToggle />
-
-          {/* Shaxsiy kabinet yoki Kirish */}
-          {customer ? (
-            <CustomerHeaderMenu />
-          ) : (
-            <button
-              type="button"
-              className="btn-auth-trigger"
-              onClick={() => openAuthModal()}
-              aria-label={t("btn_login")}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                <circle cx="12" cy="7" r="4" />
+            {/* Catalog Button */}
+            <Link to="/catalog" className="uz-btn-catalog">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="7" height="7" rx="1.5" />
+                <rect x="14" y="3" width="7" height="7" rx="1.5" />
+                <rect x="14" y="14" width="7" height="7" rx="1.5" />
+                <rect x="3" y="14" width="7" height="7" rx="1.5" />
               </svg>
-              <span>{t("btn_login")}</span>
-            </button>
-          )}
+              <span>Katalog</span>
+            </Link>
 
-          {/* Savat */}
-          <Link className={`cartlink ${count > 0 ? "has-items" : ""}`} to="/cart" aria-label={`${t("nav_cart")}, ${count} ${t("items_count")}`}>
-            <svg className="cart-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="9" cy="21" r="1" />
-              <circle cx="20" cy="21" r="1" />
-              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-            </svg>
-            <span>{t("nav_cart")}</span>
-            {count > 0 && <span className="cart-badge-pill">{count}</span>}
-          </Link>
+            {/* Central Search Bar */}
+            <form
+              className="uz-search-form"
+              role="search"
+              onSubmit={(e) => {
+                e.preventDefault();
+                const form = e.currentTarget;
+                const input = form.elements.namedItem("search") as HTMLInputElement;
+                const val = input?.value?.trim();
+                window.location.href = val ? `/catalog?q=${encodeURIComponent(val)}` : "/catalog";
+              }}
+            >
+              <input
+                type="search"
+                name="search"
+                className="uz-search-input"
+                placeholder="Mahsulotlar va turkumlar izlash (masalan: UZI, IVL, Jarrohlik)..."
+                aria-label="Mahsulotlar va turkumlar izlash"
+              />
+              <button type="submit" className="uz-search-btn" aria-label="Qidirish">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="M21 21l-4.35-4.35" />
+                </svg>
+              </button>
+            </form>
+
+            {/* Right Action Icons: Login / Profile, Saralangan & Cart */}
+            <div className="uz-actions">
+              {customer ? (
+                <CustomerHeaderMenu />
+              ) : (
+                <button
+                  type="button"
+                  className="uz-action-btn"
+                  onClick={() => openAuthModal()}
+                  aria-label={t("btn_login")}
+                >
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg>
+                  <span>Kirish</span>
+                </button>
+              )}
+
+              <Link
+                className="uz-action-btn"
+                to="/catalog"
+                aria-label="Saralangan mahsulotlar"
+              >
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                </svg>
+                <span>Saralangan</span>
+              </Link>
+
+              <Link
+                className={`uz-action-btn uz-cart-btn ${count > 0 ? "has-items" : ""}`}
+                to="/cart"
+                aria-label={`Savat, ${count} ta mahsulot`}
+              >
+                <div className="uz-cart-icon-wrap">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="9" cy="21" r="1" />
+                    <circle cx="20" cy="21" r="1" />
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                  </svg>
+                  {count > 0 && <span className="uz-badge">{count}</span>}
+                </div>
+                <span>Savat</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Tier 3: Category Strip (Quick access navigation like Uzum) */}
+        <div className="uz-catstrip">
+          <div className="wrap uz-catstrip-wrap">
+            <Link to="/catalog?flag=discount" className="uz-catstrip-pill highlight">
+              <span>🔥</span>
+              <b>Kafolatli narxlar</b>
+            </Link>
+            <Link to="/catalog?flag=new" className="uz-catstrip-pill highlight">
+              <span>✨</span>
+              <b>Yangi modellar</b>
+            </Link>
+            <Link to="/catalog?category=reanimatsiya-va-anesteziologiya" className="uz-catstrip-link">
+              Reanimatsiya va IVL
+            </Link>
+            <Link to="/catalog?category=ultratovush-diagnostikasi" className="uz-catstrip-link">
+              UZI Diagnostika
+            </Link>
+            <Link to="/catalog?category=jarrohlik" className="uz-catstrip-link">
+              Jarrohlik jihozlari
+            </Link>
+            <Link to="/catalog?category=tibbiy-mebel" className="uz-catstrip-link">
+              Tibbiy mebellar
+            </Link>
+            <Link to="/catalog?category=reabilitatsiya-va-ortopediya" className="uz-catstrip-link">
+              Reabilitatsiya
+            </Link>
+            <Link to="/catalog" className="uz-catstrip-more">
+              Barchasi →
+            </Link>
+          </div>
         </div>
       </header>
       <Outlet />
