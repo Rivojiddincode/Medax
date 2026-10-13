@@ -13,94 +13,85 @@ interface HomeData {
   latest: Product[];
 }
 
+export interface BannerBadge {
+  type: "original" | "warranty";
+  label: string;
+}
+
 export interface HeroSlide {
   id: number;
-  badge: string;
-  verified?: boolean;
-  titleTop?: string;
-  titleHighlight?: string;
-  titleSuffix?: string;
-  title?: string;
-  desc: string;
-  pills?: string[];
-  cta: string;
-  ctaLink: string;
-  secondaryCta?: string;
-  secondaryCtaLink?: string;
+  titleLines: [string, string, string];
+  badges: BannerBadge[];
   img: string;
   alt: string;
-  bgGradient?: string;
-  isGraphic?: boolean;
+  link: string;
+  bg: string;
 }
 
 export const HERO_SLIDES: HeroSlide[] = [
   {
     id: 1,
-    badge: "Yangi Texnologiya",
-    verified: true,
-    titleTop: "Nogironlar aravachasi",
-    titleHighlight: "ENDI PULT ORQALI",
-    titleSuffix: "MEDAX'DA",
-    desc: "Elektromotorli, yengil va xavfsiz konstruksiya. Masofaviy pult orqali avtomatik qulay boshqaruv.",
-    pills: ["🎮 Masofaviy pult", "⚡ Kuchli akkumulyator", "🛡️ 1 yil kafolat", "🚚 Bepul yetkazib berish"],
-    cta: "Katalogdan ko'rish →",
-    ctaLink: "/catalog?category=reabilitatsiya-va-invalit-aravachalari",
-    secondaryCta: "Menejer bilan bog'lanish",
-    secondaryCtaLink: "/contact",
+    titleLines: [
+      "Pultli nogironlar",
+      "aravachasi Endi",
+      "Medax’da",
+    ],
+    badges: [
+      { type: "original", label: "Original" },
+      { type: "warranty", label: "1 yil kafolat" },
+    ],
     img: "/uploads/banners/wheelchair-remote.png",
-    alt: "Pult orqali boshqariladigan nogironlar aravachasi Medax",
-    bgGradient: "linear-gradient(135deg, #eef2f6 0%, #e2e8f0 45%, #f8fafc 100%)",
+    alt: "Pultli nogironlar aravachasi",
+    link: "/catalog?category=reabilitatsiya-va-invalit-aravachalari",
+    bg: "#eef1f7",
   },
   {
     id: 2,
-    badge: "Kafolatli diagnostika",
-    verified: true,
-    titleTop: "Zamonaviy UZI apparatlari",
-    titleHighlight: "ANIQ VA TEZKOR",
-    titleSuffix: "MEDAX'DA",
-    desc: "4D tasvirlash, yuqori aniqlikdagi datchiklar va klinikalar uchun rasmiy muhandislik kafolati.",
-    pills: ["🩺 4D skanerlash", "🔬 Yuqori aniqlik", "🛠️ Muhandislik kafolati"],
-    cta: "UZI apparatlarini ko'rish →",
-    ctaLink: "/catalog?category=ultratovush-diagnostikasi",
-    secondaryCta: "Tijoriy taklif olish",
-    secondaryCtaLink: "/contact",
+    titleLines: [
+      "Zamonaviy UZI",
+      "apparatlari Endi",
+      "Medax’da",
+    ],
+    badges: [
+      { type: "original", label: "Original" },
+      { type: "warranty", label: "Rasmiy kafolat" },
+    ],
     img: "/uploads/products/medical-diag.jpg",
-    alt: "Diagnostika uskunalari",
-    bgGradient: "linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #f8fafc 100%)",
+    alt: "Zamonaviy UZI apparatlari",
+    link: "/catalog?category=ultratovush-diagnostikasi",
+    bg: "#eaf0f6",
   },
   {
     id: 3,
-    badge: "Reanimatsiya & Jarrohlik",
-    verified: true,
-    titleTop: "Reanimatsiya va IVL tizimlari",
-    titleHighlight: "ISHONCHLI KAFOLAT",
-    titleSuffix: "MEDAX'DA",
-    desc: "Bemor hayotiy ko'rsatkichlari monitorlari, kislorod konsentratorlari va xalqaro sertifikatli uskunalar.",
-    pills: ["🫁 Nafas berish tizimi", "📊 Ko'p parametrli monitoring", "⚡ 24/7 uzluksiz ish"],
-    cta: "Reanimatsiya jihozlari →",
-    ctaLink: "/catalog?category=reanimatsiya-va-anesteziologiya",
-    secondaryCta: "Mutaxassis konsultatsiyasi",
-    secondaryCtaLink: "/contact",
+    titleLines: [
+      "Reanimatsiya va",
+      "IVL jihozlari Endi",
+      "Medax’da",
+    ],
+    badges: [
+      { type: "original", label: "Original" },
+      { type: "warranty", label: "24/7 servis" },
+    ],
     img: "/uploads/products/medical-surgery.jpg",
-    alt: "Reanimatsiya va jarrohlik uskunalari",
-    bgGradient: "linear-gradient(135deg, #fef2f2 0%, #f8fafc 50%, #eff6ff 100%)",
+    alt: "Reanimatsiya va IVL jihozlari",
+    link: "/catalog?category=reanimatsiya-va-anesteziologiya",
+    bg: "#f3eff1",
   },
   {
     id: 4,
-    badge: "Tibbiy mebel",
-    verified: true,
-    titleTop: "Funksional tibbiy kravatlar",
-    titleHighlight: "QULAY VA CHIDAMLI",
-    titleSuffix: "MEDAX'DA",
-    desc: "Bemorlarning qulay va tez sog'ayishi uchun ko'p funksiyali elektr boshqaruvli kravatlar va aravachalar.",
-    pills: ["🛏️ Elektr sozlanish", "🦾 Mustahkam metall karkas", "🛡️ Rasmiy servis"],
-    cta: "Mebellarni tanlash →",
-    ctaLink: "/catalog?category=tibbiy-mebel",
-    secondaryCta: "Klinikaga buyurtma",
-    secondaryCtaLink: "/contact",
+    titleLines: [
+      "Funksional tibbiy",
+      "kravatlar Endi",
+      "Medax’da",
+    ],
+    badges: [
+      { type: "original", label: "Original" },
+      { type: "warranty", label: "1 yil kafolat" },
+    ],
     img: "/uploads/products/medical-bed.jpg",
-    alt: "Tibbiy funksional kravat",
-    bgGradient: "linear-gradient(135deg, #f0fdf4 0%, #dcfce7 40%, #f8fafc 100%)",
+    alt: "Funksional tibbiy kravatlar",
+    link: "/catalog?category=tibbiy-mebel",
+    bg: "#ebf3ef",
   },
 ];
 
@@ -190,97 +181,47 @@ export default function Home() {
               </svg>
             </button>
 
-            {/* Active Slide */}
-            {HERO_SLIDES[currentSlide].isGraphic ? (
-              <Link
-                to={HERO_SLIDES[currentSlide].ctaLink}
-                className="uz-carousel-slide uz-carousel-slide--graphic active"
-                key={HERO_SLIDES[currentSlide].id}
-                aria-label={HERO_SLIDES[currentSlide].alt}
-              >
+            {/* Active Slide (Uzum Market Style Clean Banner) */}
+            <Link
+              to={HERO_SLIDES[currentSlide].link}
+              className="uz-carousel-slide active"
+              key={HERO_SLIDES[currentSlide].id}
+              style={{ background: HERO_SLIDES[currentSlide].bg }}
+            >
+              <div className="uz-slide-content">
+                <h1 className="uzum-banner-title">
+                  <span>{HERO_SLIDES[currentSlide].titleLines[0]}</span>
+                  <span>{HERO_SLIDES[currentSlide].titleLines[1]}</span>
+                  <span>{HERO_SLIDES[currentSlide].titleLines[2]}</span>
+                </h1>
+
+                <div className="uzum-banner-badges">
+                  {HERO_SLIDES[currentSlide].badges.map((b, idx) => (
+                    <div key={idx} className="uzum-badge-pill">
+                      {b.type === "original" ? (
+                        <svg className="uzum-badge-icon" width="22" height="22" viewBox="0 0 24 24" fill="none">
+                          <path d="M10.41 1.76a2.25 2.25 0 0 1 3.18 0l1.24 1.25a2.25 2.25 0 0 0 1.95.63l1.74-.29a2.25 2.25 0 0 1 2.57 1.86l.28 1.74a2.25 2.25 0 0 0 1.21 1.67l1.58.8a2.25 2.25 0 0 1 1.13 2.87l-.66 1.63a2.25 2.25 0 0 0 0 2.06l.66 1.63a2.25 2.25 0 0 1-1.13 2.87l-1.58.8a2.25 2.25 0 0 0-1.21 1.67l-.28 1.74a2.25 2.25 0 0 1-2.57 1.86l-1.74-.29a2.25 2.25 0 0 0-1.95.63l-1.24 1.25a2.25 2.25 0 0 1-3.18 0l-1.24-1.25a2.25 2.25 0 0 0-1.95-.63l-1.74.29a2.25 2.25 0 0 1-2.57-1.86l-.28-1.74a2.25 2.25 0 0 0-1.21-1.67l-1.58-.8a2.25 2.25 0 0 1-1.13-2.87l.66-1.63a2.25 2.25 0 0 0 0-2.06l-.66-1.63a2.25 2.25 0 0 1 1.13-2.87l1.58-.8a2.25 2.25 0 0 0 1.21-1.67l.28-1.74a2.25 2.25 0 0 1 2.57-1.86l1.74.29a2.25 2.25 0 0 0 1.95-.63l1.24-1.25z" fill="#00c853" />
+                          <path d="M9 12.5l2 2 4.5-4.5" stroke="#ffffff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      ) : (
+                        <svg className="uzum-badge-icon" width="20" height="20" viewBox="0 0 24 24" fill="#0b0f19">
+                          <path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3z" />
+                        </svg>
+                      )}
+                      <span>{b.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="uz-slide-visual">
                 <img
                   src={HERO_SLIDES[currentSlide].img}
                   alt={HERO_SLIDES[currentSlide].alt}
-                  className="uz-slide-graphic-img"
+                  className="uzum-slide-product-img"
                 />
-              </Link>
-            ) : (
-              <div
-                className="uz-carousel-slide active"
-                key={HERO_SLIDES[currentSlide].id}
-                style={{
-                  background:
-                    HERO_SLIDES[currentSlide].bgGradient ||
-                    "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)",
-                }}
-              >
-                <div className="uz-slide-content">
-                  <div className="uz-slide-badges">
-                    <span className="uz-slide-badge">
-                      <span className="uz-badge-dot"></span>
-                      {HERO_SLIDES[currentSlide].badge}
-                    </span>
-                    {HERO_SLIDES[currentSlide].verified && (
-                      <span className="uz-slide-verified-badge">
-                        <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
-                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                        </svg>
-                        ORIGINAL
-                      </span>
-                    )}
-                  </div>
-
-                  <h1 className="uz-slide-title">
-                    <span className="slide-title-main">
-                      {HERO_SLIDES[currentSlide].titleTop || HERO_SLIDES[currentSlide].title}
-                    </span>
-                    {HERO_SLIDES[currentSlide].titleHighlight && (
-                      <span className="slide-title-highlight">
-                        {HERO_SLIDES[currentSlide].titleHighlight}
-                      </span>
-                    )}
-                    {HERO_SLIDES[currentSlide].titleSuffix && (
-                      <span className="slide-title-brand">
-                        {HERO_SLIDES[currentSlide].titleSuffix}
-                      </span>
-                    )}
-                  </h1>
-
-                  <p className="uz-slide-desc">{HERO_SLIDES[currentSlide].desc}</p>
-
-                  {HERO_SLIDES[currentSlide].pills && (
-                    <div className="uz-slide-features">
-                      {HERO_SLIDES[currentSlide].pills!.map((pill) => (
-                        <span key={pill} className="uz-feature-pill">
-                          {pill}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-
-                  <div className="uz-slide-actions">
-                    <Link to={HERO_SLIDES[currentSlide].ctaLink} className="btn btn-primary-sheen">
-                      {HERO_SLIDES[currentSlide].cta}
-                    </Link>
-                    <Link
-                      to={HERO_SLIDES[currentSlide].secondaryCtaLink || "/contact"}
-                      className="btn ghost"
-                    >
-                      {HERO_SLIDES[currentSlide].secondaryCta || "Menejer bilan bog'lanish"}
-                    </Link>
-                  </div>
-                </div>
-
-                <div className="uz-slide-visual">
-                  <div className="uz-slide-img-backdrop"></div>
-                  <img
-                    src={HERO_SLIDES[currentSlide].img}
-                    alt={HERO_SLIDES[currentSlide].alt}
-                    className="uz-slide-product-img"
-                  />
-                </div>
               </div>
-            )}
+            </Link>
 
             {/* Next arrow button */}
             <button
