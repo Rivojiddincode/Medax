@@ -51,6 +51,7 @@ export function Layout() {
   const [onboardStep, setOnboardStep] = useState<"onboard" | "login">(() => {
     return sessionStorage.getItem("medax_onboard_step") === "login" ? "login" : "onboard";
   });
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   if (loading) {
     return (
@@ -146,7 +147,7 @@ export function Layout() {
             </Link>
 
             {/* Central Uzum Search Bar with Dropdown & Dimming Backdrop */}
-            <UzumSearchBar />
+            <UzumSearchBar isOpen={isSearchOpen} onOpenChange={setIsSearchOpen} />
 
             {/* Right Action Icons: Login / Profile, Saralangan & Cart */}
             <div className="uz-actions">
@@ -229,6 +230,16 @@ export function Layout() {
           </div>
         </div>
       </header>
+
+      {/* Uzum Fon xiralashuvi (Header to'liq xiralashmay yuqorida turadi, faqat reklamadan/bosh sahifadan boshlab pastki qism xiralashadi) */}
+      {isSearchOpen && (
+        <div
+          className="uz-search-backdrop"
+          onClick={() => setIsSearchOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
       <Outlet />
       <footer id="aloqa">
         <div className="wrap">

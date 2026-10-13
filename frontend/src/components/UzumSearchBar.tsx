@@ -48,9 +48,24 @@ const POPULAR_ITEMS: PopularItem[] = [
   }
 ];
 
-export function UzumSearchBar() {
+interface UzumSearchBarProps {
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+export function UzumSearchBar({ isOpen: controlledIsOpen, onOpenChange }: UzumSearchBarProps = {}) {
   const navigate = useNavigate();
-  const [isOpen, setIsOpen] = useState(false);
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+  const isOpen = controlledIsOpen !== undefined ? controlledIsOpen : internalIsOpen;
+
+  const setIsOpen = (val: boolean) => {
+    if (onOpenChange) {
+      onOpenChange(val);
+    } else {
+      setInternalIsOpen(val);
+    }
+  };
+
   const [query, setQuery] = useState("");
   const [history, setHistory] = useState<string[]>(() => {
     try {
@@ -122,49 +137,39 @@ export function UzumSearchBar() {
   };
 
   return (
-    <>
-      {/* Background Dimming Backdrop (keeps Header & Topbar fully visible on top) */}
-      {isOpen && (
-        <div
-          className="uz-search-backdrop"
-          onClick={() => setIsOpen(false)}
-          aria-hidden="true"
+    <div className="uz-search-wrap" ref={wrapperRef}>
+      <form
+        className={`uz-search-form ${isOpen ? "is-open" : ""}`}
+        role="search"
+        onSubmit={handleSubmit}
+      >
+        <input
+          type="search"
+          name="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onFocus={() => setIsOpen(true)}
+          className="uz-search-input"
+          placeholder="Mahsulotlar va turkumlar izlash (masalan: UZI, IVL, Jarrohlik)..."
+          aria-label="Mahsulotlar va turkumlar izlash"
+          autoComplete="off"
         />
-      )}
-
-      <div className="uz-search-wrap" ref={wrapperRef}>
-        <form
-          className={`uz-search-form ${isOpen ? "is-open" : ""}`}
-          role="search"
-          onSubmit={handleSubmit}
-        >
-          <input
-            type="search"
-            name="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onFocus={() => setIsOpen(true)}
-            className="uz-search-input"
-            placeholder="Mahsulotlar va turkumlar izlash (masalan: UZI, IVL, Jarrohlik)..."
-            aria-label="Mahsulotlar va turkumlar izlash"
-            autoComplete="off"
-          />
-          <button type="submit" className="uz-search-btn" aria-label="Qidirish">
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="11" cy="11" r="8" />
-              <path d="M21 21l-4.35-4.35" />
-            </svg>
-          </button>
-        </form>
+        <button type="submit" className="uz-search-btn" aria-label="Qidirish">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <circle cx="11" cy="11" r="8" />
+            <path d="M21 21l-4.35-4.35" />
+          </svg>
+        </button>
+      </form>
 
         {/* Uzum-style Search Dropdown */}
         {isOpen && (
@@ -271,6 +276,5 @@ export function UzumSearchBar() {
           </div>
         )}
       </div>
-    </>
   );
 }
