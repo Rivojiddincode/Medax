@@ -2127,7 +2127,7 @@ footer {
 }
 
 .med-product-card .b{
-  padding:16px;
+  padding:14px 13px;
   display:flex;
   flex-direction:column;
   gap:6px;
@@ -2162,32 +2162,33 @@ footer {
 /* 1-row bottom bar for price and savatga */
 .card-bottom-bar{
   margin-top:auto;
-  padding-top:12px;
+  padding-top:10px;
   border-top:1px solid var(--line);
   display:flex;
   justify-content:space-between;
   align-items:center;
-  gap:8px;
+  gap:6px;
   flex-wrap:nowrap; /* Narx va Savatga tugmasi doim bitta tekis qatorda bo'ladi */
 }
 .med-product-card .price-val{
   font-family:var(--head);
-  font-size:15px;
+  font-size:13.5px;
   font-weight:800;
   color:var(--ink);
   white-space:nowrap;
+  letter-spacing:-0.2px;
 }
 .btn-quick-cart{
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  gap:5px;
+  gap:4px;
   background:var(--ink);
   color:var(--paper);
   border:none;
-  padding:6px 12px;
-  border-radius:9px;
-  font-size:12.5px;
+  padding:6px 10px;
+  border-radius:8px;
+  font-size:12px;
   font-weight:600;
   cursor:pointer;
   white-space:nowrap;
