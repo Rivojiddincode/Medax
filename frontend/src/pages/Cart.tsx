@@ -612,7 +612,7 @@ export default function Cart() {
 
                   <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", fontSize: 13, color: "var(--ink2)" }}>
                     <span>🕒 <b>Ish vaqti:</b> Dush - Shanba, 09:00 - 18:00</span>
-                    <span>📞 <b>Aloqa:</b> +998 90 123 45 67</span>
+                    <span>📞 <b>Aloqa:</b> +998 93 211 97 85</span>
                   </div>
 
                   <div style={{ display: "flex", gap: 12, marginTop: 4 }}>

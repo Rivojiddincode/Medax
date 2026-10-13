@@ -4,8 +4,8 @@
  */
 export const SITE_CONFIG = {
   companyName: "Medax",
-  phone: "+998 90 123 45 67",
-  phoneRaw: "+998901234567",
+  phone: "+998 93 211 97 85",
+  phoneRaw: "+998932119785",
   email: "info@medax.uz",
   telegramHandle: "@medax_uz",
   telegramUrl: "https://t.me/medax_uz",

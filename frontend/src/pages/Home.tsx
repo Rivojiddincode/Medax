@@ -13,16 +13,25 @@ interface HomeData {
   latest: Product[];
 }
 
-const HERO_SLIDES = [
+interface HeroSlide {
+  id: number;
+  isGraphic?: boolean;
+  badge?: string;
+  title?: string;
+  desc?: string;
+  cta?: string;
+  ctaLink: string;
+  img: string;
+  alt: string;
+}
+
+const HERO_SLIDES: HeroSlide[] = [
   {
     id: 1,
-    badge: "Medax Maxsus Taklif",
-    title: "O'zingizga va bemorlarga g'amxo'rlik bilan",
-    desc: "Klinikalar va shifoxonalar uchun zamonaviy tibbiy uskunalar, laboratoriya jihozlari va rasmiy kafolat.",
-    cta: "Katalogga o'tish →",
+    isGraphic: true,
+    img: "/banner-main.png",
+    alt: "Medax - Sifatli Tibbiy Uskunalar",
     ctaLink: "/catalog",
-    img: "/uploads/products/medical-surgery.jpg",
-    alt: "Tibbiy jihozlar",
   },
   {
     id: 2,
@@ -127,32 +136,47 @@ export default function Home() {
             </button>
 
             {/* Active Slide */}
-            <div className="uz-carousel-slide active" key={HERO_SLIDES[currentSlide].id}>
-              <div className="uz-slide-content">
-                <span className="uz-slide-badge">{HERO_SLIDES[currentSlide].badge}</span>
-                <h1 className="uz-slide-title">
-                  {HERO_SLIDES[currentSlide].title}
-                </h1>
-                <p className="uz-slide-desc">
-                  {HERO_SLIDES[currentSlide].desc}
-                </p>
-                <div className="uz-slide-actions">
-                  <Link to={HERO_SLIDES[currentSlide].ctaLink} className="btn btn-primary-sheen">
-                    {HERO_SLIDES[currentSlide].cta}
-                  </Link>
-                  <Link to="/contact" className="btn ghost">
-                    Menejer bilan bog'lanish
-                  </Link>
-                </div>
-              </div>
-              <div className="uz-slide-visual">
+            {HERO_SLIDES[currentSlide].isGraphic ? (
+              <Link
+                to={HERO_SLIDES[currentSlide].ctaLink}
+                className="uz-carousel-slide uz-carousel-slide--graphic active"
+                key={HERO_SLIDES[currentSlide].id}
+                aria-label={HERO_SLIDES[currentSlide].alt}
+              >
                 <img
                   src={HERO_SLIDES[currentSlide].img}
                   alt={HERO_SLIDES[currentSlide].alt}
-                  className="uz-slide-img"
+                  className="uz-slide-graphic-img"
                 />
+              </Link>
+            ) : (
+              <div className="uz-carousel-slide active" key={HERO_SLIDES[currentSlide].id}>
+                <div className="uz-slide-content">
+                  <span className="uz-slide-badge">{HERO_SLIDES[currentSlide].badge}</span>
+                  <h1 className="uz-slide-title">
+                    {HERO_SLIDES[currentSlide].title}
+                  </h1>
+                  <p className="uz-slide-desc">
+                    {HERO_SLIDES[currentSlide].desc}
+                  </p>
+                  <div className="uz-slide-actions">
+                    <Link to={HERO_SLIDES[currentSlide].ctaLink} className="btn btn-primary-sheen">
+                      {HERO_SLIDES[currentSlide].cta}
+                    </Link>
+                    <Link to="/contact" className="btn ghost">
+                      Menejer bilan bog'lanish
+                    </Link>
+                  </div>
+                </div>
+                <div className="uz-slide-visual">
+                  <img
+                    src={HERO_SLIDES[currentSlide].img}
+                    alt={HERO_SLIDES[currentSlide].alt}
+                    className="uz-slide-img"
+                  />
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Next arrow button */}
             <button
