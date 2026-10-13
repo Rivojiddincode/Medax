@@ -639,18 +639,19 @@ input:focus,select:focus,textarea:focus{
 .uz-banner-carousel {
   position: relative;
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-  border-radius: 24px;
+  border-radius: 20px;
   overflow: hidden;
   border: 1px solid var(--line);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
 }
 .uz-carousel-slide {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 380px;
-  padding: 40px 60px;
-  gap: 40px;
+  min-height: 330px;
+  padding: 26px 48px;
+  gap: 36px;
+  box-sizing: border-box;
 }
 @keyframes uzFadeInSlide {
   from {
@@ -677,62 +678,155 @@ input:focus,select:focus,textarea:focus{
 .uz-slide-graphic-img {
   width: 100%;
   height: auto;
-  aspect-ratio: 1024 / 512;
+  max-height: 330px;
   object-fit: cover;
   display: block;
-  border-radius: 24px;
+  border-radius: 20px;
   transition: transform 0.35s ease;
 }
 .uz-carousel-slide--graphic:hover .uz-slide-graphic-img {
   transform: scale(1.006);
 }
 .uz-slide-content {
-  flex: 1;
+  flex: 1.25;
   max-width: 580px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.uz-slide-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
 }
 .uz-slide-badge {
-  display: inline-block;
-  background: #e0f2fe;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(2, 132, 199, 0.1);
   color: #0284c7;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.6px;
-  padding: 5px 12px;
+  padding: 4px 10px;
   border-radius: 999px;
-  margin-bottom: 16px;
+  border: 1px solid rgba(2, 132, 199, 0.2);
+}
+.uz-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #0284c7;
+  display: inline-block;
+}
+.uz-slide-verified-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
 }
 .uz-slide-title {
-  font-size: clamp(30px, 3.8vw, 44px);
-  font-weight: 800;
-  line-height: 1.15;
+  font-size: clamp(22px, 2.5vw, 30px);
+  font-weight: 900;
+  line-height: 1.2;
   color: var(--ink);
-  margin: 0 0 16px;
-  letter-spacing: -0.8px;
+  margin: 0 0 10px;
+  letter-spacing: -0.6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.slide-title-main {
+  color: #334155;
+  font-size: 0.85em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+.slide-title-highlight {
+  color: #0f172a;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.5px;
+}
+.slide-title-brand {
+  color: #0284c7;
+  font-weight: 900;
+  letter-spacing: -0.5px;
 }
 .uz-slide-desc {
-  font-size: 16px;
-  color: var(--ink2);
-  line-height: 1.5;
-  margin: 0 0 24px;
+  font-size: 14px;
+  color: #475569;
+  line-height: 1.45;
+  margin: 0 0 14px;
+  max-width: 500px;
+}
+.uz-slide-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.uz-feature-pill {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #334155;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 4px 10px;
+  border-radius: 7px;
+  backdrop-filter: blur(4px);
 }
 .uz-slide-actions {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   align-items: center;
 }
 .uz-slide-visual {
-  flex: 1;
-  max-width: 460px;
+  flex: 0.95;
   display: flex;
+  align-items: center;
   justify-content: center;
+  position: relative;
+  height: 100%;
+}
+.uz-slide-img-backdrop {
+  position: absolute;
+  width: 240px;
+  height: 240px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0) 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 1;
+}
+.uz-slide-product-img {
+  position: relative;
+  z-index: 2;
+  max-height: 260px;
+  max-width: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 14px 22px rgba(0, 0, 0, 0.14));
+  transition: transform 0.35s ease;
+}
+.uz-banner-carousel:hover .uz-slide-product-img {
+  transform: translateY(-3px) scale(1.02);
 }
 .uz-slide-img {
   width: 100%;
-  max-height: 320px;
+  max-height: 260px;
   object-fit: cover;
-  border-radius: 20px;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
+  border-radius: 16px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
 }
 .uz-carousel-nav {
   position: absolute;
@@ -836,12 +930,22 @@ input:focus,select:focus,textarea:focus{
   .uz-topbar { display: none; }
   .uz-quick-tiles { grid-template-columns: repeat(2, 1fr); }
   .uz-carousel-slide {
-    flex-direction: column;
-    padding: 30px 24px;
+    flex-direction: column-reverse;
+    padding: 24px 20px 28px;
     text-align: center;
+    min-height: auto;
+    gap: 18px;
   }
+  .uz-slide-content {
+    align-items: center;
+    max-width: 100%;
+  }
+  .uz-slide-badges { justify-content: center; }
+  .uz-slide-features { justify-content: center; }
   .uz-slide-actions { justify-content: center; }
   .uz-slide-visual { max-width: 100%; }
+  .uz-slide-product-img { max-height: 180px; }
+  .uz-slide-img-backdrop { width: 170px; height: 170px; }
 }
 
 @media (max-width: 768px) {
