@@ -52,7 +52,7 @@ export function Layout() {
     return sessionStorage.getItem("medax_onboard_step") === "login" ? "login" : "onboard";
   });
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const { mounted: backdropMounted, animState: backdropAnimState } = useAnimatedPresence(isSearchOpen, 260);
+  const { mounted: backdropMounted, animState: backdropAnimState } = useAnimatedPresence(isSearchOpen, 280);
 
   if (loading) {
     return (

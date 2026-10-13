@@ -53,7 +53,7 @@ interface UzumSearchBarProps {
   onOpenChange?: (open: boolean) => void;
 }
 
-export function useAnimatedPresence(isOpen: boolean, durationMs = 260) {
+export function useAnimatedPresence(isOpen: boolean, durationMs = 280) {
   const [mounted, setMounted] = useState(isOpen);
   const [animState, setAnimState] = useState<"entering" | "leaving">(isOpen ? "entering" : "leaving");
 
@@ -68,7 +68,7 @@ export function useAnimatedPresence(isOpen: boolean, durationMs = 260) {
       }, durationMs);
       return () => clearTimeout(timer);
     }
-  }, [isOpen, durationMs]);
+  }, [isOpen, mounted, durationMs]);
 
   return { mounted, animState };
 }
@@ -86,7 +86,7 @@ export function UzumSearchBar({ isOpen: controlledIsOpen, onOpenChange }: UzumSe
     }
   };
 
-  const { mounted, animState } = useAnimatedPresence(isOpen, 260);
+  const { mounted, animState } = useAnimatedPresence(isOpen, 280);
 
   const [query, setQuery] = useState("");
   const [history, setHistory] = useState<string[]>(() => {

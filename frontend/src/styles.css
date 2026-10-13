@@ -217,30 +217,35 @@ input:focus,select:focus,textarea:focus{
   animation: uzBackdropFadeOut 0.24s ease-in forwards;
 }
 
-/* Material ochilgandek tepadan pastga mayin sirg'alib tushish */
-@keyframes uzMaterialOpen {
+/* Kitob ochilgandek 3D mayin tushish animatsiyasi */
+@keyframes uzBookOpen {
   0% {
     opacity: 0;
-    transform: translateY(-28px) scaleY(0.9);
+    transform: perspective(900px) rotateX(-22deg) translateY(-12px) scaleY(0.88);
+    transform-origin: top center;
+  }
+  65% {
+    opacity: 1;
+    transform: perspective(900px) rotateX(2deg) translateY(1px) scaleY(1.01);
     transform-origin: top center;
   }
   100% {
     opacity: 1;
-    transform: translateY(0) scaleY(1);
+    transform: perspective(900px) rotateX(0deg) translateY(0) scaleY(1);
     transform-origin: top center;
   }
 }
 
-/* Yopilishda tepaga qarab mayin yopilib kirib ketish */
-@keyframes uzMaterialClose {
+/* Kitob yopilgandek tepaga qarab mayin yopilib kirib ketish */
+@keyframes uzBookClose {
   0% {
     opacity: 1;
-    transform: translateY(0) scaleY(1);
+    transform: perspective(900px) rotateX(0deg) translateY(0) scaleY(1);
     transform-origin: top center;
   }
   100% {
     opacity: 0;
-    transform: translateY(-24px) scaleY(0.92);
+    transform: perspective(900px) rotateX(-18deg) translateY(-12px) scaleY(0.9);
     transform-origin: top center;
   }
 }
@@ -278,6 +283,8 @@ input:focus,select:focus,textarea:focus{
   box-shadow: none !important; /* Xato nurlarni to'liq olib tashlash */
   background: var(--paper) !important;
   transform: none !important;
+  border-bottom-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
 }
 
 .uz-search-input,
@@ -339,12 +346,13 @@ input:focus,select:focus,textarea:focus{
 /* Uzum-style Search Dropdown (Recent searches + Popular) */
 .uz-search-dropdown {
   position: absolute;
-  top: calc(100% + 6px);
+  top: 100% !important;
   left: 0;
   width: 100%;
   background: #ffffff;
-  border: 1px solid var(--line);
-  border-radius: 16px;
+  border: 1px solid #0284c7 !important;
+  border-top: 1px solid #f1f5f9 !important;
+  border-radius: 0 0 16px 16px !important;
   box-shadow: 0 20px 48px rgba(0, 0, 0, 0.14);
   padding: 16px 18px;
   z-index: 1005;
@@ -353,10 +361,10 @@ input:focus,select:focus,textarea:focus{
   overflow-y: auto;
 }
 .uz-search-dropdown.entering {
-  animation: uzMaterialOpen 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: uzBookOpen 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 .uz-search-dropdown.leaving {
-  animation: uzMaterialClose 0.24s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: uzBookClose 0.28s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 .uz-search-section-header {
