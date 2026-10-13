@@ -53,6 +53,26 @@ interface UzumSearchBarProps {
   onOpenChange?: (open: boolean) => void;
 }
 
+export function useAnimatedPresence(isOpen: boolean, durationMs = 260) {
+  const [mounted, setMounted] = useState(isOpen);
+  const [animState, setAnimState] = useState<"entering" | "leaving">(isOpen ? "entering" : "leaving");
+
+  useEffect(() => {
+    if (isOpen) {
+      setMounted(true);
+      setAnimState("entering");
+    } else if (mounted) {
+      setAnimState("leaving");
+      const timer = setTimeout(() => {
+        setMounted(false);
+      }, durationMs);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, durationMs]);
+
+  return { mounted, animState };
+}
+
 export function UzumSearchBar({ isOpen: controlledIsOpen, onOpenChange }: UzumSearchBarProps = {}) {
   const navigate = useNavigate();
   const [internalIsOpen, setInternalIsOpen] = useState(false);
@@ -65,6 +85,8 @@ export function UzumSearchBar({ isOpen: controlledIsOpen, onOpenChange }: UzumSe
       setInternalIsOpen(val);
     }
   };
+
+  const { mounted, animState } = useAnimatedPresence(isOpen, 260);
 
   const [query, setQuery] = useState("");
   const [history, setHistory] = useState<string[]>(() => {
@@ -171,9 +193,13 @@ export function UzumSearchBar({ isOpen: controlledIsOpen, onOpenChange }: UzumSe
         </button>
       </form>
 
-        {/* Uzum-style Search Dropdown */}
-        {isOpen && (
-          <div className="uz-search-dropdown" role="dialog" aria-label="Qidiruv takliflari">
+        {/* Uzum-style Search Dropdown with smooth entrance and exit animations */}
+        {mounted && (
+          <div
+            className={`uz-search-dropdown ${animState}`}
+            role="dialog"
+            aria-label="Qidiruv takliflari"
+          >
             {/* Section 1: Recent Searches */}
             {history.length > 0 && (
               <div className="uz-search-section">

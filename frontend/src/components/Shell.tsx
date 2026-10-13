@@ -14,7 +14,7 @@ import { PwaInstallPrompt } from "./PwaInstallPrompt";
 import { CustomerHeaderMenu } from "./CustomerHeaderMenu";
 import { CustomerAuthGate } from "./CustomerAuthGate";
 import { AppOnboarding } from "./AppOnboarding";
-import { UzumSearchBar } from "./UzumSearchBar";
+import { UzumSearchBar, useAnimatedPresence } from "./UzumSearchBar";
 import { SITE_CONFIG } from "../siteConfig";
 
 function useIsAppMode(): boolean {
@@ -52,6 +52,7 @@ export function Layout() {
     return sessionStorage.getItem("medax_onboard_step") === "login" ? "login" : "onboard";
   });
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const { mounted: backdropMounted, animState: backdropAnimState } = useAnimatedPresence(isSearchOpen, 260);
 
   if (loading) {
     return (
@@ -232,9 +233,9 @@ export function Layout() {
       </header>
 
       {/* Uzum Fon xiralashuvi (Header to'liq xiralashmay yuqorida turadi, faqat reklamadan/bosh sahifadan boshlab pastki qism xiralashadi) */}
-      {isSearchOpen && (
+      {backdropMounted && (
         <div
-          className="uz-search-backdrop"
+          className={`uz-search-backdrop ${backdropAnimState}`}
           onClick={() => setIsSearchOpen(false)}
           aria-hidden="true"
         />
