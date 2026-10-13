@@ -51,12 +51,13 @@ export default function Orders() {
 
   const getStatusLabel = (s: string) => {
     switch (s) {
-      case "NEW": return t("st_new");
-      case "CONFIRMED": return t("st_confirmed");
-      case "DONE": return t("st_done");
-      case "CANCELED": return t("st_canceled");
-      case "FAKE": return t("st_fake");
-      default: return s || t("all");
+      case "NEW": return t("st_new") || "Yangi";
+      case "CONFIRMED": return t("st_confirmed") || "Tasdiqlangan";
+      case "READY": return "Olib ketishga tayyor";
+      case "DONE": return t("st_done") || "Bajarildi";
+      case "CANCELED": return t("st_canceled") || "Bekor qilingan";
+      case "FAKE": return t("st_fake") || "Soxta";
+      default: return s || t("all") || "Barchasi";
     }
   };
 
@@ -64,7 +65,7 @@ export default function Orders() {
     <>
       <h1>{t("orders")}</h1>
       <div className="row">
-        {["", "NEW", "CONFIRMED", "DONE", "CANCELED", "FAKE"].map((s) => (
+        {["", "NEW", "CONFIRMED", "READY", "DONE", "CANCELED", "FAKE"].map((s) => (
           <button key={s} className="tab" style={{ margin: 0 }} role="tab" aria-selected={status === s} onClick={() => setStatus(s)}>
             {getStatusLabel(s)}
           </button>
@@ -261,14 +262,27 @@ function Detail({ order, onClose, onChanged }: { order: Order; onClose: () => vo
               <textarea id="note" value={note} onChange={(e) => setNote(e.target.value)} style={{ minHeight: 80 }} />
             </div>
             <div className="row" style={{ flexWrap: "wrap", gap: 8 }}>
-              {order.status === "NEW" && <button className="btn" disabled={busy} onClick={() => patch({ status: "CONFIRMED", managerNote: note })}>Tasdiqlash (qo'ng'iroq qilindi)</button>}
-              {order.status === "CONFIRMED" && <button className="btn" disabled={busy} onClick={() => patch({ status: "DONE", managerNote: note })}>Bajarildi</button>}
-              {(order.status === "NEW" || order.status === "CONFIRMED") && (
+              {order.status === "NEW" && (
+                <button className="btn" disabled={busy} onClick={() => patch({ status: "CONFIRMED", managerNote: note })}>
+                  📞 Tasdiqlash (Menejer qo'ng'iroq qildi)
+                </button>
+              )}
+              {order.status === "CONFIRMED" && (
+                <button className="btn" style={{ background: "#0284c7" }} disabled={busy} onClick={() => patch({ status: "READY", managerNote: note })}>
+                  📦 Olib ketishga tayyor qilish
+                </button>
+              )}
+              {order.status === "READY" && (
+                <button className="btn" style={{ background: "#16a34a" }} disabled={busy} onClick={() => patch({ status: "DONE", managerNote: note })}>
+                  ✅ Bajarildi (Mijoz olib ketdi)
+                </button>
+              )}
+              {(order.status === "NEW" || order.status === "CONFIRMED" || order.status === "READY") && (
                 <button className="btn ghost" disabled={busy} style={{ color: "#ef4444" }} onClick={() => setCanceling(true)}>
                   Bekor qilish...
                 </button>
               )}
-              {order.status !== "FAKE" && <button className="btn danger" disabled={busy} onClick={markFake}>Soxta</button>}
+              {order.status !== "FAKE" && <button className="btn danger" disabled={busy} onClick={markFake}>Soxta (Bekor va Bloklash)</button>}
               <button className="btn ghost" disabled={busy} onClick={() => patch({ managerNote: note })}>Izohni saqlash</button>
               <button className="btn ghost" disabled={busy} onClick={blockNow}>Raqamni bloklash</button>
             </div>

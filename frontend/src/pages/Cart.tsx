@@ -158,8 +158,8 @@ export default function Cart() {
           name: name.trim(),
           phone: cleanPhone,
           organization: organization.trim(),
-          deliveryAddress: deliveryAddress.trim(),
-          paymentMethod,
+          deliveryAddress: "Do'kondan olib ketish (Namangan sh., Ozod MFY, Beruniy 2-uy)",
+          paymentMethod: "Do'konda to'lash (Olib ketishda)",
           comment: comment.trim(),
           website, // honeypot
           elapsedMs: Date.now() - startedAt.current,
@@ -192,9 +192,9 @@ export default function Cart() {
               <polyline points="22 4 12 14.01 9 11.01" />
             </svg>
           </div>
-          <h1>Buyurtmangiz muvaffaqiyatli qabul qilindi!</h1>
+          <h1>Buyurtma so'rovi qabul qilindi!</h1>
           <p className="order-subheading">
-            Medax mutaxassisi tez orada <b>{phone}</b> raqamingizga qo'ng'iroq qilib, shartnoma, texnik hujjatlar va yetkazib berish vaqtini aniqlashtiradi.
+            Medax menejeri tez orada <b>{phone}</b> raqamingizga qo'ng'iroq qilib, tovar omborda borligini tasdiqlaydi va siz uchun ajratib qo'yadi.
           </p>
 
           <div className="order-number-banner">
@@ -206,22 +206,22 @@ export default function Cart() {
             <div className="step-point">
               <span className="step-num">1</span>
               <div>
-                <strong>Menejer aloqasi</strong>
-                <p>15 daqiqa ichida buyurtmangiz bo'yicha menejer bog'lanadi.</p>
+                <strong>Menejer tasdiqlashi</strong>
+                <p>15 daqiqa ichida qo'ng'iroq qilinib, tovar ajratib qo'yiladi.</p>
               </div>
             </div>
             <div className="step-point">
               <span className="step-num">2</span>
               <div>
-                <strong>Rasmiy kafolat & Shartnoma</strong>
-                <p>Yuridik yoki jismoniy shaxs uchun to'liq hujjatlar to'plami tayyorlanadi.</p>
+                <strong>Do'kondan olib ketish</strong>
+                <p>Do'konimizga tashrif buyurib, uskunani ko'rib tekshirib olasiz.</p>
               </div>
             </div>
             <div className="step-point">
               <span className="step-num">3</span>
               <div>
-                <strong>Tezkor yetkazib berish</strong>
-                <p>Toshkent shahri va barcha viloyatlar bo'ylab o'rnatib berish xizmati.</p>
+                <strong>Qulay to'lov</strong>
+                <p>Olib ketish paytida naqd, terminal yoki bank hisob-faktura orqali to'lov.</p>
               </div>
             </div>
           </div>
@@ -587,27 +587,64 @@ export default function Cart() {
                   />
                 </div>
 
-                <h3 className="section-subhead" style={{ marginTop: 24 }}>2. Yetkazib berish manzili</h3>
-                <div className="field">
-                  <label htmlFor="ord-addr">Yetkazib berish manzili (Shahar, viloyat, ko'cha, bino) *</label>
-                  <textarea
-                    id="ord-addr"
-                    rows={2}
-                    value={deliveryAddress}
-                    onChange={(e) => setDeliveryAddress(e.target.value)}
-                    required
-                    placeholder="Masalan: Namangan viloyati, Namangan sh., Ozod MFY, Abu Rayhon Beruniy ko'chasi 2-uy"
-                  />
+                <h3 className="section-subhead" style={{ marginTop: 24 }}>2. Olib ketish joyi va qoidalari</h3>
+                <div
+                  style={{
+                    background: "var(--sea, #f0f9ff)",
+                    border: "1.5px solid rgba(2, 132, 199, 0.3)",
+                    borderRadius: 16,
+                    padding: "20px 24px",
+                    display: "grid",
+                    gap: 12,
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+                    <span style={{ fontSize: 24 }}>🏢</span>
+                    <div>
+                      <strong style={{ fontSize: 16, color: "var(--ink, #0f172a)", display: "block", marginBottom: 4 }}>
+                        Medax do'koni va ombori:
+                      </strong>
+                      <p style={{ margin: 0, fontSize: 14, color: "var(--ink2, #334155)" }}>
+                        Namangan viloyati, Namangan sh., Ozod MFY, Abu Rayhon Beruniy ko'chasi 2-uy
+                      </p>
+                    </div>
+                  </div>
+
+                  <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", fontSize: 13, color: "var(--ink2)" }}>
+                    <span>🕒 <b>Ish vaqti:</b> Dush - Shanba, 09:00 - 18:00</span>
+                    <span>📞 <b>Aloqa:</b> +998 90 123 45 67</span>
+                  </div>
+
+                  <div style={{ display: "flex", gap: 12, marginTop: 4 }}>
+                    <a
+                      href="https://yandex.uz/maps/?ll=71.678327,41.008014&z=18&pt=71.678327,41.008014,pm2rdm"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn sm ghost"
+                      style={{ borderRadius: 8, fontSize: 12 }}
+                    >
+                      📍 Yandex Xaritada ochish
+                    </a>
+                    <a
+                      href="https://maps.app.goo.gl/Fi3DDmU1kWqHVST4A"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn sm ghost"
+                      style={{ borderRadius: 8, fontSize: 12 }}
+                    >
+                      🗺️ Google Maps'da ochish
+                    </a>
+                  </div>
                 </div>
 
-                <div className="field">
+                <div className="field" style={{ marginTop: 20 }}>
                   <label htmlFor="ord-comment">Qo'shimcha izoh yoki texnik talablar (ixtiyoriy)</label>
                   <textarea
                     id="ord-comment"
                     rows={2}
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
-                    placeholder="Masalan: Shartnomani elektron hisob-faktura (Didox) orqali yuboring"
+                    placeholder="Masalan: Uskunani soat 14:00 larda borib olib ketamiz, oldindan tayyorlab qo'ying"
                   />
                 </div>
 
@@ -616,52 +653,27 @@ export default function Cart() {
                   <input type="text" tabIndex={-1} autoComplete="off" value={website} onChange={(e) => setWebsite(e.target.value)} />
                 </div>
 
-                <h3 className="section-subhead" style={{ marginTop: 24 }}>3. To'lov usuli</h3>
-                <div className="payment-options-grid">
-                  <label className={`payment-card ${paymentMethod === "bank_transfer" ? "active" : ""}`}>
-                    <input
-                      type="radio"
-                      name="payment_opt"
-                      value="bank_transfer"
-                      checked={paymentMethod === "bank_transfer"}
-                      onChange={(e) => setPaymentMethod(e.target.value)}
-                    />
-                    <div className="pay-card-icon">🏦</div>
-                    <div className="pay-card-text">
-                      <strong>Bank hisob-faktura (Shartnoma)</strong>
-                      <span>Yuridik shaxslar, klinikalar va davlat shifoxonalari uchun</span>
-                    </div>
-                  </label>
-
-                  <label className={`payment-card ${paymentMethod === "upon_delivery" ? "active" : ""}`}>
-                    <input
-                      type="radio"
-                      name="payment_opt"
-                      value="upon_delivery"
-                      checked={paymentMethod === "upon_delivery"}
-                      onChange={(e) => setPaymentMethod(e.target.value)}
-                    />
-                    <div className="pay-card-icon">💵</div>
-                    <div className="pay-card-text">
-                      <strong>Yetkazib berilganda to'lash</strong>
-                      <span>Uskunani qabul qilib olgach (Naqd, korporativ karta yoki terminal)</span>
-                    </div>
-                  </label>
-
-                  <label className={`payment-card ${paymentMethod === "contract_quote" ? "active" : ""}`}>
-                    <input
-                      type="radio"
-                      name="payment_opt"
-                      value="contract_quote"
-                      checked={paymentMethod === "contract_quote"}
-                      onChange={(e) => setPaymentMethod(e.target.value)}
-                    />
-                    <div className="pay-card-icon">📑</div>
-                    <div className="pay-card-text">
-                      <strong>Tijoriy taklif & Tender hisob-kitobi</strong>
-                      <span>Katta hajmdagi tibbiy jihozlar, lizing va rasmiy smeta uchun</span>
-                    </div>
-                  </label>
+                <h3 className="section-subhead" style={{ marginTop: 24 }}>3. To'lov tartibi</h3>
+                <div
+                  style={{
+                    background: "var(--card, #fff)",
+                    border: "1.5px solid var(--line)",
+                    borderRadius: 16,
+                    padding: "18px 20px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 16,
+                  }}
+                >
+                  <span style={{ fontSize: 32 }}>🏪</span>
+                  <div>
+                    <strong style={{ fontSize: 16, display: "block", color: "var(--ink)" }}>
+                      Do'konda to'lash (Olib ketish paytida)
+                    </strong>
+                    <span style={{ fontSize: 13, color: "var(--ink2)" }}>
+                      Uskunani ko'rib, tekshirib qabul qilgach to'laysiz (Naqd, korporativ karta/terminal yoki bank hisob-faktura orqali).
+                    </span>
+                  </div>
                 </div>
 
                 <div style={{ marginTop: 28 }}>
@@ -671,10 +683,10 @@ export default function Cart() {
                     style={{ width: "100%", height: 52, fontSize: 17, fontWeight: 700 }}
                     disabled={busy}
                   >
-                    {busy ? "Buyurtma yuborilmoqda…" : "Buyurtmani tasdiqlash va yakunlash ✓"}
+                    {busy ? "Buyurtma yuborilmoqda…" : "Buyurtma so'rovini yuborish ✓"}
                   </button>
                   <p className="note" style={{ textAlign: "center", marginTop: 12 }}>
-                    Tugmani bosish orqali siz shartnoma shartlariga va shaxsiy ma'lumotlarni qayta ishlashga rozilik bildirasiz.
+                    Tugmani bosish orqali siz do'kondan olib ketish qoidalariga rozilik bildirasiz.
                   </p>
                 </div>
               </form>

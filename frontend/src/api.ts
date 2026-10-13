@@ -93,7 +93,8 @@ export const money = (v?: string | number | null) =>
 export const STATUS_LABEL: Record<string, string> = {
   NEW: "Yangi",
   CONFIRMED: "Tasdiqlangan",
-  DONE: "Bajarildi",
+  READY: "Olib ketishga tayyor",
+  DONE: "Bajarildi (Olib ketildi)",
   CANCELED: "Bekor qilingan",
   FAKE: "Soxta",
 };

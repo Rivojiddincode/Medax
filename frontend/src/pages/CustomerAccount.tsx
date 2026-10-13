@@ -22,7 +22,7 @@ interface OrderItem {
 interface CustomerOrder {
   id: number;
   code: string;
-  status: "NEW" | "CONFIRMED" | "DONE" | "CANCELED";
+  status: "NEW" | "CONFIRMED" | "READY" | "DONE" | "CANCELED";
   createdAt: string;
   customerName: string;
   phone: string;
@@ -197,11 +197,13 @@ export default function CustomerAccount() {
   const getStatusBadge = (st: string) => {
     switch (st) {
       case "NEW":
-        return <span className="st NEW">Yangi buyurtma (Kutilmoqda)</span>;
+        return <span className="st NEW">Yangi (Kutilmoqda)</span>;
       case "CONFIRMED":
-        return <span className="st CONFIRMED">Tasdiqlangan / Tayyorlanmoqda</span>;
+        return <span className="st CONFIRMED">Tasdiqlangan (Tayyorlanmoqda)</span>;
+      case "READY":
+        return <span className="st CONFIRMED" style={{ background: "#e0f2fe", color: "#0284c7", fontWeight: 700 }}>Do'kondan olib ketishga tayyor ✓</span>;
       case "DONE":
-        return <span className="st DONE">Yetkazib berildi ✓</span>;
+        return <span className="st DONE">Qabul qilingan (Olib ketildi) ✓</span>;
       case "CANCELED":
         return <span className="st CANCELED">Bekor qilingan</span>;
       default:
