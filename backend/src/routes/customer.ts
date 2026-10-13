@@ -179,19 +179,13 @@ customerRouter.post("/auth/verify-otp", authLimiter, async (req, res) => {
         ...(passwordHash ? { passwordHash } : {}),
       },
     });
-    // MDX-1, MDX-2... ketma-ketlikda ID biriktiramiz
-    customer = await prisma.customer.update({
-      where: { id: customer.id },
-      data: { customerCode: `MDX-${customer.id}` },
-    });
-  } else if (passwordHash || name || organization || !customer.customerCode) {
+  } else if (passwordHash || name || organization) {
     customer = await prisma.customer.update({
       where: { id: customer.id },
       data: {
         ...(passwordHash ? { passwordHash } : {}),
         ...(name ? { name } : {}),
         ...(organization !== undefined ? { organization } : {}),
-        ...(!customer.customerCode ? { customerCode: `MDX-${customer.id}` } : {}),
       },
     });
   }
@@ -202,12 +196,10 @@ customerRouter.post("/auth/verify-otp", authLimiter, async (req, res) => {
     token,
     customer: {
       id: customer.id,
-      customerCode: customer.customerCode || `MDX-${customer.id}`,
       name: customer.name,
       phone: customer.phone,
       organization: customer.organization,
       avatar: customer.avatar,
-      balance: customer.balance,
       hasPassword: Boolean(customer.passwordHash),
     },
   });
@@ -248,12 +240,10 @@ customerRouter.post("/auth/login", authLimiter, async (req, res) => {
     token,
     customer: {
       id: customer.id,
-      customerCode: customer.customerCode || `MDX-${customer.id}`,
       name: customer.name,
       phone: customer.phone,
       organization: customer.organization,
       avatar: customer.avatar,
-      balance: customer.balance,
       hasPassword: true,
     },
   });
@@ -261,30 +251,19 @@ customerRouter.post("/auth/login", authLimiter, async (req, res) => {
 
 // 4. Joriy mijoz ma'lumotlari
 customerRouter.get("/auth/me", requireCustomerAuth, async (req, res) => {
-  let customer = await prisma.customer.findUnique({
+  const customer = await prisma.customer.findUnique({
     where: { id: req.customer!.id },
     select: {
       id: true,
-      customerCode: true,
       name: true,
       phone: true,
       organization: true,
       avatar: true,
-      balance: true,
       passwordHash: true,
       createdAt: true,
     },
   });
   if (!customer) throw new HttpError(404, "Mijoz topilmadi");
-
-  // Agar mavjud mijozda hali customerCode bo'lmasa, darhol MDX-{id} qilib biriktiramiz
-  if (!customer.customerCode) {
-    const updated = await prisma.customer.update({
-      where: { id: customer.id },
-      data: { customerCode: `MDX-${customer.id}` },
-    });
-    customer.customerCode = updated.customerCode;
-  }
 
   const { passwordHash, ...rest } = customer;
   res.json({ customer: { ...rest, hasPassword: Boolean(passwordHash) } });
@@ -404,89 +383,4 @@ customerRouter.post("/orders/:id/cancel", requireCustomerAuth, async (req, res) 
   });
 
   res.json({ ok: true, order: updated });
-});
-
-// 9. Balansni to'ldirish uchun to'lov so'rovi yaratish (10 daqiqalik sessiya + Micro-amount)
-customerRouter.post("/deposit/create", requireCustomerAuth, async (req, res) => {
-  const { amount } = z
-    .object({
-      amount: z.number().int().min(1000, "Minimal to'ldirish summasi 1 000 so'm").max(100_000_000, "Maksimal summa 100 mln so'm"),
-    })
-    .parse(req.body);
-
-  const customerId = req.customer!.id;
-
-  // Hozirda aktiv bo'lgan to'lovlar uchun band bo'lgan mikro-farqlarni topamiz (10..99)
-  const activeDeposits = await prisma.depositRequest.findMany({
-    where: {
-      baseAmount: amount,
-      status: "PENDING",
-      expiresAt: { gte: new Date() },
-    },
-    select: { diffAmount: true },
-  });
-
-  const usedDiffs = new Set(activeDeposits.map((d) => d.diffAmount));
-  // 11 dan 99 gacha bo'sh bo'lgan mikro-summa tanlaymiz
-  let chosenDiff = 0;
-  for (let d = 11; d <= 99; d++) {
-    if (!usedDiffs.has(d)) {
-      chosenDiff = d;
-      break;
-    }
-  }
-
-  const finalAmount = amount + chosenDiff;
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 daqiqa
-  const depositCode = `MDX-T${Math.floor(100000 + Math.random() * 900000)}`;
-
-  const deposit = await prisma.depositRequest.create({
-    data: {
-      code: depositCode,
-      customerId,
-      baseAmount: amount,
-      diffAmount: chosenDiff,
-      finalAmount,
-      expiresAt,
-    },
-  });
-
-  res.status(201).json({
-    ok: true,
-    deposit: {
-      id: deposit.id,
-      code: deposit.code,
-      baseAmount: deposit.baseAmount,
-      diffAmount: deposit.diffAmount,
-      finalAmount: deposit.finalAmount,
-      status: deposit.status,
-      expiresAt: deposit.expiresAt,
-      // To'lov uchun rekvizitlar (foydalanuvchi bevosita ko'radi)
-      cardNumber: config.paymentCardNumber,
-      cardHolder: config.paymentCardHolder,
-    },
-  });
-});
-
-// 10. To'lov so'rovi holatini tekshirish (Polling)
-customerRouter.get("/deposit/:id/status", requireCustomerAuth, async (req, res) => {
-  const depositId = Number(req.params.id);
-  const customerId = req.customer!.id;
-
-  const deposit = await prisma.depositRequest.findFirst({
-    where: { id: depositId, customerId },
-  });
-
-  if (!deposit) throw new HttpError(404, "To'lov so'rovi topilmadi");
-
-  // Agar vaqti o'tgan bo'lsa va hali PENDING bo'lsa -> EXPIRED qilamiz
-  if (deposit.status === "PENDING" && new Date() > deposit.expiresAt) {
-    const expired = await prisma.depositRequest.update({
-      where: { id: deposit.id },
-      data: { status: "EXPIRED" },
-    });
-    return res.json({ ok: true, deposit: expired });
-  }
-
-  res.json({ ok: true, deposit });
 });

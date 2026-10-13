@@ -40,27 +40,18 @@ export default function CustomerAccount() {
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get("tab");
 
-  const [tab, setTab] = useState<"orders" | "wallet" | "profile">(
-    tabParam === "profile" ? "profile" : tabParam === "wallet" ? "wallet" : "orders"
+  const [tab, setTab] = useState<"orders" | "profile">(
+    tabParam === "profile" ? "profile" : "orders"
   );
   const [orders, setOrders] = useState<CustomerOrder[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
 
-  // Wallet / Deposit states
-  const [topupAmount, setTopupAmount] = useState<number>(50000);
-  const [creatingDeposit, setCreatingDeposit] = useState(false);
-  const [activeDeposit, setActiveDeposit] = useState<any>(null);
-  const [timeLeft, setTimeLeft] = useState<number>(600); // 10 daqiqa (soniyalarda)
-  const [copiedField, setCopiedField] = useState<string | null>(null);
-  const [depositSuccess, setDepositSuccess] = useState(false);
-
   useEffect(() => {
     if (tabParam === "profile") setTab("profile");
-    else if (tabParam === "wallet") setTab("wallet");
     else if (tabParam === "orders") setTab("orders");
   }, [tabParam]);
 
-  const switchTab = (newTab: "orders" | "wallet" | "profile") => {
+  const switchTab = (newTab: "orders" | "profile") => {
     setTab(newTab);
     setSearchParams(newTab === "orders" ? {} : { tab: newTab });
   };
@@ -138,79 +129,7 @@ export default function CustomerAccount() {
     }
   };
 
-  // 10 daqiqalik taymer va avto-tekshiruv (Polling)
-  useEffect(() => {
-    if (!activeDeposit || activeDeposit.status !== "PENDING") return;
 
-    const timer = setInterval(() => {
-      const exp = new Date(activeDeposit.expiresAt).getTime();
-      const diff = Math.max(0, Math.floor((exp - Date.now()) / 1000));
-      setTimeLeft(diff);
-      if (diff <= 0) {
-        clearInterval(timer);
-        setActiveDeposit((prev: any) => (prev ? { ...prev, status: "EXPIRED" } : null));
-      }
-    }, 1000);
-
-    // Har 4 soniyada to'lov qabul qilinganligini tekshirib turamiz
-    const poller = setInterval(async () => {
-      try {
-        const res = await fetch(`/api/customer/deposit/${activeDeposit.id}/status`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (res.ok) {
-          const data = await res.json();
-          if (data.deposit?.status === "CONFIRMED") {
-            setActiveDeposit(null);
-            setDepositSuccess(true);
-            refreshCustomer();
-            clearInterval(poller);
-            clearInterval(timer);
-          } else if (data.deposit?.status === "EXPIRED") {
-            setActiveDeposit((prev: any) => (prev ? { ...prev, status: "EXPIRED" } : null));
-            clearInterval(poller);
-            clearInterval(timer);
-          }
-        }
-      } catch {}
-    }, 4000);
-
-    return () => {
-      clearInterval(timer);
-      clearInterval(poller);
-    };
-  }, [activeDeposit, token]);
-
-  const handleCreateDeposit = async (amt: number) => {
-    if (!token || amt < 1000) return;
-    setCreatingDeposit(true);
-    setDepositSuccess(false);
-    try {
-      const res = await fetch("/api/customer/deposit/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ amount: amt }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "So'rov yaratishda xatolik");
-      setActiveDeposit(data.deposit);
-      const exp = new Date(data.deposit.expiresAt).getTime();
-      setTimeLeft(Math.max(0, Math.floor((exp - Date.now()) / 1000)));
-    } catch (e: any) {
-      alert(e.message || "Xatolik yuz berdi");
-    } finally {
-      setCreatingDeposit(false);
-    }
-  };
-
-  const copyToClipboard = (text: string, field: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedField(field);
-    setTimeout(() => setCopiedField(null), 2000);
-  };
 
   if (!customer && !token) {
     return (
@@ -304,40 +223,6 @@ export default function CustomerAccount() {
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
               <h1>{customer?.name}</h1>
-              {customer && (
-                <span
-                  style={{
-                    background: "var(--brand, #0284c7)",
-                    color: "#fff",
-                    padding: "3px 10px",
-                    borderRadius: 8,
-                    fontSize: 12,
-                    fontWeight: 700,
-                    letterSpacing: 0.5,
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 6,
-                  }}
-                  title="Sizning shaxsiy Medax hisob ID raqamingiz"
-                >
-                  ID: {customer.customerCode || `MDX-${customer.id}`}
-                  <button
-                    type="button"
-                    onClick={() => copyToClipboard(customer.customerCode || `MDX-${customer.id}`, "cid")}
-                    style={{
-                      background: "transparent",
-                      border: "none",
-                      color: "#fff",
-                      cursor: "pointer",
-                      padding: 0,
-                      fontSize: 11,
-                      opacity: 0.9,
-                    }}
-                  >
-                    {copiedField === "cid" ? "✓" : "📋"}
-                  </button>
-                </span>
-              )}
             </div>
             <div className="account-meta">
               {customer?.organization && (
@@ -385,18 +270,7 @@ export default function CustomerAccount() {
           <OrderBoxIcon size={18} />
           <span>Buyurtmalarim ({orders.length})</span>
         </button>
-        <button
-          className={`tab-btn ${tab === "wallet" ? "active" : ""}`}
-          onClick={() => switchTab("wallet")}
-          style={{ position: "relative" }}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="2" y="4" width="20" height="16" rx="3" />
-            <path d="M16 12h.01" />
-            <path d="M2 10h20" />
-          </svg>
-          <span>Hamyon / Balans ({(customer?.balance || 0).toLocaleString("ru-RU")} so'm)</span>
-        </button>
+
         <button
           className={`tab-btn ${tab === "profile" ? "active" : ""}`}
           onClick={() => switchTab("profile")}
@@ -544,292 +418,6 @@ export default function CustomerAccount() {
         </section>
       )}
 
-      {/* 2. WALLET / BALANS TAB */}
-      {tab === "wallet" && (
-        <section className="account-wallet-section" style={{ display: "grid", gap: 24, maxWidth: 840, margin: "0 auto" }}>
-          {/* Asosiy Balans kartasi */}
-          <div
-            style={{
-              background: "linear-gradient(135deg, #0284c7 0%, #0369a1 100%)",
-              color: "#fff",
-              borderRadius: 20,
-              padding: "28px 32px",
-              boxShadow: "0 14px 34px -10px rgba(2, 132, 199, 0.45)",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              flexWrap: "wrap",
-              gap: 20,
-            }}
-          >
-            <div>
-              <div style={{ fontSize: 14, opacity: 0.9, marginBottom: 6, fontWeight: 500 }}>
-                Shaxsiy hamyon balansi
-              </div>
-              <div style={{ fontSize: 36, fontWeight: 800, letterSpacing: -0.5 }}>
-                {(customer?.balance || 0).toLocaleString("ru-RU")}{" "}
-                <span style={{ fontSize: 20, fontWeight: 600 }}>so'm</span>
-              </div>
-              <div style={{ fontSize: 13, opacity: 0.85, marginTop: 8 }}>
-                Buyurtmalarni 1 bosishda to'lash uchun foydalaniladi
-              </div>
-            </div>
-
-            <button
-              type="button"
-              className="btn"
-              onClick={() => refreshCustomer()}
-              style={{
-                background: "rgba(255,255,255,0.2)",
-                color: "#fff",
-                border: "1px solid rgba(255,255,255,0.3)",
-                borderRadius: 12,
-                padding: "10px 18px",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 8,
-                cursor: "pointer",
-                fontWeight: 600,
-              }}
-            >
-              🔄 Balansni yangilash
-            </button>
-          </div>
-
-          {/* Muvaffaqiyatli to'lov xabari */}
-          {depositSuccess && (
-            <div
-              style={{
-                background: "#ecfdf5",
-                border: "1.5px solid #10b981",
-                color: "#065f46",
-                borderRadius: 16,
-                padding: "20px 24px",
-                display: "flex",
-                alignItems: "center",
-                gap: 16,
-              }}
-            >
-              <span style={{ fontSize: 32 }}>🎉</span>
-              <div>
-                <h4 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>To'lov muvaffaqiyatli qabul qilindi!</h4>
-                <p style={{ margin: "4px 0 0", fontSize: 14, opacity: 0.9 }}>
-                  Mablag' shaxsiy hisobingizga muvaffaqiyatli o'tkazildi. Endi istalgan tibbiy jihozni to'g'ridan-to'g'ri balansdan xarid qilishingiz mumkin.
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* Faol to'lov sessiyasi (10 daqiqalik hisoblagich) */}
-          {activeDeposit && activeDeposit.status === "PENDING" && (
-            <div
-              style={{
-                background: "var(--card, #fff)",
-                border: "2px solid #0284c7",
-                borderRadius: 20,
-                padding: "28px",
-                boxShadow: "0 10px 30px rgba(0,0,0,0.06)",
-              }}
-            >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12, marginBottom: 20 }}>
-                <div>
-                  <span style={{ display: "inline-block", background: "#e0f2fe", color: "#0284c7", padding: "4px 10px", borderRadius: 8, fontSize: 12, fontWeight: 700, marginBottom: 6 }}>
-                    KUTILMOQDA • AVTOMATIK TEKSHIRUV
-                  </span>
-                  <h3 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: "var(--ink)" }}>
-                    To'lovni amalga oshirish
-                  </h3>
-                </div>
-
-                {/* 10 Daqiqalik Taymer */}
-                <div
-                  style={{
-                    background: timeLeft < 120 ? "#fee2e2" : "#f0fdf4",
-                    border: `1.5px solid ${timeLeft < 120 ? "#ef4444" : "#22c55e"}`,
-                    color: timeLeft < 120 ? "#b91c1c" : "#15803d",
-                    borderRadius: 12,
-                    padding: "8px 16px",
-                    textAlign: "center",
-                    fontWeight: 700,
-                  }}
-                >
-                  <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: 0.5 }}>Qolgan vaqt</div>
-                  <div style={{ fontSize: 22, fontVariantNumeric: "tabular-nums" }}>
-                    {String(Math.floor(timeLeft / 60)).padStart(2, "0")}:{String(timeLeft % 60).padStart(2, "0")}
-                  </div>
-                </div>
-              </div>
-
-              <p style={{ fontSize: 14, color: "var(--ink2)", margin: "0 0 20px" }}>
-                Iltimos, Click, Payme yoki bank ilovangiz orqali quyidagi kartaga <b>aniq ko'rsatilgan summani</b> o'tkazing. <b>Hech qanday izoh yozish shart emas!</b> Tizim summadagi maxsus tiyinlar orqali to'lovni avtomatik taniydi:
-              </p>
-
-              <div style={{ display: "grid", gap: 14, background: "var(--bg, #f8fafc)", padding: 20, borderRadius: 16 }}>
-                {/* To'lanishi kerak bo'lgan aniq summa */}
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
-                  <div>
-                    <div style={{ fontSize: 12, color: "var(--ink2)", fontWeight: 600 }}>O'tkazilishi kerak bo'lgan aniq summa:</div>
-                    <div style={{ fontSize: 24, fontWeight: 800, color: "#0284c7" }}>
-                      {activeDeposit.finalAmount?.toLocaleString("ru-RU")} so'm
-                    </div>
-                    {activeDeposit.diffAmount > 0 && (
-                      <div style={{ fontSize: 11, color: "var(--ink3)" }}>
-                        (Asosiy summa: {activeDeposit.baseAmount?.toLocaleString("ru-RU")} so'm + {activeDeposit.diffAmount} so'm avto-identifikatsiya)
-                      </div>
-                    )}
-                  </div>
-                  <button
-                    type="button"
-                    className="btn sm ghost"
-                    onClick={() => copyToClipboard(String(activeDeposit.finalAmount), "amount")}
-                    style={{ borderRadius: 8, padding: "6px 14px", fontWeight: 600 }}
-                  >
-                    {copiedField === "amount" ? "Nusxalandi ✓" : "Summani nusxalash"}
-                  </button>
-                </div>
-
-                <div style={{ height: 1, background: "var(--line, #e2e8f0)" }} />
-
-                {/* Karta raqami */}
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
-                  <div>
-                    <div style={{ fontSize: 12, color: "var(--ink2)", fontWeight: 600 }}>Qabul qiluvchi karta:</div>
-                    <div style={{ fontSize: 18, fontWeight: 700, letterSpacing: 1, color: "var(--ink)" }}>
-                      {activeDeposit.cardNumber}
-                    </div>
-                    <div style={{ fontSize: 12, color: "var(--ink3)" }}>{activeDeposit.cardHolder}</div>
-                  </div>
-                  <button
-                    type="button"
-                    className="btn sm ghost"
-                    onClick={() => copyToClipboard(activeDeposit.cardNumber.replace(/\s+/g, ""), "card")}
-                    style={{ borderRadius: 8, padding: "6px 14px", fontWeight: 600 }}
-                  >
-                    {copiedField === "card" ? "Nusxalandi ✓" : "Kartani nusxalash"}
-                  </button>
-                </div>
-              </div>
-
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 20, flexWrap: "wrap", gap: 12 }}>
-                <span style={{ fontSize: 13, color: "var(--ink2)", display: "inline-flex", alignItems: "center", gap: 6 }}>
-                  <span className="spinner-dot" style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: "#0284c7" }} />
-                  Bankdan xat kutilmoqda... Sahifani yangilash shart emas.
-                </span>
-
-                <button
-                  type="button"
-                  className="btn sm ghost"
-                  onClick={() => setActiveDeposit(null)}
-                  style={{ color: "var(--ink3)" }}
-                >
-                  Bekor qilish
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Eskirgan sessiya */}
-          {activeDeposit && activeDeposit.status === "EXPIRED" && (
-            <div
-              style={{
-                background: "#fef2f2",
-                border: "1.5px solid #f87171",
-                color: "#991b1b",
-                borderRadius: 16,
-                padding: "20px 24px",
-              }}
-            >
-              <h4 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>To'lov vaqti tugadi (10 daqiqa)</h4>
-              <p style={{ margin: "6px 0 12px", fontSize: 14 }}>
-                Ushbu sessiya uchun ajratilgan vaqt tugadi. Iltimos, yangi to'lov so'rovini yarating.
-              </p>
-              <button
-                type="button"
-                className="btn sm btn-primary-sheen"
-                onClick={() => setActiveDeposit(null)}
-              >
-                Qayta urinish
-              </button>
-            </div>
-          )}
-
-          {/* Hisobni to'ldirish formasi */}
-          {(!activeDeposit || activeDeposit.status !== "PENDING") && (
-            <div
-              style={{
-                background: "var(--card, #fff)",
-                border: "1px solid var(--line, #e2e8f0)",
-                borderRadius: 20,
-                padding: "28px",
-              }}
-            >
-              <h3 style={{ margin: "0 0 8px", fontSize: 18, fontWeight: 700, color: "var(--ink)" }}>
-                Hisobni to'ldirish
-              </h3>
-              <p style={{ fontSize: 14, color: "var(--ink2)", margin: "0 0 20px" }}>
-                To'ldirmoqchi bo'lgan summani tanlang yoki kiriting:
-              </p>
-
-              {/* Tayyor summa tugmalari */}
-              <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 20 }}>
-                {[50000, 100000, 300000, 500000, 1000000, 2000000].map((amt) => (
-                  <button
-                    key={amt}
-                    type="button"
-                    className={`btn sm ${topupAmount === amt ? "btn-primary-sheen" : "ghost"}`}
-                    onClick={() => setTopupAmount(amt)}
-                    style={{
-                      borderRadius: 12,
-                      padding: "8px 16px",
-                      fontWeight: topupAmount === amt ? 700 : 500,
-                    }}
-                  >
-                    {amt.toLocaleString("ru-RU")} so'm
-                  </button>
-                ))}
-              </div>
-
-              {/* Qo'lda kiritish */}
-              <div style={{ marginBottom: 24 }}>
-                <label style={{ display: "block", fontSize: 13, fontWeight: 600, marginBottom: 8, color: "var(--ink)" }}>
-                  Boshqa summa (so'mda):
-                </label>
-                <input
-                  type="number"
-                  min={1000}
-                  step={5000}
-                  value={topupAmount}
-                  onChange={(e) => setTopupAmount(Number(e.target.value) || 0)}
-                  style={{
-                    width: "100%",
-                    maxWidth: 320,
-                    padding: "12px 16px",
-                    borderRadius: 12,
-                    fontSize: 16,
-                    fontWeight: 700,
-                    border: "1.5px solid var(--line)",
-                  }}
-                />
-              </div>
-
-              <button
-                type="button"
-                className="btn btn-primary-sheen"
-                disabled={creatingDeposit || topupAmount < 1000}
-                onClick={() => handleCreateDeposit(topupAmount)}
-                style={{
-                  borderRadius: 14,
-                  padding: "12px 28px",
-                  fontSize: 15,
-                  fontWeight: 700,
-                }}
-              >
-                {creatingDeposit ? "So'rov tayyorlanmoqda..." : `Davom etish (${topupAmount.toLocaleString("ru-RU")} so'm) →`}
-              </button>
-            </div>
-          )}
-        </section>
-      )}
 
       {/* 3. PROFILE TAB */}
       {tab === "profile" && (

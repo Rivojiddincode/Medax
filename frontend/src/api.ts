@@ -1,5 +1,3 @@
-import { MOCK_HOME_DATA, MOCK_CATEGORIES, MOCK_BRANDS, MOCK_PRODUCTS } from "./mockData";
-
 export class ApiError extends Error {
   constructor(public status: number, message: string) {
     super(message);
@@ -19,29 +17,6 @@ interface Opts {
   headers?: Record<string, string>;
 }
 
-function getMockFallback(path: string): any {
-  const clean = path.split("?")[0];
-  if (clean === "/home") return MOCK_HOME_DATA;
-  if (clean === "/categories") return MOCK_CATEGORIES;
-  if (clean === "/brands") return MOCK_BRANDS;
-  if (clean === "/products") {
-    return {
-      items: MOCK_PRODUCTS,
-      total: MOCK_PRODUCTS.length,
-      page: 1,
-      limit: 12,
-      pages: 1,
-    };
-  }
-  if (clean.startsWith("/products/")) {
-    const slug = clean.replace("/products/", "");
-    const found = MOCK_PRODUCTS.find((p) => p.slug === slug || String(p.id) === slug);
-    return found || MOCK_PRODUCTS[0];
-  }
-  if (clean === "/orders") return [];
-  return null;
-}
-
 export async function api<T = any>(path: string, opts: Opts = {}): Promise<T> {
   const headers: Record<string, string> = { ...opts.headers };
   let body: BodyInit | undefined;
@@ -58,20 +33,15 @@ export async function api<T = any>(path: string, opts: Opts = {}): Promise<T> {
     if (t) headers.Authorization = `Bearer ${t}`;
   }
 
-  let res: Response | null = null;
+  let res: Response;
   try {
     res = await fetch(`/api${path}`, { method: opts.method || (body ? "POST" : "GET"), headers, body });
   } catch {
-    const fallback = getMockFallback(path);
-    if (fallback !== null) return fallback as T;
     throw new ApiError(0, "Server bilan aloqa yo'q. Internetni tekshiring.");
   }
 
   const isJson = res.headers.get("content-type")?.includes("application/json");
   if (!res.ok || !isJson) {
-    const fallback = getMockFallback(path);
-    if (fallback !== null) return fallback as T;
-
     if (res.status === 401 && opts.admin) {
       setToken(null);
       if (!location.pathname.startsWith("/admin/login")) location.href = "/admin/login";

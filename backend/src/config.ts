@@ -61,7 +61,4 @@ export const config = {
   dailySmsBudget: Number(process.env.DAILY_SMS_BUDGET || 250), // butun server bo'yicha kunlik max SMS
   dailyIpSmsLimit: Number(process.env.DAILY_IP_SMS_LIMIT || 8), // 1 ta IP dan kunlik max SMS
   hourlyPhoneOtpLimit: Number(process.env.HOURLY_PHONE_OTP_LIMIT || 4), // 1 ta raqamga soatlik max OTP
-  paymentWebhookSecret: process.env.PAYMENT_WEBHOOK_SECRET || "medax_payment_secret_2026",
-  paymentCardNumber: process.env.PAYMENT_CARD_NUMBER || "8600 5704 1234 5678",
-  paymentCardHolder: process.env.PAYMENT_CARD_HOLDER || "MEDAX MCHJ (P. RIVOJIDDIN)",
 };

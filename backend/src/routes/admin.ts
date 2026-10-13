@@ -443,103 +443,8 @@ adminRouter.delete("/contact-messages/:id", async (req, res) => {
   res.json({ ok: true });
 });
 
-/* --------------------------- To'lovlar va Hamyonlar (Deposits) --------------------------- */
+/* --------------------------- Mijozlar (Customers) --------------------------- */
 
-// 1. Barcha hisob to'ldirish so'rovlarini ko'rish (Filtrlar bilan)
-adminRouter.get("/deposits", async (req, res) => {
-  const q = z
-    .object({
-      status: z.enum(["PENDING", "CONFIRMED", "EXPIRED", "CANCELED"]).optional(),
-      search: z.string().trim().optional(),
-      page,
-    })
-    .parse(req.query);
-
-  const where: Prisma.DepositRequestWhereInput = {};
-  if (q.status) where.status = q.status;
-  if (q.search) {
-    where.OR = [
-      { code: { contains: q.search, mode: "insensitive" } },
-      { customer: { name: { contains: q.search, mode: "insensitive" } } },
-      { customer: { phone: { contains: q.search, mode: "insensitive" } } },
-    ];
-  }
-
-  const [total, items] = await Promise.all([
-    prisma.depositRequest.count({ where }),
-    prisma.depositRequest.findMany({
-      where,
-      orderBy: { createdAt: "desc" },
-      skip: (q.page - 1) * 30,
-      take: 30,
-      include: {
-        customer: {
-          select: { id: true, name: true, phone: true, balance: true, organization: true },
-        },
-      },
-    }),
-  ]);
-
-  res.json({
-    items,
-    total,
-    page: q.page,
-    pages: Math.max(1, Math.ceil(total / 30)),
-  });
-});
-
-// 2. Admin tomonidan qo'lda tasdiqlash (masalan, bank xati kechiksa yoki mijoz chek ko'rsatsa)
-adminRouter.post("/deposits/:id/confirm", async (req, res) => {
-  const depositId = id(req.params.id);
-  const deposit = await prisma.depositRequest.findUnique({
-    where: { id: depositId },
-    include: { customer: true },
-  });
-
-  if (!deposit) throw new HttpError(404, "To'lov so'rovi topilmadi");
-  if (deposit.status === "CONFIRMED") {
-    throw new HttpError(400, "Ushbu to'lov allaqachon tasdiqlangan va balansga qo'shilgan");
-  }
-
-  const note = `[ADMIN-TASDIQ]: Admin (${req.user!.name}) tomonidan qo'lda tasdiqlandi. Sana: ${new Date().toISOString()}`;
-
-  await prisma.$transaction([
-    prisma.depositRequest.update({
-      where: { id: deposit.id },
-      data: {
-        status: "CONFIRMED",
-        paidAt: new Date(),
-        rawEmailNote: deposit.rawEmailNote ? `${deposit.rawEmailNote}\n${note}` : note,
-      },
-    }),
-    prisma.customer.update({
-      where: { id: deposit.customerId },
-      data: { balance: { increment: deposit.baseAmount } },
-    }),
-  ]);
-
-  res.json({ ok: true, message: `Mijoz balansi ${deposit.baseAmount} so'mga to'ldirildi ✓` });
-});
-
-// 3. Admin tomonidan bekor qilish
-adminRouter.post("/deposits/:id/cancel", async (req, res) => {
-  const depositId = id(req.params.id);
-  const deposit = await prisma.depositRequest.findUnique({ where: { id: depositId } });
-  if (!deposit) throw new HttpError(404, "To'lov so'rovi topilmadi");
-
-  if (deposit.status === "CONFIRMED") {
-    throw new HttpError(400, "Tasdiqlangan to'lovni bekor qilib bo'lmaydi.");
-  }
-
-  const updated = await prisma.depositRequest.update({
-    where: { id: depositId },
-    data: { status: "CANCELED" },
-  });
-
-  res.json({ ok: true, deposit: updated });
-});
-
-// 4. Mijozlar ro'yxati va ularning balanslarini ko'rish / to'g'ridan-to'g'ri o'zgartirish
 adminRouter.get("/customers", async (req, res) => {
   const q = z
     .object({
@@ -551,7 +456,6 @@ adminRouter.get("/customers", async (req, res) => {
   const where: Prisma.CustomerWhereInput = {};
   if (q.search) {
     where.OR = [
-      { customerCode: { contains: q.search, mode: "insensitive" } },
       { name: { contains: q.search, mode: "insensitive" } },
       { phone: { contains: q.search, mode: "insensitive" } },
       { organization: { contains: q.search, mode: "insensitive" } },
@@ -567,46 +471,15 @@ adminRouter.get("/customers", async (req, res) => {
       take: 30,
       select: {
         id: true,
-        customerCode: true,
         name: true,
         phone: true,
         organization: true,
-        balance: true,
         createdAt: true,
-        _count: { select: { orders: true, deposits: true } },
+        _count: { select: { orders: true } },
       },
     }),
   ]);
 
   res.json({ items, total, page: q.page, pages: Math.max(1, Math.ceil(total / 30)) });
-});
-
-// 5. Mijoz balansiga qo'lda pul qo'shish yoki ayirish
-adminRouter.post("/customers/:id/adjust-balance", requireAdmin, async (req, res) => {
-  const customerId = id(req.params.id);
-  const { amount, reason } = z
-    .object({
-      amount: z.number().int(), // musbat bo'lsa qo'shadi, manfiy bo'lsa yechadi
-      reason: z.string().trim().min(3, "Sababini ko'rsating"),
-    })
-    .parse(req.body);
-
-  const customer = await prisma.customer.findUnique({ where: { id: customerId } });
-  if (!customer) throw new HttpError(404, "Mijoz topilmadi");
-
-  if (customer.balance + amount < 0) {
-    throw new HttpError(400, "Mijoz balansi 0 dan kam bo'lib ketishi mumkin emas.");
-  }
-
-  const updated = await prisma.customer.update({
-    where: { id: customerId },
-    data: { balance: { increment: amount } },
-  });
-
-  res.json({
-    ok: true,
-    customer: updated,
-    message: `Balans muvaffaqiyatli o'zgartirildi: ${amount > 0 ? "+" : ""}${amount} so'm (${reason})`,
-  });
 });
 
