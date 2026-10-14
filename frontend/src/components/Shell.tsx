@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, NavLink, Outlet } from "react-router-dom";
+import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { useCart } from "../cart";
 import { Product, money } from "../api";
 import { MedaxLogo } from "./MedaxLogo";
@@ -15,6 +15,7 @@ import { CustomerHeaderMenu } from "./CustomerHeaderMenu";
 import { CustomerAuthGate } from "./CustomerAuthGate";
 import { AppOnboarding } from "./AppOnboarding";
 import { UzumSearchBar, useAnimatedPresence } from "./UzumSearchBar";
+import { UzumCatalogModal } from "./UzumCatalogModal";
 import { SITE_CONFIG } from "../siteConfig";
 
 function useIsAppMode(): boolean {
@@ -46,13 +47,35 @@ export function Layout() {
   const { theme, toggleTheme } = useTheme();
   const { lang, setLang, t } = useI18n();
   const isApp = useIsAppMode();
+  const location = useLocation();
+
   // Ilovada kirmagan foydalanuvchiga BIRINCHI BO'LIB Onboarding chiqadi!
   // Onboarding tugagach yoki o'tkazib yuborilgach, KEYIN Kirish oynasi ochiladi.
   const [onboardStep, setOnboardStep] = useState<"onboard" | "login">(() => {
     return sessionStorage.getItem("medax_onboard_step") === "login" ? "login" : "onboard";
   });
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const { mounted: backdropMounted, animState: backdropAnimState } = useAnimatedPresence(isSearchOpen, 280);
+  const [isCatalogOpen, setIsCatalogOpen] = useState(false);
+  const isBackdropActive = isSearchOpen || isCatalogOpen;
+  const { mounted: backdropMounted, animState: backdropAnimState } = useAnimatedPresence(isBackdropActive, 280);
+
+  // Close catalog and search on route change
+  useEffect(() => {
+    setIsSearchOpen(false);
+    setIsCatalogOpen(false);
+  }, [location.pathname, location.search]);
+
+  // Close catalog and search on ESC key press
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsSearchOpen(false);
+        setIsCatalogOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   if (loading) {
     return (
@@ -137,18 +160,40 @@ export function Layout() {
             </Link>
 
             {/* Catalog Button */}
-            <Link to="/catalog" className="uz-btn-catalog">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="7" height="7" rx="1.5" />
-                <rect x="14" y="3" width="7" height="7" rx="1.5" />
-                <rect x="14" y="14" width="7" height="7" rx="1.5" />
-                <rect x="3" y="14" width="7" height="7" rx="1.5" />
-              </svg>
+            <button
+              type="button"
+              className={`uz-btn-catalog ${isCatalogOpen ? "is-open" : ""}`}
+              onClick={() => {
+                setIsSearchOpen(false);
+                setIsCatalogOpen((prev) => !prev);
+              }}
+              aria-expanded={isCatalogOpen}
+              aria-label="Katalog"
+            >
+              {isCatalogOpen ? (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              ) : (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="7" height="7" rx="1.5" />
+                  <rect x="14" y="3" width="7" height="7" rx="1.5" />
+                  <rect x="14" y="14" width="7" height="7" rx="1.5" />
+                  <rect x="3" y="14" width="7" height="7" rx="1.5" />
+                </svg>
+              )}
               <span>Katalog</span>
-            </Link>
+            </button>
 
             {/* Central Uzum Search Bar with Dropdown & Dimming Backdrop */}
-            <UzumSearchBar isOpen={isSearchOpen} onOpenChange={setIsSearchOpen} />
+            <UzumSearchBar
+              isOpen={isSearchOpen}
+              onOpenChange={(open) => {
+                if (open) setIsCatalogOpen(false);
+                setIsSearchOpen(open);
+              }}
+            />
 
             {/* Right Action Icons: Login / Profile, Saralangan & Cart */}
             <div className="uz-actions">
@@ -199,15 +244,18 @@ export function Layout() {
           </div>
         </div>
 
+        {/* Uzum-style Mega Catalog Dropdown Modal */}
+        <UzumCatalogModal isOpen={isCatalogOpen} onClose={() => setIsCatalogOpen(false)} />
+
         {/* Tier 3: Category Strip (Quick access navigation like Uzum) */}
         <div className="uz-catstrip">
           <div className="wrap uz-catstrip-wrap">
-            <Link to="/catalog?flag=discount" className="uz-catstrip-pill highlight">
-              <span className="uz-catstrip-icon">🔥</span>
+            <Link to="/catalog?flag=discount" className="uz-catstrip-pill highlight-green">
+              <img src="/icons/guarantee.png" alt="" className="uz-catstrip-icon-img" />
               <b>Kafolatli narxlar</b>
             </Link>
-            <Link to="/catalog?flag=new" className="uz-catstrip-pill highlight">
-              <span className="uz-catstrip-icon">✨</span>
+            <Link to="/catalog?flag=new" className="uz-catstrip-pill highlight-red">
+              <img src="/icons/new.png" alt="" className="uz-catstrip-icon-img" />
               <b>Yangi modellar</b>
             </Link>
             <Link to="/catalog?category=nogironlar-aravachasi" className="uz-catstrip-pill standard">
@@ -241,7 +289,10 @@ export function Layout() {
       {backdropMounted && (
         <div
           className={`uz-search-backdrop ${backdropAnimState}`}
-          onClick={() => setIsSearchOpen(false)}
+          onClick={() => {
+            setIsSearchOpen(false);
+            setIsCatalogOpen(false);
+          }}
           aria-hidden="true"
         />
       )}
