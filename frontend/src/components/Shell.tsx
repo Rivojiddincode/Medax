@@ -214,14 +214,6 @@ export function Layout() {
               <span className="uz-catstrip-icon">♿</span>
               <span>Nogironlar aravachalari</span>
             </Link>
-            <Link to="/catalog?category=ultratovush-diagnostikasi" className="uz-catstrip-pill standard">
-              <span className="uz-catstrip-icon">🩺</span>
-              <span>UZI Diagnostika</span>
-            </Link>
-            <Link to="/catalog?category=reanimatsiya-va-anesteziologiya" className="uz-catstrip-pill standard">
-              <span className="uz-catstrip-icon">🫁</span>
-              <span>Reanimatsiya va IVL</span>
-            </Link>
             <Link to="/catalog?category=jarrohlik" className="uz-catstrip-pill standard">
               <span className="uz-catstrip-icon">🔬</span>
               <span>Jarrohlik jihozlari</span>
@@ -230,10 +222,6 @@ export function Layout() {
               <span className="uz-catstrip-icon">🛏️</span>
               <span>Tibbiy mebellar</span>
             </Link>
-            <Link to="/catalog?category=reabilitatsiya-va-ortopediya" className="uz-catstrip-pill standard">
-              <span className="uz-catstrip-icon">🦾</span>
-              <span>Reabilitatsiya</span>
-            </Link>
             <Link to="/catalog?category=laboratoriya" className="uz-catstrip-pill standard">
               <span className="uz-catstrip-icon">🧪</span>
               <span>Laboratoriya</span>
@@ -241,10 +229,6 @@ export function Layout() {
             <Link to="/catalog?category=nitril-qolqoplar" className="uz-catstrip-pill standard">
               <span className="uz-catstrip-icon">🧤</span>
               <span>Sarflov materiallari</span>
-            </Link>
-            <Link to="/catalog?category=sterilizatsiya" className="uz-catstrip-pill standard">
-              <span className="uz-catstrip-icon">🧴</span>
-              <span>Sterilizatsiya</span>
             </Link>
             <Link to="/catalog" className="uz-catstrip-more">
               Barchasi →
