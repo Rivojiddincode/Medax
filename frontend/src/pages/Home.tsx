@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { api, Brand, Category, Product } from "../api";
 import { ProductCard } from "../components/Shell";
 import { useI18n } from "../context/I18nContext";
+import { MedaxEmblem } from "../components/MedaxLogo";
 
 interface HomeData {
   total: number;
@@ -189,6 +190,15 @@ export default function Home() {
               style={{ background: HERO_SLIDES[currentSlide].bg }}
             >
               <div className="uz-slide-content">
+                <div className="uzum-banner-brand">
+                  <MedaxEmblem size={22} />
+                  <span className="uzum-banner-brand-name">
+                    <span className="brand-med">Med</span>
+                    <span className="brand-ax">ax</span>
+                  </span>
+                  <span className="uzum-banner-brand-tag">Rasmiy do'kon</span>
+                </div>
+
                 <h1 className="uzum-banner-title">
                   <span>{HERO_SLIDES[currentSlide].titleLines[0]}</span>
                   <span>{HERO_SLIDES[currentSlide].titleLines[1]}</span>
@@ -196,6 +206,10 @@ export default function Home() {
                 </h1>
 
                 <div className="uzum-banner-badges">
+                  <div className="uzum-badge-pill uzum-badge-pill--medax">
+                    <MedaxEmblem size={18} />
+                    <span>Medax</span>
+                  </div>
                   {HERO_SLIDES[currentSlide].badges.map((b, idx) => (
                     <div key={idx} className="uzum-badge-pill">
                       {b.type === "original" ? (
