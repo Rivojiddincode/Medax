@@ -111,11 +111,15 @@ input:focus,select:focus,textarea:focus{
 
 /* Tier 1: Micro Topbar */
 .uz-topbar {
-  background: #ffffff;
-  border-bottom: none;
+  background: #f2f4f7;
+  border-bottom: 1px solid #e5e8ed;
   font-size: 13px;
   color: var(--ink2);
   padding: 6px 0;
+}
+[data-theme="dark"] .uz-topbar {
+  background: #0d1624;
+  border-bottom: 1px solid #1a2738;
 }
 .uz-topbar-wrap {
   display: flex;
