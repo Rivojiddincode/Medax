@@ -638,6 +638,9 @@ input:focus,select:focus,textarea:focus{
 }
 .uz-banner-carousel {
   position: relative;
+  height: 270px;
+  min-height: 270px;
+  max-height: 270px;
   border-radius: 20px;
   overflow: hidden;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
@@ -646,13 +649,15 @@ input:focus,select:focus,textarea:focus{
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 310px;
-  max-height: 340px;
-  padding: 32px 56px;
+  height: 270px;
+  min-height: 270px;
+  max-height: 270px;
+  padding: 22px 50px;
   text-decoration: none;
   cursor: pointer;
   box-sizing: border-box;
   width: 100%;
+  overflow: hidden;
 }
 @keyframes uzFadeInSlide {
   from {
@@ -667,7 +672,7 @@ input:focus,select:focus,textarea:focus{
 }
 .uz-slide-content {
   flex: 1.15;
-  max-width: 560px;
+  max-width: 540px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -675,12 +680,12 @@ input:focus,select:focus,textarea:focus{
 }
 .uzum-banner-title {
   font-family: var(--head);
-  font-size: clamp(30px, 3.8vw, 46px);
+  font-size: clamp(24px, 3.1vw, 38px);
   font-weight: 800;
-  line-height: 1.14;
+  line-height: 1.12;
   color: #0b0f19;
   letter-spacing: -1.2px;
-  margin: 0 0 28px;
+  margin: 0 0 18px;
   display: flex;
   flex-direction: column;
 }
@@ -690,18 +695,18 @@ input:focus,select:focus,textarea:focus{
 .uzum-banner-badges {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 .uzum-badge-pill {
   display: inline-flex;
   align-items: center;
-  gap: 9px;
+  gap: 8px;
   background: #ffffff;
-  padding: 8px 18px;
+  padding: 6px 15px;
   border-radius: 999px;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
-  font-size: 15px;
+  font-size: 13.5px;
   font-weight: 600;
   color: #111827;
   letter-spacing: -0.2px;
@@ -716,19 +721,23 @@ input:focus,select:focus,textarea:focus{
   display: block;
 }
 .uz-slide-visual {
-  flex: 1.1;
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: flex-end;
   height: 100%;
+  max-height: 270px;
   position: relative;
   z-index: 2;
+  overflow: hidden;
 }
 .uzum-slide-product-img {
-  max-height: 290px;
+  height: 100%;
+  max-height: 226px;
   max-width: 100%;
+  width: auto;
   object-fit: contain;
-  filter: drop-shadow(0 16px 28px rgba(0, 0, 0, 0.12));
+  filter: drop-shadow(0 14px 24px rgba(0, 0, 0, 0.12));
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .uz-carousel-slide:hover .uzum-slide-product-img {
@@ -768,7 +777,7 @@ input:focus,select:focus,textarea:focus{
 }
 .uz-carousel-dots {
   position: absolute;
-  bottom: 12px;
+  bottom: 10px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
