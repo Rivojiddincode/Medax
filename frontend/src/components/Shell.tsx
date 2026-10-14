@@ -211,7 +211,7 @@ export function Layout() {
               <b>Yangi modellar</b>
             </Link>
             <Link to="/catalog?category=nogironlar-aravachasi" className="uz-catstrip-pill standard">
-              <span className="uz-catstrip-icon">♿</span>
+              <img src="/icons/wheelchair.png" alt="" className="uz-catstrip-icon-img" />
               <span>Nogironlar aravachalari</span>
             </Link>
             <Link to="/catalog?category=jarrohlik" className="uz-catstrip-pill standard">
