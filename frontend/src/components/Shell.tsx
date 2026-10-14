@@ -334,7 +334,6 @@ export function Layout() {
             <div className="footer-col">
               <h4>{t("footer_services")}</h4>
               <nav className="footer-links">
-                <a href="#buyurtma">{t("how_to_order")}</a>
                 <a href="#brend">{t("partners")}</a>
                 <a href="#aloqa">{t("engineering_service")}</a>
                 <a href="#aloqa">{t("installation")}</a>
