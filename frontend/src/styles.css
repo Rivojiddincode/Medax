@@ -103,8 +103,8 @@ input:focus,select:focus,textarea:focus{
   position: sticky;
   top: 0;
   z-index: 1000; /* Header to'liq (topbar, mainbar, toifalar) doim fon pardasidan yuqorida turadi */
-  background: #ffffff !important;
-  box-shadow: none !important; /* Ortiqcha kulrang soya yo'qotildi, butun fon bilan bir xil toza oq bo'ladi */
+  background: var(--paper) !important;
+  box-shadow: none !important; /* Ortiqcha kulrang soya yo'qotildi, butun fon bilan bir xil toza bo'ladi */
   border: none !important;
   width: 100%;
 }
@@ -163,7 +163,7 @@ input:focus,select:focus,textarea:focus{
 /* Tier 2: Main Search & Catalog Bar */
 .uz-mainbar {
   padding: 14px 0;
-  background: #ffffff;
+  background: var(--paper);
   border-bottom: none;
 }
 .uz-mainbar-wrap {
@@ -849,8 +849,8 @@ input:focus,select:focus,textarea:focus{
 
 /* Tier 3: Category Strip */
 .uz-catstrip {
-  background: #ffffff;
-  border: none;
+  background: var(--paper);
+  border-bottom: 1px solid var(--line);
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -897,12 +897,12 @@ input:focus,select:focus,textarea:focus{
   background: #dcfce7;
 }
 .uz-catstrip-pill.standard {
-  color: #374151;
+  color: var(--ink);
   background: transparent;
 }
 .uz-catstrip-pill.standard:hover {
   color: #0284c7;
-  background: #f1f5f9;
+  background: var(--sea);
 }
 .uz-catstrip-icon {
   font-size: 14px;
@@ -937,7 +937,7 @@ input:focus,select:focus,textarea:focus{
    ========================================================================== */
 .uz-hero-section {
   padding: 24px 0 32px;
-  background: #ffffff;
+  background: var(--paper);
 }
 .uz-banner-carousel {
   position: relative;
@@ -1263,6 +1263,333 @@ input:focus,select:focus,textarea:focus{
   .uz-quick-tiles {
     grid-template-columns: 1fr;
   }
+}
+
+/* ==========================================================================
+   UZUM MARKET DARK THEME COMPLETE HOMEPAGE INTEGRATION
+   ========================================================================== */
+[data-theme="dark"] .uz-mainbar {
+  background: var(--paper);
+  border-bottom: 1px solid var(--line);
+}
+
+[data-theme="dark"] .uz-catstrip {
+  background: var(--paper);
+  border-bottom: 1px solid var(--line);
+}
+
+[data-theme="dark"] .uz-btn-catalog {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border-color: rgba(52, 211, 153, 0.35);
+}
+
+[data-theme="dark"] .uz-btn-catalog:hover {
+  background: #10b981;
+  color: #022c22;
+  border-color: #10b981;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+}
+
+[data-theme="dark"] .uz-btn-catalog.is-open {
+  background: rgba(16, 185, 129, 0.28);
+  color: #6ee7b7;
+  border-color: #34d399;
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
+}
+
+[data-theme="dark"] .uz-search-form {
+  background: var(--card) !important;
+  border-color: var(--line) !important;
+}
+
+[data-theme="dark"] .uz-search-form:hover {
+  border-color: #475569 !important;
+}
+
+[data-theme="dark"] .uz-search-input {
+  color: var(--ink) !important;
+}
+
+[data-theme="dark"] .uz-search-input::placeholder {
+  color: var(--ink2) !important;
+}
+
+[data-theme="dark"] .uz-search-btn {
+  background: var(--sea) !important;
+  color: var(--ink) !important;
+  border-left: 1px solid var(--line) !important;
+}
+
+[data-theme="dark"] .uz-search-btn:hover {
+  background: var(--line) !important;
+  color: #38bdf8 !important;
+}
+
+[data-theme="dark"] .uz-search-dropdown {
+  background: var(--card) !important;
+  border-color: var(--line) !important;
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.65) !important;
+}
+
+[data-theme="dark"] .uz-search-dropdown h4 {
+  color: var(--ink);
+}
+
+[data-theme="dark"] .uz-history-pill {
+  background: var(--sea);
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+
+[data-theme="dark"] .uz-history-pill:hover {
+  background: var(--line);
+  color: #38bdf8;
+}
+
+[data-theme="dark"] .uz-search-popular-card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+}
+
+[data-theme="dark"] .uz-search-popular-card:hover {
+  background: var(--sea);
+  border-color: #38bdf8;
+}
+
+[data-theme="dark"] .uz-popular-thumb-wrap {
+  background: #0b131b;
+}
+
+[data-theme="dark"] .uz-search-remove-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--ink);
+}
+
+[data-theme="dark"] .uz-catalog-mega-dropdown {
+  background: var(--paper);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.65);
+}
+
+[data-theme="dark"] .uz-catalog-mega-body {
+  background: var(--paper);
+}
+
+[data-theme="dark"] .uz-catalog-sidebar {
+  border-right: 1px solid var(--line);
+}
+
+[data-theme="dark"] .uz-catalog-cat-btn {
+  color: var(--ink);
+}
+
+[data-theme="dark"] .uz-catalog-cat-name {
+  color: var(--ink);
+}
+
+[data-theme="dark"] .uz-catalog-cat-btn:hover,
+[data-theme="dark"] .uz-catalog-cat-btn.is-active {
+  background: var(--card);
+}
+
+[data-theme="dark"] .uz-catalog-cat-btn.is-active .uz-catalog-cat-name {
+  color: #38bdf8;
+}
+
+[data-theme="dark"] .uz-catalog-cat-btn.is-active .uz-catalog-chevron {
+  color: #38bdf8;
+}
+
+[data-theme="dark"] .uz-catalog-chevron {
+  color: var(--ink2);
+}
+
+[data-theme="dark"] .uz-catalog-content-header {
+  border-bottom: 1px solid var(--line);
+}
+
+[data-theme="dark"] .uz-catalog-main-link {
+  color: var(--ink);
+}
+
+[data-theme="dark"] .uz-catalog-main-link:hover {
+  color: #38bdf8;
+}
+
+[data-theme="dark"] .uz-catalog-group-title {
+  color: var(--ink);
+}
+
+[data-theme="dark"] .uz-catalog-group-title:hover {
+  color: #38bdf8;
+}
+
+[data-theme="dark"] .uz-catalog-item-link {
+  color: var(--ink2);
+}
+
+[data-theme="dark"] .uz-catalog-item-link:hover {
+  color: #38bdf8;
+}
+
+[data-theme="dark"] .uz-catstrip-pill.highlight-green {
+  background: rgba(16, 185, 129, 0.16);
+  color: #34d399;
+}
+
+[data-theme="dark"] .uz-catstrip-pill.highlight-green:hover {
+  background: rgba(16, 185, 129, 0.28);
+}
+
+[data-theme="dark"] .uz-catstrip-pill.highlight,
+[data-theme="dark"] .uz-catstrip-pill.highlight-red {
+  background: rgba(239, 68, 68, 0.16);
+  color: #f87171;
+}
+
+[data-theme="dark"] .uz-catstrip-pill.highlight:hover,
+[data-theme="dark"] .uz-catstrip-pill.highlight-red:hover {
+  background: rgba(239, 68, 68, 0.28);
+}
+
+[data-theme="dark"] .uz-catstrip-more {
+  color: #38bdf8;
+}
+
+[data-theme="dark"] .uz-catstrip-more:hover {
+  background: rgba(56, 189, 248, 0.15);
+}
+
+[data-theme="dark"] .uz-banner-carousel {
+  border: 1px solid var(--line);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .uzum-banner-title {
+  color: #f8fafc;
+}
+
+[data-theme="dark"] .uzum-banner-brand {
+  background: rgba(19, 34, 46, 0.85);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+[data-theme="dark"] .uzum-banner-brand-name {
+  color: #f8fafc;
+}
+
+[data-theme="dark"] .uzum-banner-brand-tag {
+  color: #38bdf8;
+  border-left-color: #334155;
+}
+
+[data-theme="dark"] .uzum-badge-pill {
+  background: rgba(19, 34, 46, 0.85);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #f8fafc;
+}
+
+[data-theme="dark"] .uzum-badge-pill--medax {
+  color: #f8fafc;
+}
+
+[data-theme="dark"] .uz-carousel-nav {
+  background: rgba(19, 34, 46, 0.85);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .uz-carousel-nav:hover {
+  background: #1e3447;
+  color: #ffffff;
+}
+
+[data-theme="dark"] .uz-carousel-dots .dot {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+[data-theme="dark"] .uz-carousel-dots .dot.active {
+  background: rgba(255, 255, 255, 0.85);
+}
+
+[data-theme="dark"] .uz-quick-tile {
+  background: var(--card);
+  border-color: var(--line);
+}
+
+[data-theme="dark"] .uz-quick-tile:hover {
+  border-color: #38bdf8;
+  box-shadow: 0 8px 24px rgba(56, 189, 248, 0.12);
+}
+
+[data-theme="dark"] .p .img,
+[data-theme="dark"] .device-icon-wrap {
+  background: #0f172a;
+}
+
+[data-theme="dark"] .tab {
+  background: var(--card);
+  color: var(--ink);
+  border-color: var(--line);
+}
+
+[data-theme="dark"] .tab:hover {
+  border-color: #38bdf8;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.1);
+}
+
+[data-theme="dark"] .tab[aria-selected="true"] {
+  background: #0284c7;
+  color: #ffffff;
+  border-color: #0284c7;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35);
+}
+
+[data-theme="dark"] .catalog-text-link {
+  color: #38bdf8;
+}
+
+[data-theme="dark"] .catalog-text-link:hover {
+  color: #7dd3fc;
+}
+
+[data-theme="dark"] .fact-icon {
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+}
+
+[data-theme="dark"] .fact-item:hover {
+  border-color: rgba(56, 189, 248, 0.4);
+}
+
+[data-theme="dark"] .cat:hover {
+  border-color: #38bdf8;
+}
+
+[data-theme="dark"] .cat:hover h3,
+[data-theme="dark"] .cat-arrow {
+  color: #38bdf8;
+}
+
+[data-theme="dark"] .brand-clean-card {
+  background: var(--card);
+  border-color: var(--line);
+}
+
+[data-theme="dark"] .brand-clean-card:hover {
+  border-color: #38bdf8;
+}
+
+[data-theme="dark"] .brand-clean-card:hover .brand-clean-name {
+  color: #38bdf8;
+}
+
+[data-theme="dark"] .brand-logo-box {
+  background: #ffffff;
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
 /* Medax Logo */

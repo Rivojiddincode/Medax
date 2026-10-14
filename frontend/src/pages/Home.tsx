@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { api, Brand, Category, Product } from "../api";
 import { ProductCard } from "../components/Shell";
 import { useI18n } from "../context/I18nContext";
+import { useTheme } from "../context/ThemeContext";
 import { MedaxEmblem } from "../components/MedaxLogo";
 
 interface HomeData {
@@ -27,6 +28,7 @@ export interface HeroSlide {
   alt: string;
   link: string;
   bg: string;
+  darkBg: string;
 }
 
 export const HERO_SLIDES: HeroSlide[] = [
@@ -45,6 +47,7 @@ export const HERO_SLIDES: HeroSlide[] = [
     alt: "Pultli nogironlar aravachasi",
     link: "/catalog?category=reabilitatsiya-va-invalit-aravachalari",
     bg: "#eef1f7",
+    darkBg: "#111c2a",
   },
   {
     id: 2,
@@ -61,6 +64,7 @@ export const HERO_SLIDES: HeroSlide[] = [
     alt: "Zamonaviy UZI apparatlari",
     link: "/catalog?category=ultratovush-diagnostikasi",
     bg: "#eaf0f6",
+    darkBg: "#141e2b",
   },
   {
     id: 3,
@@ -77,6 +81,7 @@ export const HERO_SLIDES: HeroSlide[] = [
     alt: "Reanimatsiya va IVL jihozlari",
     link: "/catalog?category=reanimatsiya-va-anesteziologiya",
     bg: "#f3eff1",
+    darkBg: "#1e141a",
   },
   {
     id: 4,
@@ -93,12 +98,14 @@ export const HERO_SLIDES: HeroSlide[] = [
     alt: "Funksional tibbiy kravatlar",
     link: "/catalog?category=tibbiy-mebel",
     bg: "#ebf3ef",
+    darkBg: "#122019",
   },
 ];
 
 export default function Home() {
   const nav = useNavigate();
   const { lang, t } = useI18n();
+  const { theme } = useTheme();
   const [data, setData] = useState<HomeData | null>(null);
   const [tab, setTab] = useState<"latest" | "hits">("latest");
   const [q, setQ] = useState("");
@@ -169,7 +176,7 @@ export default function Home() {
               to={HERO_SLIDES[currentSlide].link}
               className="uz-carousel-slide active"
               key={HERO_SLIDES[currentSlide].id}
-              style={{ background: HERO_SLIDES[currentSlide].bg }}
+              style={{ background: theme === "dark" ? HERO_SLIDES[currentSlide].darkBg : HERO_SLIDES[currentSlide].bg }}
             >
               <div className="uz-slide-content">
                 <div className="uzum-banner-brand">
