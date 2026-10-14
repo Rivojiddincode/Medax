@@ -632,11 +632,12 @@ input:focus,select:focus,textarea:focus{
   display: inline-block;
 }
 .uz-catstrip-icon-img {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   object-fit: contain;
   display: inline-block;
   vertical-align: middle;
+  flex-shrink: 0;
 }
 .uz-catstrip-more {
   font-size: 13.5px;

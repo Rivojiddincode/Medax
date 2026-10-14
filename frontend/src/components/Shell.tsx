@@ -215,19 +215,19 @@ export function Layout() {
               <span>Nogironlar aravachalari</span>
             </Link>
             <Link to="/catalog?category=jarrohlik" className="uz-catstrip-pill standard">
-              <span className="uz-catstrip-icon">🔬</span>
+              <img src="/icons/surgery.png" alt="" className="uz-catstrip-icon-img" />
               <span>Jarrohlik jihozlari</span>
             </Link>
             <Link to="/catalog?category=tibbiy-mebel" className="uz-catstrip-pill standard">
-              <span className="uz-catstrip-icon">🛏️</span>
+              <img src="/icons/furniture.png" alt="" className="uz-catstrip-icon-img" />
               <span>Tibbiy mebellar</span>
             </Link>
             <Link to="/catalog?category=laboratoriya" className="uz-catstrip-pill standard">
-              <span className="uz-catstrip-icon">🧪</span>
+              <img src="/icons/lab.png" alt="" className="uz-catstrip-icon-img" />
               <span>Laboratoriya</span>
             </Link>
             <Link to="/catalog?category=nitril-qolqoplar" className="uz-catstrip-pill standard">
-              <span className="uz-catstrip-icon">🧤</span>
+              <img src="/icons/consumables.png" alt="" className="uz-catstrip-icon-img" />
               <span>Sarflov materiallari</span>
             </Link>
             <Link to="/catalog" className="uz-catstrip-more">
