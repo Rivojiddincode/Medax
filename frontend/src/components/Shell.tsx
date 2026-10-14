@@ -203,27 +203,48 @@ export function Layout() {
         <div className="uz-catstrip">
           <div className="wrap uz-catstrip-wrap">
             <Link to="/catalog?flag=discount" className="uz-catstrip-pill highlight">
-              <span>🔥</span>
+              <span className="uz-catstrip-icon">🔥</span>
               <b>Kafolatli narxlar</b>
             </Link>
             <Link to="/catalog?flag=new" className="uz-catstrip-pill highlight">
-              <span>✨</span>
+              <span className="uz-catstrip-icon">✨</span>
               <b>Yangi modellar</b>
             </Link>
-            <Link to="/catalog?category=reanimatsiya-va-anesteziologiya" className="uz-catstrip-link">
-              Reanimatsiya va IVL
+            <Link to="/catalog?category=nogironlar-aravachasi" className="uz-catstrip-pill standard">
+              <span className="uz-catstrip-icon">♿</span>
+              <span>Nogironlar aravachalari</span>
             </Link>
-            <Link to="/catalog?category=ultratovush-diagnostikasi" className="uz-catstrip-link">
-              UZI Diagnostika
+            <Link to="/catalog?category=ultratovush-diagnostikasi" className="uz-catstrip-pill standard">
+              <span className="uz-catstrip-icon">🩺</span>
+              <span>UZI Diagnostika</span>
             </Link>
-            <Link to="/catalog?category=jarrohlik" className="uz-catstrip-link">
-              Jarrohlik jihozlari
+            <Link to="/catalog?category=reanimatsiya-va-anesteziologiya" className="uz-catstrip-pill standard">
+              <span className="uz-catstrip-icon">🫁</span>
+              <span>Reanimatsiya va IVL</span>
             </Link>
-            <Link to="/catalog?category=tibbiy-mebel" className="uz-catstrip-link">
-              Tibbiy mebellar
+            <Link to="/catalog?category=jarrohlik" className="uz-catstrip-pill standard">
+              <span className="uz-catstrip-icon">🔬</span>
+              <span>Jarrohlik jihozlari</span>
             </Link>
-            <Link to="/catalog?category=reabilitatsiya-va-ortopediya" className="uz-catstrip-link">
-              Reabilitatsiya
+            <Link to="/catalog?category=tibbiy-mebel" className="uz-catstrip-pill standard">
+              <span className="uz-catstrip-icon">🛏️</span>
+              <span>Tibbiy mebellar</span>
+            </Link>
+            <Link to="/catalog?category=reabilitatsiya-va-ortopediya" className="uz-catstrip-pill standard">
+              <span className="uz-catstrip-icon">🦾</span>
+              <span>Reabilitatsiya</span>
+            </Link>
+            <Link to="/catalog?category=laboratoriya" className="uz-catstrip-pill standard">
+              <span className="uz-catstrip-icon">🧪</span>
+              <span>Laboratoriya</span>
+            </Link>
+            <Link to="/catalog?category=nitril-qolqoplar" className="uz-catstrip-pill standard">
+              <span className="uz-catstrip-icon">🧤</span>
+              <span>Sarflov materiallari</span>
+            </Link>
+            <Link to="/catalog?category=sterilizatsiya" className="uz-catstrip-pill standard">
+              <span className="uz-catstrip-icon">🧴</span>
+              <span>Sterilizatsiya</span>
             </Link>
             <Link to="/catalog" className="uz-catstrip-more">
               Barchasi →
