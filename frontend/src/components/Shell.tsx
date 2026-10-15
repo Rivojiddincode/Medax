@@ -124,7 +124,7 @@ export function Layout() {
                   <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
                   <circle cx="12" cy="10" r="3" />
                 </svg>
-                <span>Shahar: <b>Namangan</b></span>
+                <span>{t("topbar_city")} <b>{t("topbar_city_val")}</b></span>
               </span>
               <a
                 href={SITE_CONFIG.yandexMapsUrl}
@@ -132,7 +132,7 @@ export function Layout() {
                 rel="noopener noreferrer"
                 className="uz-topbar-link"
               >
-                Olib ketish punkti
+                {t("topbar_pickup")}
               </a>
             </div>
 
@@ -141,8 +141,8 @@ export function Layout() {
                 <span className="tel-pulse-dot" />
                 {SITE_CONFIG.phone}
               </a>
-              <Link to="/contact" className="uz-topbar-link">Savol-javob</Link>
-              <Link to={customer ? "/account" : "/cart"} className="uz-topbar-link">Buyurtmalarim</Link>
+              <Link to="/contact" className="uz-topbar-link">{t("topbar_faq")}</Link>
+              <Link to={customer ? "/account" : "/cart"} className="uz-topbar-link">{t("topbar_my_orders")}</Link>
               <div className="uz-topbar-tools">
                 <LanguageSwitcher />
                 <ThemeToggle />
@@ -168,7 +168,7 @@ export function Layout() {
                 setIsCatalogOpen((prev) => !prev);
               }}
               aria-expanded={isCatalogOpen}
-              aria-label="Katalog"
+              aria-label={t("nav_catalog")}
             >
               {isCatalogOpen ? (
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
@@ -183,7 +183,7 @@ export function Layout() {
                   <rect x="3" y="14" width="7" height="7" rx="1.5" />
                 </svg>
               )}
-              <span>Katalog</span>
+              <span>{t("nav_catalog")}</span>
             </button>
 
             {/* Central Uzum Search Bar with Dropdown & Dimming Backdrop */}
@@ -210,25 +210,25 @@ export function Layout() {
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                     <circle cx="12" cy="7" r="4" />
                   </svg>
-                  <span>Kirish</span>
+                  <span>{t("btn_login")}</span>
                 </button>
               )}
 
               <Link
                 className="uz-action-btn"
                 to="/catalog"
-                aria-label="Saralangan mahsulotlar"
+                aria-label={t("nav_wishlist")}
               >
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
                 </svg>
-                <span>Saralangan</span>
+                <span>{t("nav_wishlist")}</span>
               </Link>
 
               <Link
                 className={`uz-action-btn uz-cart-btn ${count > 0 ? "has-items" : ""}`}
                 to="/cart"
-                aria-label={`Savat, ${count} ta mahsulot`}
+                aria-label={`${t("nav_cart")}, ${count}`}
               >
                 <div className="uz-cart-icon-wrap">
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -238,7 +238,7 @@ export function Layout() {
                   </svg>
                   {count > 0 && <span className="uz-badge">{count}</span>}
                 </div>
-                <span>Savat</span>
+                <span>{t("nav_cart")}</span>
               </Link>
             </div>
           </div>
@@ -252,34 +252,34 @@ export function Layout() {
           <div className="wrap uz-catstrip-wrap">
             <Link to="/catalog?flag=discount" className="uz-catstrip-pill highlight-green">
               <img src="/icons/guarantee.png" alt="" className="uz-catstrip-icon-img" />
-              <b>Kafolatli narxlar</b>
+              <b>{t("strip_guaranteed_prices")}</b>
             </Link>
             <Link to="/catalog?flag=new" className="uz-catstrip-pill highlight-red">
               <img src="/icons/new.png" alt="" className="uz-catstrip-icon-img" />
-              <b>Yangi modellar</b>
+              <b>{t("strip_new_models")}</b>
             </Link>
             <Link to="/catalog?category=nogironlar-aravachasi" className="uz-catstrip-pill standard">
               <img src="/icons/wheelchair.png" alt="" className="uz-catstrip-icon-img" />
-              <span>Nogironlar aravachalari</span>
+              <span>{t("strip_wheelchairs")}</span>
             </Link>
             <Link to="/catalog?category=jarrohlik" className="uz-catstrip-pill standard">
               <img src="/icons/surgery.png" alt="" className="uz-catstrip-icon-img" />
-              <span>Jarrohlik jihozlari</span>
+              <span>{t("strip_surgery")}</span>
             </Link>
             <Link to="/catalog?category=tibbiy-mebel" className="uz-catstrip-pill standard">
               <img src="/icons/furniture.png" alt="" className="uz-catstrip-icon-img" />
-              <span>Tibbiy mebellar</span>
+              <span>{t("strip_furniture")}</span>
             </Link>
             <Link to="/catalog?category=laboratoriya" className="uz-catstrip-pill standard">
               <img src="/icons/lab.png" alt="" className="uz-catstrip-icon-img" />
-              <span>Laboratoriya</span>
+              <span>{t("strip_laboratory")}</span>
             </Link>
             <Link to="/catalog?category=nitril-qolqoplar" className="uz-catstrip-pill standard">
               <img src="/icons/consumables.png" alt="" className="uz-catstrip-icon-img" />
-              <span>Sarflov materiallari</span>
+              <span>{t("strip_consumables")}</span>
             </Link>
             <Link to="/catalog" className="uz-catstrip-more">
-              Barchasi →
+              {t("strip_all")}
             </Link>
           </div>
         </div>
@@ -377,7 +377,7 @@ export function Layout() {
             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
             <polyline points="9 22 9 12 15 12 15 22" />
           </svg>
-          <span>Asosiy</span>
+          <span>{t("nav_home")}</span>
         </NavLink>
 
         <NavLink to="/catalog" className={({ isActive }) => `mob-nav-item ${isActive ? "active" : ""}`}>
@@ -387,7 +387,7 @@ export function Layout() {
             <rect x="14" y="14" width="7" height="7" rx="1.5" />
             <rect x="3" y="14" width="7" height="7" rx="1.5" />
           </svg>
-          <span>Katalog</span>
+          <span>{t("nav_catalog")}</span>
         </NavLink>
 
         <NavLink to="/cart" className={({ isActive }) => `mob-nav-item ${isActive ? "active" : ""}`}>
@@ -399,14 +399,14 @@ export function Layout() {
             </svg>
             {count > 0 && <span className="mob-cart-badge">{count}</span>}
           </div>
-          <span>Savat</span>
+          <span>{t("nav_cart")}</span>
         </NavLink>
 
         <NavLink to="/contact" className={({ isActive }) => `mob-nav-item ${isActive ? "active" : ""}`}>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
           </svg>
-          <span>Aloqa</span>
+          <span>{t("nav_contact")}</span>
         </NavLink>
 
         {customer ? (
@@ -414,7 +414,7 @@ export function Layout() {
             <div className="mob-avatar-wrap">
               {customer.avatar ? <img src={customer.avatar} alt="" /> : customer.name.charAt(0)}
             </div>
-            <span>Kabinet</span>
+            <span>{t("nav_account")}</span>
           </NavLink>
         ) : (
           <button type="button" className="mob-nav-item mob-nav-btn" onClick={() => openAuthModal()}>
@@ -422,7 +422,7 @@ export function Layout() {
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
               <circle cx="12" cy="7" r="4" />
             </svg>
-            <span>Kirish</span>
+            <span>{t("btn_login")}</span>
           </button>
         )}
       </nav>
@@ -588,8 +588,8 @@ export function ProductCard({ p }: { p: Product }) {
         {/* Top Badges: Chegirma, Xit, Yangi */}
         <div className="card-badges-top">
           {discountVal && <span className="tag discount-badge">-{discountVal}%</span>}
-          {p.isHit && <span className="tag hit">Xit</span>}
-          {p.isNew && <span className="tag new">Yangi</span>}
+          {p.isHit && <span className="tag hit">{t("badge_hit")}</span>}
+          {p.isNew && <span className="tag new">{t("badge_new")}</span>}
         </div>
 
         {img ? (
@@ -611,7 +611,11 @@ export function ProductCard({ p }: { p: Product }) {
         {/* Qutida ko'p dona bo'lsa, donalab hisobi */}
         {perPiecePrice && (
           <div className="card-package-subtext">
-            1 qutida {p.packageQty} ta (1 donasi ~ {perPiecePrice.toLocaleString("ru-RU").replace(/,/g, " ")} so'm)
+            {lang === "ru"
+              ? `В упаковке ${p.packageQty} шт (1 шт ~ ${perPiecePrice.toLocaleString("ru-RU").replace(/,/g, " ")} сум)`
+              : lang === "en"
+              ? `${p.packageQty} pcs/box (~ ${perPiecePrice.toLocaleString("ru-RU").replace(/,/g, " ")} UZS each)`
+              : `1 qutida ${p.packageQty} ta (1 donasi ~ ${perPiecePrice.toLocaleString("ru-RU").replace(/,/g, " ")} so'm)`}
           </div>
         )}
 

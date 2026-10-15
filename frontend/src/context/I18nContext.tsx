@@ -10,10 +10,55 @@ export interface Translations {
   nav_cart: string;
   btn_login: string;
   nav_account: string;
+  nav_wishlist: string;
+  nav_home: string;
   theme_toggle: string;
   theme_light: string;
   theme_dark: string;
   language: string;
+
+  // Topbar
+  topbar_city: string;
+  topbar_city_val: string;
+  topbar_pickup: string;
+  topbar_faq: string;
+  topbar_my_orders: string;
+
+  // Category Strip
+  strip_guaranteed_prices: string;
+  strip_new_models: string;
+  strip_wheelchairs: string;
+  strip_surgery: string;
+  strip_furniture: string;
+  strip_laboratory: string;
+  strip_consumables: string;
+  strip_all: string;
+
+  // Search Dropdown & Badges
+  search_input_ph: string;
+  search_recent: string;
+  search_clear: string;
+  search_popular: string;
+  search_in_stock: string;
+  search_guaranteed: string;
+  search_ready_pickup: string;
+  badge_hit: string;
+  badge_new: string;
+  official_store: string;
+
+  // Quick Category Tiles
+  quick_ventilator_title: string;
+  quick_ventilator_sub: string;
+  quick_ultrasound_title: string;
+  quick_ultrasound_sub: string;
+  quick_surgery_title: string;
+  quick_surgery_sub: string;
+  quick_furniture_title: string;
+  quick_furniture_sub: string;
+
+  // Product Meta
+  mfd_label: string;
+  exp_label: string;
 
   // Hero Section
   hero_title: string;
@@ -225,10 +270,50 @@ export const translations: Record<Lang, Translations> = {
     nav_cart: "Savat",
     btn_login: "Kirish",
     nav_account: "Kabinet",
+    nav_wishlist: "Saralangan",
+    nav_home: "Asosiy",
     theme_toggle: "Mavzuni almashtirish",
     theme_light: "Yorug' rejim",
     theme_dark: "Tungi rejim",
     language: "Til",
+
+    topbar_city: "Shahar:",
+    topbar_city_val: "Namangan",
+    topbar_pickup: "Olib ketish punkti",
+    topbar_faq: "Savol-javob",
+    topbar_my_orders: "Buyurtmalarim",
+
+    strip_guaranteed_prices: "Kafolatli narxlar",
+    strip_new_models: "Yangi modellar",
+    strip_wheelchairs: "Nogironlar aravachalari",
+    strip_surgery: "Jarrohlik jihozlari",
+    strip_furniture: "Tibbiy mebellar",
+    strip_laboratory: "Laboratoriya",
+    strip_consumables: "Sarflov materiallari",
+    strip_all: "Barchasi →",
+
+    search_input_ph: "Mahsulotlar va turkumlar izlash (masalan: UZI, IVL, Jarrohlik)...",
+    search_recent: "Yaqinda izlaganlaringiz",
+    search_clear: "Tozalash",
+    search_popular: "Ommabop uskunalar",
+    search_in_stock: "Do'konda bor",
+    search_guaranteed: "Kafolatli",
+    search_ready_pickup: "Olib ketishga tayyor",
+    badge_hit: "Xit",
+    badge_new: "Yangi",
+    official_store: "Rasmiy do'kon",
+
+    quick_ventilator_title: "Reanimatsiya va IVL",
+    quick_ventilator_sub: "O'pka sun'iy nafas berish apparatlari va bemor monitorlari",
+    quick_ultrasound_title: "UZI Diagnostika",
+    quick_ultrasound_sub: "4D/5D Doppler rangli skanerlar va ko'p funksiyali datchiklar",
+    quick_surgery_title: "Jarrohlik jihozlari",
+    quick_surgery_sub: "Operatsiya stollari, ko'lanka tushmas yoritgichlar va koagulyatorlar",
+    quick_furniture_title: "Tibbiy mebel",
+    quick_furniture_sub: "Elektr boshqaruvli funksional karavotlar va shifoxona jihozlari",
+
+    mfd_label: "Ishlab chiqarilgan (Mfd)",
+    exp_label: "Yaroqlilik muddati (Exp)",
 
     hero_title: "Xorijiy tibbiy uskunalar katalogi",
     hero_desc: "Yaponiya, Germaniya va AQSh ishlab chiqaruvchilarining tibbiy uskunalari. O'zbekiston bo'ylab to'g'ridan-to'g'ri yetkazib berish, o'rnatish va rasmiy texnik servis xizmati.",
@@ -426,10 +511,50 @@ export const translations: Record<Lang, Translations> = {
     nav_cart: "Корзина",
     btn_login: "Войти",
     nav_account: "Кабинет",
+    nav_wishlist: "Избранное",
+    nav_home: "Главная",
     theme_toggle: "Переключить тему",
     theme_light: "Светлая тема",
     theme_dark: "Тёмная тема",
     language: "Язык",
+
+    topbar_city: "Город:",
+    topbar_city_val: "Наманган",
+    topbar_pickup: "Пункт выдачи",
+    topbar_faq: "Вопрос-ответ",
+    topbar_my_orders: "Мои заказы",
+
+    strip_guaranteed_prices: "Гарантированные цены",
+    strip_new_models: "Новые модели",
+    strip_wheelchairs: "Инвалидные коляски",
+    strip_surgery: "Хирургическое оборудование",
+    strip_furniture: "Медицинская мебель",
+    strip_laboratory: "Лаборатория",
+    strip_consumables: "Расходные материалы",
+    strip_all: "Все →",
+
+    search_input_ph: "Искать товары и категории (например: УЗИ, ИВЛ, Хирургия)...",
+    search_recent: "Недавние поиски",
+    search_clear: "Очистить",
+    search_popular: "Популярное оборудование",
+    search_in_stock: "В наличии",
+    search_guaranteed: "С гарантией",
+    search_ready_pickup: "Готово к выдаче",
+    badge_hit: "Хит",
+    badge_new: "Новинка",
+    official_store: "Официальный магазин",
+
+    quick_ventilator_title: "Реанимация и ИВЛ",
+    quick_ventilator_sub: "Аппараты искусственной вентиляции легких и мониторы пациента",
+    quick_ultrasound_title: "УЗИ Диагностика",
+    quick_ultrasound_sub: "Цветные сканеры 4D/5D Doppler и многофункциональные датчики",
+    quick_surgery_title: "Хирургическое оборудование",
+    quick_surgery_sub: "Операционные столы, бестеневые лампы и коагуляторы",
+    quick_furniture_title: "Медицинская мебель",
+    quick_furniture_sub: "Функциональные медицинские кровати и оборудование палат",
+
+    mfd_label: "Дата производства (Mfd)",
+    exp_label: "Срок годности (Exp)",
 
     hero_title: "Каталог зарубежного медицинского оборудования",
     hero_desc: "Медицинское оборудование ведущих производителей Японии, Германии и США. Прямые поставки по всему Узбекистану, профессиональный монтаж и официальный сервис.",
@@ -627,10 +752,50 @@ export const translations: Record<Lang, Translations> = {
     nav_cart: "Cart",
     btn_login: "Sign In",
     nav_account: "Account",
+    nav_wishlist: "Favorites",
+    nav_home: "Home",
     theme_toggle: "Toggle Theme",
     theme_light: "Light Mode",
     theme_dark: "Dark Mode",
     language: "Language",
+
+    topbar_city: "City:",
+    topbar_city_val: "Namangan",
+    topbar_pickup: "Pickup Point",
+    topbar_faq: "FAQ",
+    topbar_my_orders: "My Orders",
+
+    strip_guaranteed_prices: "Guaranteed Prices",
+    strip_new_models: "New Models",
+    strip_wheelchairs: "Wheelchairs",
+    strip_surgery: "Surgical Equipment",
+    strip_furniture: "Medical Furniture",
+    strip_laboratory: "Laboratory",
+    strip_consumables: "Consumables",
+    strip_all: "All →",
+
+    search_input_ph: "Search products & categories (e.g., Ultrasound, Ventilator, Surgery)...",
+    search_recent: "Recent Searches",
+    search_clear: "Clear",
+    search_popular: "Popular Equipment",
+    search_in_stock: "In Stock",
+    search_guaranteed: "Warranty",
+    search_ready_pickup: "Ready for Pickup",
+    badge_hit: "Hit",
+    badge_new: "New",
+    official_store: "Official Store",
+
+    quick_ventilator_title: "ICU & Ventilators",
+    quick_ventilator_sub: "Mechanical ventilators and patient monitors",
+    quick_ultrasound_title: "Ultrasound Diagnostics",
+    quick_ultrasound_sub: "4D/5D Doppler color scanners and multifunctional probes",
+    quick_surgery_title: "Surgical Equipment",
+    quick_surgery_sub: "Operating tables, shadowless surgical lights and coagulators",
+    quick_furniture_title: "Medical Furniture",
+    quick_furniture_sub: "Electric functional hospital beds and clinical equipment",
+
+    mfd_label: "Manufacture Date (Mfd)",
+    exp_label: "Expiry Date (Exp)",
 
     hero_title: "Foreign Medical Equipment Catalog",
     hero_desc: "Medical equipment from top manufacturers in Japan, Germany and the USA. Direct delivery across Uzbekistan, professional installation and official service.",

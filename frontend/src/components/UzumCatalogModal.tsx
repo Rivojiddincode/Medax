@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAnimatedPresence } from "./UzumSearchBar";
+import { useI18n } from "../context/I18nContext";
 
 export interface SubCategoryGroup {
   id: string;
@@ -405,18 +406,98 @@ export const MEGA_CATEGORIES: MegaCategory[] = [
   }
 ];
 
+const LOCALIZED_CATS: Record<string, Record<"uz" | "ru" | "en", string>> = {
+  wheelchairs: {
+    uz: "Nogironlar aravachalari",
+    ru: "Инвалидные коляски",
+    en: "Wheelchairs"
+  },
+  surgery: {
+    uz: "Jarrohlik jihozlari",
+    ru: "Хирургическое оборудование",
+    en: "Surgical Equipment"
+  },
+  furniture: {
+    uz: "Tibbiy mebellar",
+    ru: "Медицинская мебель",
+    en: "Medical Furniture"
+  },
+  lab: {
+    uz: "Laboratoriya jihozlari",
+    ru: "Лабораторное оборудование",
+    en: "Laboratory Equipment"
+  },
+  consumables: {
+    uz: "Sarflov materiallari",
+    ru: "Расходные материалы",
+    en: "Consumables"
+  },
+  ultrasound: {
+    uz: "UZI va diagnostika",
+    ru: "УЗИ и диагностика",
+    en: "Ultrasound & Diagnostics"
+  },
+  icu: {
+    uz: "Reanimatsiya va IVL",
+    ru: "Реанимация и ИВЛ",
+    en: "ICU & Ventilators"
+  },
+  rehab: {
+    uz: "Ortopediya va reabilitatsiya",
+    ru: "Ортопедия и реабилитация",
+    en: "Orthopedics & Rehab"
+  }
+};
+
+const LOCALIZED_GROUPS: Record<string, Record<"uz" | "ru" | "en", string>> = {
+  "w-electric": { uz: "Elektr va pultli aravachalar", ru: "Электрические коляски с пультом", en: "Electric & Powered Chairs" },
+  "w-manual": { uz: "Mexanik aravachalar", ru: "Механические коляски", en: "Manual Wheelchairs" },
+  "w-pediatric": { uz: "Bolalar reabilitatsiyasi", ru: "Детская реабилитация", en: "Pediatric Rehabilitation" },
+  "w-parts": { uz: "Aksessuarlar va qismlar", ru: "Аксессуары и запчасти", en: "Accessories & Parts" },
+  "s-instruments": { uz: "Jarrohlik asboblari", ru: "Хирургические инструменты", en: "Surgical Instruments" },
+  "s-electrosurgery": { uz: "Elektrojarrohlik", ru: "Электрохирургия", en: "Electrosurgery" },
+  "s-lighting": { uz: "Operatsiya yoritgichlari", ru: "Операционные светильники", en: "Surgical Lighting" },
+  "s-sterilization": { uz: "Sterilizatsiya uskunalari", ru: "Стерилизационное оборудование", en: "Sterilization Devices" },
+  "f-tables": { uz: "Operatsiya stollari", ru: "Операционные столы", en: "Operating Tables" },
+  "f-beds": { uz: "Funksional karavotlar", ru: "Функциональные кровати", en: "Hospital Beds" },
+  "f-couches": { uz: "Kreslo va kuchetkalar", ru: "Кресла и кушетки", en: "Couches & Chairs" },
+  "f-storage": { uz: "Aravacha va shkaflar", ru: "Медицинские тележки и шкафы", en: "Medical Carts & Cabinets" },
+  "l-analyzers": { uz: "Tahlil analizatorlari", ru: "Лабораторные анализаторы", en: "Clinical Analyzers" },
+  "l-general": { uz: "Umumiy laboratoriya", ru: "Общелабораторное оборудование", en: "General Laboratory" },
+  "l-rapid": { uz: "Ekspress test & asboblar", ru: "Экспресс-тесты и приборы", en: "Rapid Tests & Meters" },
+  "l-consumables": { uz: "Idishlar va sarflovlar", ru: "Посуда и расходные материалы", en: "Lab Glassware & Consumables" },
+  "c-gloves": { uz: "Qo'lqoplar va himoya", ru: "Перчатки и средства защиты", en: "Gloves & Protection" },
+  "c-injection": { uz: "Inyeksiya va infuziya", ru: "Инъекции и инфузии", en: "Injection & Infusion" },
+  "c-dressing": { uz: "Bog'lov vositalari", ru: "Перевязочные средства", en: "Wound Care & Dressings" },
+  "c-disinfection": { uz: "Dezinfeksiya va gigiyena", ru: "Дезинфекция и гигиена", en: "Disinfection & Hygiene" },
+  "u-machines": { uz: "UZI apparatlari", ru: "УЗИ аппараты", en: "Ultrasound Scanners" },
+  "u-probes": { uz: "UZI datchiklari", ru: "УЗИ датчики", en: "Ultrasound Probes" },
+  "u-functional": { uz: "Funksional diagnostika", ru: "Функциональная диагностика", en: "Functional Diagnostics" },
+  "u-xray": { uz: "Rentgen apparatlari", ru: "Рентген аппараты", en: "X-Ray Equipment" },
+  "i-ventilator": { uz: "IVL va nafas apparatlari", ru: "Аппараты ИВЛ и дыхания", en: "Ventilators & Respiratory" },
+  "i-monitors": { uz: "Bemor monitorlari", ru: "Мониторы пациента", en: "Patient Monitors" },
+  "i-defibrillators": { uz: "Defibrillyatorlar", ru: "Дефибрилляторы", en: "Defibrillators" },
+  "i-infusion": { uz: "Infuzion uskunalar", ru: "Инфузионное оборудование", en: "Infusion Pumps" },
+  "r-walking": { uz: "Yurish vositalari", ru: "Средства для ходьбы", en: "Mobility & Walking Aids" },
+  "r-physio": { uz: "Fizioterapiya apparatlari", ru: "Физиотерапия", en: "Physiotherapy Devices" },
+  "r-exercise": { uz: "Tiklash trenajyorlari", ru: "Тренажеры реабилитации", en: "Rehabilitation Trainers" },
+  "r-orthotics": { uz: "Bandaj va fiksatorlar", ru: "Бандажи и корсеты", en: "Braces & Orthotics" }
+};
+
 interface UzumCatalogModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
 export function UzumCatalogModal({ isOpen, onClose }: UzumCatalogModalProps) {
+  const { lang } = useI18n();
   const [activeCatId, setActiveCatId] = useState<string>(MEGA_CATEGORIES[0].id);
   const { mounted, animState } = useAnimatedPresence(isOpen, 220);
 
   if (!mounted) return null;
 
   const activeCategory = MEGA_CATEGORIES.find((c) => c.id === activeCatId) || MEGA_CATEGORIES[0];
+  const activeCatTitle = LOCALIZED_CATS[activeCategory.id]?.[lang] || activeCategory.name;
 
   return (
     <div className={`uz-catalog-mega-dropdown ${animState}`} role="dialog" aria-modal="true">
@@ -441,7 +522,7 @@ export function UzumCatalogModal({ isOpen, onClose }: UzumCatalogModalProps) {
                         ) : (
                           <span className="uz-catalog-icon-emoji">{cat.iconEmoji}</span>
                         )}
-                        <span className="uz-catalog-cat-name">{cat.name}</span>
+                        <span className="uz-catalog-cat-name">{LOCALIZED_CATS[cat.id]?.[lang] || cat.name}</span>
                       </span>
                       <svg
                         className="uz-catalog-chevron"
@@ -472,7 +553,7 @@ export function UzumCatalogModal({ isOpen, onClose }: UzumCatalogModalProps) {
                 onClick={onClose}
                 className="uz-catalog-main-link"
               >
-                <span>{activeCategory.name}</span>
+                <span>{activeCatTitle}</span>
                 <svg
                   width="18"
                   height="18"
@@ -490,15 +571,17 @@ export function UzumCatalogModal({ isOpen, onClose }: UzumCatalogModalProps) {
 
             {/* Grid of Subcategories */}
             <div className="uz-catalog-grid">
-              {activeCategory.groups.map((group) => (
-                <div key={group.id} className="uz-catalog-group">
-                  <Link
-                    to={`/catalog?category=${activeCategory.slug}&q=${encodeURIComponent(group.name)}`}
-                    onClick={onClose}
-                    className="uz-catalog-group-title"
-                  >
-                    {group.name}
-                  </Link>
+              {activeCategory.groups.map((group) => {
+                const groupTitle = LOCALIZED_GROUPS[group.id]?.[lang] || group.name;
+                return (
+                  <div key={group.id} className="uz-catalog-group">
+                    <Link
+                      to={`/catalog?category=${activeCategory.slug}&q=${encodeURIComponent(group.name)}`}
+                      onClick={onClose}
+                      className="uz-catalog-group-title"
+                    >
+                      {groupTitle}
+                    </Link>
                   <ul className="uz-catalog-item-list">
                     {group.items.map((item, idx) => (
                       <li key={idx} className="uz-catalog-subitem">
@@ -513,7 +596,8 @@ export function UzumCatalogModal({ isOpen, onClose }: UzumCatalogModalProps) {
                     ))}
                   </ul>
                 </div>
-              ))}
+              );
+            })}
             </div>
           </div>
         </div>

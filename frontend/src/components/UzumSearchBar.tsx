@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useI18n } from "../context/I18nContext";
 
 interface PopularItem {
   id: string;
   title: string;
   price: string;
-  badge: string;
+  badge: Record<"uz" | "ru" | "en", string>;
   tag: string;
   img: string;
   query: string;
@@ -23,7 +24,7 @@ const POPULAR_ITEMS: PopularItem[] = [
     id: "pop-1",
     title: "Mindray DP-50 Portativ UZI skaneri",
     price: "38 500 000 so'm",
-    badge: "Do'konda bor",
+    badge: { uz: "Do'konda bor", ru: "В наличии", en: "In stock" },
     tag: "UZI diagnostika",
     img: "/uploads/products/medical-diag.jpg",
     query: "UZI"
@@ -32,7 +33,7 @@ const POPULAR_ITEMS: PopularItem[] = [
     id: "pop-2",
     title: "Hamilton-C1 Reanimatsiya IVL ventilyatori",
     price: "65 000 000 so'm",
-    badge: "Kafolatli",
+    badge: { uz: "Kafolatli", ru: "С гарантией", en: "Warranty" },
     tag: "Reanimatsiya",
     img: "/uploads/products/medical-icu.jpg",
     query: "IVL"
@@ -41,7 +42,7 @@ const POPULAR_ITEMS: PopularItem[] = [
     id: "pop-3",
     title: "Ko'p funksiyali elektr tibbiy kravat",
     price: "12 400 000 so'm",
-    badge: "Olib ketishga tayyor",
+    badge: { uz: "Olib ketishga tayyor", ru: "Готово к выдаче", en: "Ready for pickup" },
     tag: "Tibbiy mebel",
     img: "/uploads/products/medical-bed.jpg",
     query: "kravat"
@@ -74,6 +75,7 @@ export function useAnimatedPresence(isOpen: boolean, durationMs = 280) {
 }
 
 export function UzumSearchBar({ isOpen: controlledIsOpen, onOpenChange }: UzumSearchBarProps = {}) {
+  const { lang, t } = useI18n();
   const navigate = useNavigate();
   const [internalIsOpen, setInternalIsOpen] = useState(false);
   const isOpen = controlledIsOpen !== undefined ? controlledIsOpen : internalIsOpen;
@@ -172,11 +174,11 @@ export function UzumSearchBar({ isOpen: controlledIsOpen, onOpenChange }: UzumSe
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setIsOpen(true)}
           className="uz-search-input"
-          placeholder="Mahsulotlar va turkumlar izlash (masalan: UZI, IVL, Jarrohlik)..."
-          aria-label="Mahsulotlar va turkumlar izlash"
+          placeholder={t("search_input_ph")}
+          aria-label={t("search_input_ph")}
           autoComplete="off"
         />
-        <button type="submit" className="uz-search-btn" aria-label="Qidirish">
+        <button type="submit" className="uz-search-btn" aria-label={t("btn_search")}>
           <svg
             width="18"
             height="18"
@@ -204,13 +206,13 @@ export function UzumSearchBar({ isOpen: controlledIsOpen, onOpenChange }: UzumSe
             {history.length > 0 && (
               <div className="uz-search-section">
                 <div className="uz-search-section-header">
-                  <h4 className="uz-search-section-title">Yaqinda izlaganlaringiz</h4>
+                  <h4 className="uz-search-section-title">{t("search_recent")}</h4>
                   <button
                     type="button"
                     className="uz-search-clear-btn"
                     onClick={handleClearHistory}
                   >
-                    Tozalash
+                    {t("search_clear")}
                   </button>
                 </div>
 
@@ -269,7 +271,7 @@ export function UzumSearchBar({ isOpen: controlledIsOpen, onOpenChange }: UzumSe
 
             {/* Section 2: Popular / Trending Medical Items */}
             <div className="uz-search-section popular-section">
-              <h4 className="uz-search-section-title">Mashhur</h4>
+              <h4 className="uz-search-section-title">{t("search_popular")}</h4>
               <div className="uz-search-popular-grid">
                 {POPULAR_ITEMS.map((item) => (
                   <div
@@ -292,7 +294,7 @@ export function UzumSearchBar({ isOpen: controlledIsOpen, onOpenChange }: UzumSe
                       <span className="uz-popular-price">{item.price}</span>
                       <span className="uz-popular-title">{item.title}</span>
                       <span className="uz-popular-badge">
-                        <span>⚡</span> {item.badge}
+                        <span>⚡</span> {item.badge[lang]}
                       </span>
                     </div>
                   </div>

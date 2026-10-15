@@ -17,12 +17,12 @@ interface HomeData {
 
 export interface BannerBadge {
   type: "original" | "warranty";
-  label: string;
+  label: Record<"uz" | "ru" | "en", string>;
 }
 
 export interface HeroSlide {
   id: number;
-  titleLines: [string, string, string];
+  titleLines: Record<"uz" | "ru" | "en", [string, string, string]>;
   badges: BannerBadge[];
   img: string;
   alt: string;
@@ -34,14 +34,14 @@ export interface HeroSlide {
 export const HERO_SLIDES: HeroSlide[] = [
   {
     id: 1,
-    titleLines: [
-      "Pultli nogironlar",
-      "aravachasi Endi",
-      "Medax’da",
-    ],
+    titleLines: {
+      uz: ["Pultli nogironlar", "aravachasi Endi", "Medax’da"],
+      ru: ["Коляски с пультом", "управления Теперь", "в Medax"],
+      en: ["Powered Wheelchairs", "with Remote Now", "at Medax"]
+    },
     badges: [
-      { type: "original", label: "Original" },
-      { type: "warranty", label: "1 yil kafolat" },
+      { type: "original", label: { uz: "Original", ru: "Оригинал", en: "Original" } },
+      { type: "warranty", label: { uz: "1 yil kafolat", ru: "Гарантия 1 год", en: "1 Year Warranty" } },
     ],
     img: "/banners/wheelchair-remote.png",
     alt: "Pultli nogironlar aravachasi",
@@ -51,14 +51,14 @@ export const HERO_SLIDES: HeroSlide[] = [
   },
   {
     id: 2,
-    titleLines: [
-      "Zamonaviy UZI",
-      "apparatlari Endi",
-      "Medax’da",
-    ],
+    titleLines: {
+      uz: ["Zamonaviy UZI", "apparatlari Endi", "Medax’da"],
+      ru: ["Современные аппараты", "УЗИ Теперь", "в Medax"],
+      en: ["Advanced Ultrasound", "Systems Now", "at Medax"]
+    },
     badges: [
-      { type: "original", label: "Original" },
-      { type: "warranty", label: "Rasmiy kafolat" },
+      { type: "original", label: { uz: "Original", ru: "Оригинал", en: "Original" } },
+      { type: "warranty", label: { uz: "Rasmiy kafolat", ru: "Официальная гарантия", en: "Official Warranty" } },
     ],
     img: "/banners/medical-diag.jpg",
     alt: "Zamonaviy UZI apparatlari",
@@ -68,14 +68,14 @@ export const HERO_SLIDES: HeroSlide[] = [
   },
   {
     id: 3,
-    titleLines: [
-      "Reanimatsiya va",
-      "IVL jihozlari Endi",
-      "Medax’da",
-    ],
+    titleLines: {
+      uz: ["Reanimatsiya va", "IVL jihozlari Endi", "Medax’da"],
+      ru: ["Оборудование ИВЛ", "и реанимации Теперь", "в Medax"],
+      en: ["ICU & Ventilators", "Equipment Now", "at Medax"]
+    },
     badges: [
-      { type: "original", label: "Original" },
-      { type: "warranty", label: "24/7 servis" },
+      { type: "original", label: { uz: "Original", ru: "Оригинал", en: "Original" } },
+      { type: "warranty", label: { uz: "24/7 servis", ru: "Сервис 24/7", en: "24/7 Service" } },
     ],
     img: "/banners/medical-surgery.jpg",
     alt: "Reanimatsiya va IVL jihozlari",
@@ -85,14 +85,14 @@ export const HERO_SLIDES: HeroSlide[] = [
   },
   {
     id: 4,
-    titleLines: [
-      "Funksional tibbiy",
-      "kravatlar Endi",
-      "Medax’da",
-    ],
+    titleLines: {
+      uz: ["Funksional tibbiy", "kravatlar Endi", "Medax’da"],
+      ru: ["Функциональные койки", "и кровати Теперь", "в Medax"],
+      en: ["Functional Hospital", "Beds Now", "at Medax"]
+    },
     badges: [
-      { type: "original", label: "Original" },
-      { type: "warranty", label: "1 yil kafolat" },
+      { type: "original", label: { uz: "Original", ru: "Оригинал", en: "Original" } },
+      { type: "warranty", label: { uz: "1 yil kafolat", ru: "Гарантия 1 год", en: "1 Year Warranty" } },
     ],
     img: "/banners/medical-bed.jpg",
     alt: "Funksional tibbiy kravatlar",
@@ -185,13 +185,13 @@ export default function Home() {
                     <span className="brand-med">Med</span>
                     <span className="brand-ax">ax</span>
                   </span>
-                  <span className="uzum-banner-brand-tag">Rasmiy do'kon</span>
+                  <span className="uzum-banner-brand-tag">{t("official_store")}</span>
                 </div>
 
                 <h1 className="uzum-banner-title">
-                  <span>{HERO_SLIDES[currentSlide].titleLines[0]}</span>
-                  <span>{HERO_SLIDES[currentSlide].titleLines[1]}</span>
-                  <span>{HERO_SLIDES[currentSlide].titleLines[2]}</span>
+                  <span>{HERO_SLIDES[currentSlide].titleLines[lang][0]}</span>
+                  <span>{HERO_SLIDES[currentSlide].titleLines[lang][1]}</span>
+                  <span>{HERO_SLIDES[currentSlide].titleLines[lang][2]}</span>
                 </h1>
 
                 <div className="uzum-banner-badges">
@@ -211,7 +211,7 @@ export default function Home() {
                           <path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3z" />
                         </svg>
                       )}
-                      <span>{b.label}</span>
+                      <span>{b.label[lang]}</span>
                     </div>
                   ))}
                 </div>
@@ -257,32 +257,32 @@ export default function Home() {
             <Link to="/catalog?category=reanimatsiya-va-anesteziologiya" className="uz-quick-tile">
               <div className="tile-icon-wrap">🫁</div>
               <div className="tile-info">
-                <strong>Reanimatsiya va IVL</strong>
-                <span>Nafas berish va monitoring</span>
+                <strong>{t("quick_ventilator_title")}</strong>
+                <span>{t("quick_ventilator_sub")}</span>
               </div>
             </Link>
 
             <Link to="/catalog?category=ultratovush-diagnostikasi" className="uz-quick-tile">
               <div className="tile-icon-wrap">🩺</div>
               <div className="tile-info">
-                <strong>UZI Diagnostika</strong>
-                <span>Dopler va 3D/4D datchiklar</span>
+                <strong>{t("quick_ultrasound_title")}</strong>
+                <span>{t("quick_ultrasound_sub")}</span>
               </div>
             </Link>
 
             <Link to="/catalog?category=jarrohlik" className="uz-quick-tile">
               <div className="tile-icon-wrap">🔬</div>
               <div className="tile-info">
-                <strong>Jarrohlik jihozlari</strong>
-                <span>Stollar, lampalar va koagulyator</span>
+                <strong>{t("quick_surgery_title")}</strong>
+                <span>{t("quick_surgery_sub")}</span>
               </div>
             </Link>
 
             <Link to="/catalog?category=tibbiy-mebel" className="uz-quick-tile">
               <div className="tile-icon-wrap">🛏️</div>
               <div className="tile-info">
-                <strong>Tibbiy mebel</strong>
-                <span>Funksional kravatlar va aravachalar</span>
+                <strong>{t("quick_furniture_title")}</strong>
+                <span>{t("quick_furniture_sub")}</span>
               </div>
             </Link>
           </div>

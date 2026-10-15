@@ -78,12 +78,12 @@ export default function ProductPage() {
             <div className="product-date-meta">
               {p.mfdDate && (
                 <span className="date-item">
-                  <strong>Ishlab chiqarilgan (Mfd):</strong> {p.mfdDate}
+                  <strong>{t("mfd_label")}:</strong> {p.mfdDate}
                 </span>
               )}
               {p.expDate && (
                 <span className="date-item exp">
-                  <strong>Yaroqlilik muddati (Exp):</strong> {p.expDate}
+                  <strong>{t("exp_label")}:</strong> {p.expDate}
                 </span>
               )}
             </div>
@@ -101,7 +101,11 @@ export default function ProductPage() {
             </div>
             {p.priceFrom && p.packageQty && p.packageQty > 1 && (
               <p className="package-piece-hint">
-                💡 1 qutida {p.packageQty} ta (1 donasi ~ {money(Math.round(Number(p.priceFrom) / p.packageQty))} {t("sum_currency")})
+                💡 {lang === "ru"
+                  ? `В упаковке ${p.packageQty} шт (1 шт ~ ${money(Math.round(Number(p.priceFrom) / p.packageQty))} ${t("sum_currency")})`
+                  : lang === "en"
+                  ? `${p.packageQty} pcs per box (~ ${money(Math.round(Number(p.priceFrom) / p.packageQty))} ${t("sum_currency")} each)`
+                  : `1 qutida ${p.packageQty} ta (1 donasi ~ ${money(Math.round(Number(p.priceFrom) / p.packageQty))} ${t("sum_currency")})`}
               </p>
             )}
           </div>

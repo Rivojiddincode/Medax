@@ -1592,6 +1592,117 @@ input:focus,select:focus,textarea:focus{
   border-color: rgba(255, 255, 255, 0.15);
 }
 
+/* Product Detail Page Dark Mode */
+[data-theme="dark"] .gal .main {
+  background: var(--card);
+  border-color: var(--line);
+}
+
+[data-theme="dark"] .thumbs button {
+  background: var(--card);
+  border-color: var(--line);
+}
+
+[data-theme="dark"] .thumbs button[aria-current="true"] {
+  border-color: #38bdf8;
+}
+
+[data-theme="dark"] .price-detail-wrap {
+  border-color: var(--line);
+}
+
+[data-theme="dark"] .specs tr {
+  border-color: var(--line);
+}
+
+/* Mobile Bottom Navigation Dark Mode */
+[data-theme="dark"] .mobile-bottom-nav {
+  background: var(--card);
+  border-top: 1px solid var(--line);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .mob-nav-item {
+  color: var(--ink2);
+}
+
+[data-theme="dark"] .mob-nav-item.active {
+  color: #38bdf8;
+}
+
+[data-theme="dark"] .mob-avatar-wrap {
+  background: var(--sea);
+  color: var(--ink);
+  border-color: var(--line);
+}
+
+/* Contact Page Dark Mode */
+[data-theme="dark"] .contact-card-item {
+  background: var(--card);
+  border-color: var(--line);
+}
+
+[data-theme="dark"] .contact-card-item:hover {
+  border-color: #38bdf8;
+  box-shadow: 0 8px 24px rgba(56, 189, 248, 0.12);
+}
+
+[data-theme="dark"] .contact-form-card {
+  background: var(--card);
+  border-color: var(--line);
+}
+
+[data-theme="dark"] .map-card-wrapper {
+  background: var(--card);
+  border-color: var(--line);
+}
+
+[data-theme="dark"] .map-card-topbar {
+  background: var(--card);
+  border-bottom: 1px solid var(--line);
+}
+
+[data-theme="dark"] .btn-route-link {
+  background: rgba(56, 189, 248, 0.12);
+  color: #38bdf8;
+}
+
+[data-theme="dark"] .btn-route-link:hover {
+  background: #0284c7;
+  color: #ffffff;
+}
+
+[data-theme="dark"] .btn-copy-email {
+  background: var(--card);
+  border-color: var(--line);
+  color: var(--ink);
+}
+
+/* Catalog Filter Sidebar Dark Mode */
+[data-theme="dark"] .price-input {
+  background: var(--card);
+  border-color: var(--line);
+  color: var(--ink);
+}
+
+[data-theme="dark"] .price-preset-chips .chip {
+  background: var(--card);
+  border-color: var(--line);
+  color: var(--ink2);
+}
+
+[data-theme="dark"] .price-preset-chips .chip.active,
+[data-theme="dark"] .price-preset-chips .chip:hover {
+  background: rgba(56, 189, 248, 0.15);
+  border-color: #38bdf8;
+  color: #38bdf8;
+}
+
+[data-theme="dark"] .btn-apply-price {
+  background: #0284c7;
+  color: #ffffff;
+}
+
 /* Medax Logo */
 .logo-link{display:inline-flex;align-items:center;text-decoration:none;transition:transform .2s ease}
 .logo-link:hover{transform:translateY(-1px)}
