@@ -260,6 +260,49 @@ export interface Translations {
   float_gmail_sub: string;
   float_map_btn: string;
   float_map_sub: string;
+
+  // Auth Modal
+  auth_login_title: string;
+  auth_register_title: string;
+  auth_sms_title: string;
+  auth_login_sub: string;
+  auth_register_sub: string;
+  auth_sms_sub: string;
+  auth_tab_pwd: string;
+  auth_tab_reg: string;
+  auth_phone_label: string;
+  auth_pwd_label: string;
+  auth_forgot_pwd: string;
+  auth_pwd_ph: string;
+  auth_btn_login: string;
+  auth_btn_logging: string;
+  auth_sms_login_btn: string;
+  auth_open_reg: string;
+  auth_reg_hint: string;
+  auth_btn_get_sms: string;
+  auth_btn_sending: string;
+  auth_has_account: string;
+  auth_enter_code: string;
+  auth_change_phone: string;
+  auth_otp_ph: string;
+  auth_name_label: string;
+  auth_name_ph: string;
+  auth_org_label: string;
+  auth_org_ph: string;
+  auth_new_pwd: string;
+  auth_min_chars: string;
+  auth_pwd_hint: string;
+  auth_confirm_pwd: string;
+  auth_confirm_pwd_ph: string;
+  auth_btn_create: string;
+  auth_resend: string;
+  auth_resend_btn: string;
+  auth_terms_note: string;
+  auth_back_to_pwd: string;
+  auth_new_pwd_opt: string;
+  auth_new_pwd_opt_ph: string;
+  auth_new_pwd_opt_hint: string;
+  auth_modal_close: string;
 }
 
 export const translations: Record<Lang, Translations> = {
@@ -503,6 +546,49 @@ export const translations: Record<Lang, Translations> = {
     float_gmail_sub: "info@medax.uz",
     float_map_btn: "Xaritadan manzilni ko'rish",
     float_map_sub: "Namangan, Beruniy ko'chasi, 2-uy",
+
+    // Auth Modal
+    auth_login_title: "Shaxsiy kabinetga kirish",
+    auth_register_title: "Yangi akkaunt ochish",
+    auth_sms_title: "SMS orqali kirish",
+    auth_login_sub: "Telefon raqamingiz va parolingiz orqali 1 soniyada kiring",
+    auth_register_sub: "Telefon raqamni SMS bilan tasdiqlab, kirish uchun parol belgilang",
+    auth_sms_sub: "Telefon raqamingizga kelgan 6 xonali kod orqali kiring",
+    auth_tab_pwd: "Parol bilan kirish",
+    auth_tab_reg: "Ro'yxatdan o'tish",
+    auth_phone_label: "Telefon raqamingiz",
+    auth_pwd_label: "Parolingiz",
+    auth_forgot_pwd: "Parolni unutdingizmi?",
+    auth_pwd_ph: "Parolingizni kiriting",
+    auth_btn_login: "Kabinetga kirish →",
+    auth_btn_logging: "Kirilmoqda…",
+    auth_sms_login_btn: "SMS kod orqali kirish",
+    auth_open_reg: "Yangi akkaunt ochish →",
+    auth_reg_hint: "Ushbu raqamga bir martalik 6 xonali tasdiqlash kodi yuboriladi",
+    auth_btn_get_sms: "SMS kodni olish →",
+    auth_btn_sending: "Yuborilmoqda…",
+    auth_has_account: "Allaqachon akkauntingiz bormi?",
+    auth_enter_code: "SMS kod:",
+    auth_change_phone: "Raqamni o'zgartirish",
+    auth_otp_ph: "6 xonali kod (masalan: 123456)",
+    auth_name_label: "Ism-familiyangiz",
+    auth_name_ph: "Masalan: Dr. Sardor",
+    auth_org_label: "Klinika / Tashkilot (ixtiyoriy)",
+    auth_org_ph: "Klinika yoki MCHJ",
+    auth_new_pwd: "Yangi parol belgilang",
+    auth_min_chars: "Kamida 6 ta belgi",
+    auth_pwd_hint: "Keyingi safar tizimga kirish uchun ushbu paroldan foydalanasiz",
+    auth_confirm_pwd: "Parolni qayta tering",
+    auth_confirm_pwd_ph: "Parolni tasdiqlang",
+    auth_btn_create: "Akkauntni yaratish va Kirish ✓",
+    auth_resend: "Qayta yuborish:",
+    auth_resend_btn: "Yangi kod yuborish",
+    auth_terms_note: "Tizimga kirish orqali siz Medax xizmat ko'rsatish shartlariga rozilik bildirasiz.",
+    auth_back_to_pwd: "← Parol orqali kirishga qaytish",
+    auth_new_pwd_opt: "Yangi parol (ixtiyoriy)",
+    auth_new_pwd_opt_ph: "Parolni yangilamoqchi bo'lsangiz yozing",
+    auth_new_pwd_opt_hint: "Agar parol kiritsangiz, kelgusida parol orqali kirishingiz mumkin bo'ladi",
+    auth_modal_close: "Yopish",
   },
   ru: {
     nav_catalog: "Каталог",
@@ -744,6 +830,49 @@ export const translations: Record<Lang, Translations> = {
     float_gmail_sub: "info@medax.uz",
     float_map_btn: "Смотреть адрес на карте",
     float_map_sub: "Наманган, ул. Беруни, 2",
+
+    // Auth Modal
+    auth_login_title: "Вход в личный кабинет",
+    auth_register_title: "Регистрация аккаунта",
+    auth_sms_title: "Вход через SMS",
+    auth_login_sub: "Войдите по номеру телефона и паролю за 1 секунду",
+    auth_register_sub: "Подтвердите номер через SMS и установите пароль для входа",
+    auth_sms_sub: "Войдите по 6-значному коду, отправленному на ваш телефон",
+    auth_tab_pwd: "Вход по паролю",
+    auth_tab_reg: "Регистрация",
+    auth_phone_label: "Номер телефона",
+    auth_pwd_label: "Ваш пароль",
+    auth_forgot_pwd: "Забыли пароль?",
+    auth_pwd_ph: "Введите ваш пароль",
+    auth_btn_login: "Войти в кабинет →",
+    auth_btn_logging: "Вход…",
+    auth_sms_login_btn: "Вход по SMS коду",
+    auth_open_reg: "Создать аккаунт →",
+    auth_reg_hint: "На этот номер будет отправлен 6-значный код подтверждения",
+    auth_btn_get_sms: "Получить SMS-код →",
+    auth_btn_sending: "Отправка…",
+    auth_has_account: "Уже есть аккаунт?",
+    auth_enter_code: "SMS код:",
+    auth_change_phone: "Изменить номер",
+    auth_otp_ph: "6-значный код (например: 123456)",
+    auth_name_label: "Имя и фамилия",
+    auth_name_ph: "Например: Доктор Сардор",
+    auth_org_label: "Клиника / Организация (необязательно)",
+    auth_org_ph: "Клиника или ООО",
+    auth_new_pwd: "Установите новый пароль",
+    auth_min_chars: "Минимум 6 символов",
+    auth_pwd_hint: "В следующий раз вы будете использовать этот пароль для входа",
+    auth_confirm_pwd: "Повторите пароль",
+    auth_confirm_pwd_ph: "Подтвердите пароль",
+    auth_btn_create: "Создать аккаунт и Войти ✓",
+    auth_resend: "Отправить повторно через:",
+    auth_resend_btn: "Отправить новый код",
+    auth_terms_note: "Входя в систему, вы соглашаетесь с условиями обслуживания Medax.",
+    auth_back_to_pwd: "← Вернуться ко входу по паролю",
+    auth_new_pwd_opt: "Новый пароль (необязательно)",
+    auth_new_pwd_opt_ph: "Введите, если хотите обновить пароль",
+    auth_new_pwd_opt_hint: "Если вы укажете пароль, в будущем сможете входить по нему",
+    auth_modal_close: "Закрыть",
   },
   en: {
     nav_catalog: "Catalog",
@@ -985,6 +1114,49 @@ export const translations: Record<Lang, Translations> = {
     float_gmail_sub: "info@medax.uz",
     float_map_btn: "View Office Location",
     float_map_sub: "Namangan, Beruniy St., 2",
+
+    // Auth Modal
+    auth_login_title: "Sign in to Account",
+    auth_register_title: "Create an Account",
+    auth_sms_title: "Sign in via SMS",
+    auth_login_sub: "Sign in with your phone and password in 1 second",
+    auth_register_sub: "Verify your phone via SMS and set a password",
+    auth_sms_sub: "Sign in using the 6-digit code sent to your phone",
+    auth_tab_pwd: "Password Login",
+    auth_tab_reg: "Registration",
+    auth_phone_label: "Phone number",
+    auth_pwd_label: "Password",
+    auth_forgot_pwd: "Forgot password?",
+    auth_pwd_ph: "Enter your password",
+    auth_btn_login: "Sign In →",
+    auth_btn_logging: "Signing in…",
+    auth_sms_login_btn: "Sign in with SMS code",
+    auth_open_reg: "Create new account →",
+    auth_reg_hint: "A 6-digit confirmation code will be sent to this number",
+    auth_btn_get_sms: "Get SMS Code →",
+    auth_btn_sending: "Sending…",
+    auth_has_account: "Already have an account?",
+    auth_enter_code: "SMS code:",
+    auth_change_phone: "Change number",
+    auth_otp_ph: "6-digit code (e.g. 123456)",
+    auth_name_label: "Full Name",
+    auth_name_ph: "E.g.: Dr. Sardor",
+    auth_org_label: "Clinic / Organization (optional)",
+    auth_org_ph: "Clinic or LLC",
+    auth_new_pwd: "Set a new password",
+    auth_min_chars: "At least 6 characters",
+    auth_pwd_hint: "You will use this password to sign in next time",
+    auth_confirm_pwd: "Confirm password",
+    auth_confirm_pwd_ph: "Confirm password",
+    auth_btn_create: "Create Account & Sign In ✓",
+    auth_resend: "Resend code in:",
+    auth_resend_btn: "Send new code",
+    auth_terms_note: "By signing in, you agree to the Medax Terms of Service.",
+    auth_back_to_pwd: "← Back to password login",
+    auth_new_pwd_opt: "New password (optional)",
+    auth_new_pwd_opt_ph: "Enter if you want to update password",
+    auth_new_pwd_opt_hint: "If you set a password, you can use it to sign in later",
+    auth_modal_close: "Close",
   },
 };
 

@@ -2,11 +2,13 @@ import { FormEvent, useState } from "react";
 import { useCustomerAuth } from "../customerAuth";
 import { MedaxLogo } from "./MedaxLogo";
 import { TurnstileWidget } from "./TurnstileWidget";
+import { useI18n } from "../context/I18nContext";
 
 type AuthMode = "password_login" | "register" | "sms_login";
 
 export function AuthModal() {
   const { isAuthModalOpen, closeAuthModal, sendOtp, verifyOtp, loginWithPassword } = useCustomerAuth();
+  const { t, lang } = useI18n();
 
   // Mode: "password_login" (default) | "register" | "sms_login"
   const [mode, setMode] = useState<AuthMode>("password_login");
@@ -51,14 +53,27 @@ export function AuthModal() {
     e.preventDefault();
     setError("");
     if (!password) {
-      setError("Iltimos, parolingizni kiriting.");
+      setError(
+        lang === "ru"
+          ? "Пожалуйста, введите ваш пароль."
+          : lang === "en"
+          ? "Please enter your password."
+          : "Iltimos, parolingizni kiriting."
+      );
       return;
     }
     setLoading(true);
     try {
       await loginWithPassword(phone, password);
     } catch (err: any) {
-      setError(err.message || "Kirishda xatolik yuz berdi");
+      setError(
+        err.message ||
+          (lang === "ru"
+            ? "Ошибка при входе"
+            : lang === "en"
+            ? "Sign in error"
+            : "Kirishda xatolik yuz berdi")
+      );
     } finally {
       setLoading(false);
     }
@@ -84,7 +99,14 @@ export function AuthModal() {
         });
       }, 1000);
     } catch (err: any) {
-      setError(err.message || "SMS kod yuborishda xatolik");
+      setError(
+        err.message ||
+          (lang === "ru"
+            ? "Ошибка при отправке SMS"
+            : lang === "en"
+            ? "Error sending SMS code"
+            : "SMS kod yuborishda xatolik")
+      );
     } finally {
       setLoading(false);
     }
@@ -96,11 +118,23 @@ export function AuthModal() {
     setError("");
 
     if (password.length < 6) {
-      setError("Parol kamida 6 ta belgidan iborat bo'lishi kerak.");
+      setError(
+        lang === "ru"
+          ? "Пароль должен содержать минимум 6 символов."
+          : lang === "en"
+          ? "Password must be at least 6 characters."
+          : "Parol kamida 6 ta belgidan iborat bo'lishi kerak."
+      );
       return;
     }
     if (password !== confirmPassword) {
-      setError("Parollar bir-biriga mos kelmadi.");
+      setError(
+        lang === "ru"
+          ? "Пароли не совпадают."
+          : lang === "en"
+          ? "Passwords do not match."
+          : "Parollar bir-biriga mos kelmadi."
+      );
       return;
     }
 
@@ -114,7 +148,14 @@ export function AuthModal() {
         password,
       });
     } catch (err: any) {
-      setError(err.message || "Kod noto'g'ri");
+      setError(
+        err.message ||
+          (lang === "ru"
+            ? "Неверный код"
+            : lang === "en"
+            ? "Invalid code"
+            : "Kod noto'g'ri")
+      );
     } finally {
       setLoading(false);
     }
@@ -132,7 +173,14 @@ export function AuthModal() {
         password: password ? password : undefined,
       });
     } catch (err: any) {
-      setError(err.message || "Kod noto'g'ri");
+      setError(
+        err.message ||
+          (lang === "ru"
+            ? "Неверный код"
+            : lang === "en"
+            ? "Invalid code"
+            : "Kod noto'g'ri")
+      );
     } finally {
       setLoading(false);
     }
@@ -142,7 +190,7 @@ export function AuthModal() {
     <div className="modal-backdrop" onClick={closeAuthModal} role="dialog" aria-modal="true">
       <div className="auth-modal-card" onClick={(e) => e.stopPropagation()}>
         {/* Yopish tugmasi */}
-        <button className="modal-close-btn" onClick={closeAuthModal} aria-label="Yopish">
+        <button className="modal-close-btn" onClick={closeAuthModal} aria-label={t("auth_modal_close")}>
           ✕
         </button>
 
@@ -150,14 +198,14 @@ export function AuthModal() {
         <div className="auth-header">
           <MedaxLogo size="sm" />
           <h2>
-            {mode === "password_login" && "Shaxsiy kabinetga kirish"}
-            {mode === "register" && "Yangi akkaunt ochish"}
-            {mode === "sms_login" && "SMS orqali kirish"}
+            {mode === "password_login" && t("auth_login_title")}
+            {mode === "register" && t("auth_register_title")}
+            {mode === "sms_login" && t("auth_sms_title")}
           </h2>
           <p className="auth-sub">
-            {mode === "password_login" && "Telefon raqamingiz va parolingiz orqali 1 soniyada kiring"}
-            {mode === "register" && "Telefon raqamni SMS bilan tasdiqlab, kirish uchun parol belgilang"}
-            {mode === "sms_login" && "Telefon raqamingizga kelgan 6 xonali kod orqali kiring"}
+            {mode === "password_login" && t("auth_login_sub")}
+            {mode === "register" && t("auth_register_sub")}
+            {mode === "sms_login" && t("auth_sms_sub")}
           </p>
         </div>
 
@@ -172,7 +220,7 @@ export function AuthModal() {
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
               <path d="M7 11V7a5 5 0 0 1 10 0v4" />
             </svg>
-            <span>Parol bilan kirish</span>
+            <span>{t("auth_tab_pwd")}</span>
           </button>
           <button
             type="button"
@@ -185,7 +233,7 @@ export function AuthModal() {
               <line x1="19" y1="8" x2="19" y2="14" />
               <line x1="22" y1="11" x2="16" y2="11" />
             </svg>
-            <span>Ro'yxatdan o'tish</span>
+            <span>{t("auth_tab_reg")}</span>
           </button>
         </div>
 
@@ -198,7 +246,7 @@ export function AuthModal() {
           {mode === "password_login" && (
             <form onSubmit={handlePasswordLogin}>
               <div className="field">
-                <label htmlFor="auth-login-phone">Telefon raqamingiz</label>
+                <label htmlFor="auth-login-phone">{t("auth_phone_label")}</label>
                 <input
                   id="auth-login-phone"
                   type="tel"
@@ -212,14 +260,14 @@ export function AuthModal() {
 
               <div className="field">
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <label htmlFor="auth-login-pwd">Parolingiz</label>
+                  <label htmlFor="auth-login-pwd">{t("auth_pwd_label")}</label>
                   <button
                     type="button"
                     className="link-btn"
                     style={{ fontSize: 12.5 }}
                     onClick={() => switchMode("sms_login")}
                   >
-                    Parolni unutdingizmi?
+                    {t("auth_forgot_pwd")}
                   </button>
                 </div>
                 <div className="pwd-input-wrap">
@@ -228,14 +276,14 @@ export function AuthModal() {
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Parolingizni kiriting"
+                    placeholder={t("auth_pwd_ph")}
                     required
                   />
                   <button
                     type="button"
                     className="pwd-toggle-btn"
                     onClick={() => setShowPassword((p) => !p)}
-                    title={showPassword ? "Parolni yashirish" : "Parolni ko'rsatish"}
+                    title={showPassword ? "Hide" : "Show"}
                   >
                     {showPassword ? "🙈" : "👁"}
                   </button>
@@ -243,7 +291,7 @@ export function AuthModal() {
               </div>
 
               <button className="btn btn-primary-sheen w-full" type="submit" disabled={loading}>
-                {loading ? "Kirilmoqda…" : "Kabinetga kirish →"}
+                {loading ? t("auth_btn_logging") : t("auth_btn_login")}
               </button>
 
               <div className="auth-alt-actions">
@@ -255,7 +303,7 @@ export function AuthModal() {
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                   </svg>
-                  <span>SMS kod orqali kirish</span>
+                  <span>{t("auth_sms_login_btn")}</span>
                 </button>
                 <span className="alt-sep">•</span>
                 <button
@@ -263,7 +311,7 @@ export function AuthModal() {
                   className="link-btn"
                   onClick={() => switchMode("register")}
                 >
-                  Yangi akkaunt ochish →
+                  {t("auth_open_reg")}
                 </button>
               </div>
             </form>
@@ -275,7 +323,7 @@ export function AuthModal() {
           {mode === "register" && !otpSent && (
             <form onSubmit={handleSendOtp}>
               <div className="field">
-                <label htmlFor="auth-reg-phone">Telefon raqamingiz</label>
+                <label htmlFor="auth-reg-phone">{t("auth_phone_label")}</label>
                 <input
                   id="auth-reg-phone"
                   type="tel"
@@ -286,24 +334,24 @@ export function AuthModal() {
                   autoFocus
                 />
                 <small className="field-hint">
-                  Ushbu raqamga bir martalik 6 xonali tasdiqlash kodi yuboriladi
+                  {t("auth_reg_hint")}
                 </small>
               </div>
 
               <TurnstileWidget onVerify={(t) => setCaptchaToken(t)} onExpire={() => setCaptchaToken("")} />
 
               <button className="btn btn-primary-sheen w-full" type="submit" disabled={loading}>
-                {loading ? "Yuborilmoqda…" : "SMS kodni olish →"}
+                {loading ? t("auth_btn_sending") : t("auth_btn_get_sms")}
               </button>
 
               <div className="auth-alt-actions" style={{ justifyContent: "center" }}>
-                <span>Allaqachon akkauntingiz bormi?</span>
+                <span>{t("auth_has_account")}</span>
                 <button
                   type="button"
                   className="link-btn"
                   onClick={() => switchMode("password_login")}
                 >
-                  Kirish →
+                  {t("btn_login")} →
                 </button>
               </div>
             </form>
@@ -313,15 +361,15 @@ export function AuthModal() {
             <form onSubmit={handleRegisterWithOtp}>
               {devCode && (
                 <div className="ok dev-code-badge">
-                  <span>Sinov kodi (Dev):</span> <b>{devCode}</b>
+                  <span>Dev:</span> <b>{devCode}</b>
                 </div>
               )}
 
               <div className="field">
                 <div className="otp-sent-info">
-                  <span>SMS kod: <b>{phone}</b></span>
+                  <span>{t("auth_enter_code")} <b>{phone}</b></span>
                   <button type="button" className="link-btn" onClick={resetFields}>
-                    Raqamni o'zgartirish
+                    {t("auth_change_phone")}
                   </button>
                 </div>
                 <input
@@ -330,7 +378,7 @@ export function AuthModal() {
                   maxLength={6}
                   value={otpCode}
                   onChange={(e) => setOtpCode(e.target.value)}
-                  placeholder="6 xonali kod (masalan: 123456)"
+                  placeholder={t("auth_otp_ph")}
                   className="otp-input"
                   required
                   autoFocus
@@ -339,37 +387,37 @@ export function AuthModal() {
 
               <div className="formgrid">
                 <div className="field">
-                  <label htmlFor="auth-p-name">Ism-familiyangiz</label>
+                  <label htmlFor="auth-p-name">{t("auth_name_label")}</label>
                   <input
                     id="auth-p-name"
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="Masalan: Dr. Sardor"
+                    placeholder={t("auth_name_ph")}
                     required
                   />
                 </div>
                 <div className="field">
-                  <label htmlFor="auth-p-org">Klinika / Tashkilot (ixtiyoriy)</label>
+                  <label htmlFor="auth-p-org">{t("auth_org_label")}</label>
                   <input
                     id="auth-p-org"
                     type="text"
                     value={organization}
                     onChange={(e) => setOrganization(e.target.value)}
-                    placeholder="Klinika yoki MCHJ"
+                    placeholder={t("auth_org_ph")}
                   />
                 </div>
               </div>
 
               <div className="field">
-                <label htmlFor="auth-reg-pwd">Yangi parol belgilang</label>
+                <label htmlFor="auth-reg-pwd">{t("auth_new_pwd")}</label>
                 <div className="pwd-input-wrap">
                   <input
                     id="auth-reg-pwd"
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Kamida 6 ta belgi"
+                    placeholder={t("auth_min_chars")}
                     required
                   />
                   <button
@@ -381,18 +429,18 @@ export function AuthModal() {
                   </button>
                 </div>
                 <small className="field-hint">
-                  Keyingi safar tizimga kirish uchun ushbu paroldan foydalanasiz
+                  {t("auth_pwd_hint")}
                 </small>
               </div>
 
               <div className="field">
-                <label htmlFor="auth-reg-pwd-conf">Parolni qayta tering</label>
+                <label htmlFor="auth-reg-pwd-conf">{t("auth_confirm_pwd")}</label>
                 <input
                   id="auth-reg-pwd-conf"
                   type={showPassword ? "text" : "password"}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Parolni tasdiqlang"
+                  placeholder={t("auth_confirm_pwd_ph")}
                   required
                 />
               </div>
@@ -402,15 +450,15 @@ export function AuthModal() {
                 type="submit"
                 disabled={loading || otpCode.length < 6 || password.length < 6}
               >
-                {loading ? "Yaratilmoqda…" : "Akkauntni yaratish va Kirish ✓"}
+                {loading ? t("auth_btn_sending") : t("auth_btn_create")}
               </button>
 
               <div className="resend-wrap">
                 {countdown > 0 ? (
-                  <span className="muted">Qayta yuborish: {countdown}s</span>
+                  <span className="muted">{t("auth_resend")} {countdown}s</span>
                 ) : (
                   <button type="button" className="link-btn" onClick={() => handleSendOtp()} disabled={loading}>
-                    Yangi kod yuborish
+                    {t("auth_resend_btn")}
                   </button>
                 )}
               </div>
@@ -423,7 +471,7 @@ export function AuthModal() {
           {mode === "sms_login" && !otpSent && (
             <form onSubmit={handleSendOtp}>
               <div className="field">
-                <label htmlFor="auth-sms-phone">Telefon raqamingiz</label>
+                <label htmlFor="auth-sms-phone">{t("auth_phone_label")}</label>
                 <input
                   id="auth-sms-phone"
                   type="tel"
@@ -434,14 +482,14 @@ export function AuthModal() {
                   autoFocus
                 />
                 <small className="field-hint">
-                  Kodni qabul qilib, parolsiz kirishingiz yoki yangi parol o'rnatishingiz mumkin
+                  {t("auth_reg_hint")}
                 </small>
               </div>
 
               <TurnstileWidget onVerify={(t) => setCaptchaToken(t)} onExpire={() => setCaptchaToken("")} />
 
               <button className="btn btn-primary-sheen w-full" type="submit" disabled={loading}>
-                {loading ? "Yuborilmoqda…" : "SMS kodni olish →"}
+                {loading ? t("auth_btn_sending") : t("auth_btn_get_sms")}
               </button>
 
               <div className="auth-alt-actions" style={{ justifyContent: "center" }}>
@@ -450,7 +498,7 @@ export function AuthModal() {
                   className="link-btn"
                   onClick={() => switchMode("password_login")}
                 >
-                  ← Parol orqali kirishga qaytish
+                  {t("auth_back_to_pwd")}
                 </button>
               </div>
             </form>
@@ -460,15 +508,15 @@ export function AuthModal() {
             <form onSubmit={handleSmsOnlyLogin}>
               {devCode && (
                 <div className="ok dev-code-badge">
-                  <span>Sinov kodi (Dev):</span> <b>{devCode}</b>
+                  <span>Dev:</span> <b>{devCode}</b>
                 </div>
               )}
 
               <div className="field">
                 <div className="otp-sent-info">
-                  <span>Kodni kiriting: <b>{phone}</b></span>
+                  <span>{t("auth_enter_code")} <b>{phone}</b></span>
                   <button type="button" className="link-btn" onClick={resetFields}>
-                    Raqamni o'zgartirish
+                    {t("auth_change_phone")}
                   </button>
                 </div>
                 <input
@@ -477,7 +525,7 @@ export function AuthModal() {
                   maxLength={6}
                   value={otpCode}
                   onChange={(e) => setOtpCode(e.target.value)}
-                  placeholder="6 xonali kod"
+                  placeholder={t("auth_otp_ph")}
                   className="otp-input"
                   required
                   autoFocus
@@ -485,14 +533,14 @@ export function AuthModal() {
               </div>
 
               <div className="field">
-                <label htmlFor="auth-new-pwd-optional">Yangi parol (ixtiyoriy)</label>
+                <label htmlFor="auth-new-pwd-optional">{t("auth_new_pwd_opt")}</label>
                 <div className="pwd-input-wrap">
                   <input
                     id="auth-new-pwd-optional"
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Parolni yangilamoqchi bo'lsangiz yozing"
+                    placeholder={t("auth_new_pwd_opt_ph")}
                   />
                   <button
                     type="button"
@@ -503,7 +551,7 @@ export function AuthModal() {
                   </button>
                 </div>
                 <small className="field-hint">
-                  Agar parol kiritsangiz, kelgusida parol orqali kirishingiz mumkin bo'ladi
+                  {t("auth_new_pwd_opt_hint")}
                 </small>
               </div>
 
@@ -512,15 +560,15 @@ export function AuthModal() {
                 type="submit"
                 disabled={loading || otpCode.length < 6}
               >
-                {loading ? "Kirilmoqda…" : "Kabinetga kirish ✓"}
+                {loading ? t("auth_btn_logging") : t("auth_btn_login")}
               </button>
 
               <div className="resend-wrap">
                 {countdown > 0 ? (
-                  <span className="muted">Qayta yuborish: {countdown}s</span>
+                  <span className="muted">{t("auth_resend")} {countdown}s</span>
                 ) : (
                   <button type="button" className="link-btn" onClick={() => handleSendOtp()} disabled={loading}>
-                    Yangi kod yuborish
+                    {t("auth_resend_btn")}
                   </button>
                 )}
               </div>
@@ -529,7 +577,7 @@ export function AuthModal() {
         </div>
 
         <div className="auth-footer-note">
-          Tizimga kirish orqali siz Medax xizmat ko'rsatish shartlariga rozilik bildirasiz.
+          {t("auth_terms_note")}
         </div>
       </div>
     </div>
