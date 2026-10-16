@@ -122,7 +122,10 @@ export async function checkOrderLimits(
     include: { items: true },
   });
   for (const o of recent) {
-    const k = [...o.items].sort((a, b) => a.productId - b.productId).map((i) => `${i.productId}x${i.quantity}`).join(",");
+    const k = [...o.items]
+      .sort((a, b) => (a.productId ?? 0) - (b.productId ?? 0))
+      .map((i) => `${i.productId ?? 0}x${i.quantity}`)
+      .join(",");
     if (k === key) throw new HttpError(409, "Bu buyurtma allaqachon yuborilgan.");
   }
 }

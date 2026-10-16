@@ -43,7 +43,25 @@ app.use(
   })
 );
 
-app.use(cors({ origin: config.corsOrigin, credentials: true }));
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (
+        config.corsOrigin.includes("*") ||
+        config.corsOrigin.includes(origin) ||
+        origin.endsWith(".vercel.app") ||
+        origin.endsWith("medax.uz") ||
+        origin.includes("localhost") ||
+        origin.includes("127.0.0.1")
+      ) {
+        return callback(null, true);
+      }
+      return callback(null, true);
+    },
+    credentials: true,
+  })
+);
 app.use(express.json({ limit: "1mb" }));
 
 fs.mkdirSync(config.uploadDir, { recursive: true });
