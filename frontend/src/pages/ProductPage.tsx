@@ -46,7 +46,28 @@ export default function ProductPage() {
 
       <div className="pd">
         <div className="gal">
-          <div className="main">{img ? <img src={img.url} alt={p.name} /> : <DeviceIcon />}</div>
+          <div className="main">
+            {img ? (
+              <img src={img.url} alt={p.name} />
+            ) : (
+              <img
+                src={
+                  p.category?.slug === "reanimatsiya-va-anesteziologiya"
+                    ? "/uploads/products/medical-icu.jpg"
+                    : p.category?.slug === "ultratovush-diagnostikasi"
+                    ? "/uploads/products/medical-diag.jpg"
+                    : p.category?.slug === "jarrohlik"
+                    ? "/uploads/products/medical-surgery.jpg"
+                    : p.category?.slug === "tibbiy-mebel"
+                    ? "/uploads/products/medical-bed.jpg"
+                    : p.category?.slug === "operatsion-raqamli-integratsiya"
+                    ? "/uploads/products/medical-recorder.jpg"
+                    : "/uploads/products/medical-diag.jpg"
+                }
+                alt={p.name}
+              />
+            )}
+          </div>
           {p.images.length > 1 && (
             <div className="thumbs">
               {p.images.map((im, i) => (

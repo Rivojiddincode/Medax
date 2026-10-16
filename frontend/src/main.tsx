@@ -15,10 +15,19 @@ createRoot(document.getElementById("root")!).render(
   </StrictMode>
 );
 
-// PWA Service Worker ro'yxatdan o'tkazish
-if ("serviceWorker" in navigator && import.meta.env.PROD) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js").catch(() => {});
+// Eski PWA Service Worker keshini tozalash va o'chirish (stale cache muammosini oldini olish)
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    for (const r of registrations) {
+      r.unregister();
+    }
   });
+  if ("caches" in window) {
+    caches.keys().then((keys) => {
+      for (const k of keys) {
+        caches.delete(k);
+      }
+    });
+  }
 }
 

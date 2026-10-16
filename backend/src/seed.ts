@@ -449,7 +449,7 @@ async function main() {
 
   for (const item of items) {
     const slug = slugify(item.name);
-    await prisma.product.upsert({
+    const prod = await prisma.product.upsert({
       where: { slug },
       create: {
         name: item.name,
@@ -478,6 +478,26 @@ async function main() {
         specs: item.specs,
       },
     });
+
+    const imgMap: Record<string, string> = {
+      "Reanimatsiya va anesteziologiya": "/uploads/products/medical-icu.jpg",
+      "Ultratovush diagnostikasi": "/uploads/products/medical-diag.jpg",
+      "Jarrohlik": "/uploads/products/medical-surgery.jpg",
+      "Tibbiy mebel": "/uploads/products/medical-bed.jpg",
+      "Operatsion raqamli integratsiya": "/uploads/products/medical-recorder.jpg",
+    };
+    const imgUrl = imgMap[item.cat] || "/uploads/products/medical-diag.jpg";
+    const existingImg = await prisma.productImage.findFirst({ where: { productId: prod.id } });
+    if (!existingImg) {
+      await prisma.productImage.create({
+        data: {
+          productId: prod.id,
+          url: imgUrl,
+          thumbUrl: imgUrl,
+          sortOrder: 0,
+        },
+      });
+    }
   }
 
   console.log(`Katalog muvaffaqiyatli to'ldirildi: ${items.length} ta tibbiy uskuna mavjud.`);
