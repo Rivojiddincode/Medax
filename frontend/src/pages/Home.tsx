@@ -408,45 +408,27 @@ export default function Home() {
           </div>
 
           <div className="brands-clean-grid stagger-items">
-            {((data?.brands && data.brands.length > 0) ? data.brands : MOCK_BRANDS).map((b) => {
-              const logoMap: Record<string, string> = {
-                dirui: "/brands/dirui.png",
-                rayto: "/brands/rayto.png",
-                chison: "/brands/chison.png",
-                human: "/brands/human.png",
-                cypress: "/brands/cypress.png",
-                mindray: "/brands/mindray.png",
-                drager: "/brands/drager.svg",
-                philips: "/brands/philips.svg",
-                siemens: "/brands/siemens.svg",
-                "ge-healthcare": "/brands/ge-healthcare.svg",
-                ge: "/brands/ge-healthcare.svg",
-                samsung: "/brands/samsung.svg",
-                "samsung-medison": "/brands/samsung.svg",
-                olympus: "/brands/olympus.svg",
-                "nihon-kohden": "/brands/nihon-kohden.svg",
-              };
-              const logoSrc = logoMap[b.slug];
-
-              return (
-                <Link
-                  key={b.id}
-                  className="brand-clean-card reveal"
-                  to={`/catalog?brand=${b.slug}`}
-                  title={`${b.name} (${b.country || ""})`}
-                >
-                  <div className="brand-logo-box">
-                    {logoSrc ? (
-                      <img src={logoSrc} alt={b.name} loading="lazy" />
-                    ) : (
-                      <span className="brand-fallback-badge">{b.name}</span>
-                    )}
-                  </div>
-                  <strong className="brand-clean-name">{b.name}</strong>
-                  {b.country && <span className="brand-clean-country">{b.country}</span>}
-                </Link>
-              );
-            })}
+            {[
+              { id: 1, name: "DIRUI", slug: "dirui", country: "Xitoy", logo: "/brands/dirui.png" },
+              { id: 2, name: "Rayto", slug: "rayto", country: "Xitoy", logo: "/brands/rayto.png" },
+              { id: 3, name: "CHISON", slug: "chison", country: "Xitoy", logo: "/brands/chison.png" },
+              { id: 4, name: "Human Diagnostics", slug: "human", country: "Germaniya", logo: "/brands/human.png" },
+              { id: 5, name: "CYPRESS DIAGNOSTICS", slug: "cypress", country: "Belgiya", logo: "/brands/cypress.png" },
+              { id: 6, name: "Mindray", slug: "mindray", country: "Xitoy", logo: "/brands/mindray.png" },
+            ].map((b) => (
+              <Link
+                key={b.id}
+                className="brand-clean-card reveal"
+                to={`/catalog?brand=${b.slug}`}
+                title={`${b.name} (${b.country})`}
+              >
+                <div className="brand-logo-box">
+                  <img src={b.logo} alt={b.name} loading="lazy" />
+                </div>
+                <strong className="brand-clean-name">{b.name}</strong>
+                <span className="brand-clean-country">{b.country}</span>
+              </Link>
+            ))}
           </div>
         </div>
       </section>

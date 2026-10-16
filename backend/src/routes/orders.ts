@@ -18,6 +18,7 @@ import {
 } from "../antispam";
 import { optionalCustomerAuth } from "./customer";
 import { getClientIp } from "../ip";
+import { createInpayPayment, getInpayTransactionStatus } from "../inpay";
 
 export const ordersRouter = Router();
 
@@ -176,6 +177,31 @@ ordersRouter.post("/", orderIpLimiter, optionalCustomerAuth, async (req, res) =>
 
   const orderCode = "MDX-" + crypto.randomBytes(3).toString("hex").toUpperCase();
 
+  let payUrl: string | undefined;
+  let inpayOrderId: string | undefined;
+
+  if (body.paymentMethod === "inpay") {
+    if (totalAmount < 1000) {
+      throw new HttpError(400, "inPAY orqali to'lash uchun buyurtma summasi kamida 1 000 so'm bo'lishi kerak.");
+    }
+    if (!config.inpay.merchantId || !config.inpay.merchantToken) {
+      throw new HttpError(503, "inPAY to'lov tizimi sozlanmagan. Iltimos, boshqa to'lov usulini tanlang yoki do'kon bilan bog'laning.");
+    }
+    try {
+      const payment = await createInpayPayment({
+        amount: totalAmount,
+        description: `Medax buyurtma #${orderCode}`,
+        phone,
+        clientIp: ip || undefined,
+      });
+      payUrl = payment.payUrl;
+      inpayOrderId = payment.orderId;
+    } catch (err: any) {
+      console.error("inPAY yaratishda xatolik:", err);
+      throw new HttpError(502, err.message || "inPAY to'lov hisobini shakllantirishda xatolik yuz berdi.");
+    }
+  }
+
   // ATOMAR TRANZAKSIYA: Limit tekshirish, OTP sarflash va Buyurtma yaratish
   await prisma.$transaction(async (tx) => {
     // 1. Atomar limit tekshiruvi
@@ -219,6 +245,9 @@ ordersRouter.post("/", orderIpLimiter, optionalCustomerAuth, async (req, res) =>
         ip,
         flags,
         customerId,
+        totalAmount,
+        inpayOrderId,
+        isPaid: false,
         items: {
           create: items.map((i) => ({
             productId: i.productId,
@@ -230,5 +259,98 @@ ordersRouter.post("/", orderIpLimiter, optionalCustomerAuth, async (req, res) =>
     });
   });
 
-  res.status(201).json({ ok: true, code: orderCode });
+  res.status(201).json({ ok: true, code: orderCode, payUrl });
+});
+
+// inPAY Webhook bildirishnomasi
+ordersRouter.post("/inpay/callback", async (req, res) => {
+  try {
+    const { order_id, status, transaction_id, amount } = req.body || {};
+    console.log("[inPAY Webhook]", { order_id, status, transaction_id, amount });
+
+    if (!order_id) {
+      return res.status(200).json({ ok: false, message: "order_id topilmadi" });
+    }
+
+    const order = await prisma.order.findFirst({
+      where: { inpayOrderId: String(order_id) },
+    });
+
+    if (!order) {
+      console.warn(`[inPAY Webhook] Buyurtma topilmadi: inpayOrderId=${order_id}`);
+      return res.status(200).json({ ok: true, message: "Buyurtma topilmadi" });
+    }
+
+    if (status === "success") {
+      if (!order.isPaid) {
+        await prisma.order.update({
+          where: { id: order.id },
+          data: {
+            status: "CONFIRMED",
+            isPaid: true,
+            paidAt: new Date(),
+            inpayTransId: transaction_id ? Number(transaction_id) : undefined,
+          },
+        });
+        console.log(`[inPAY Webhook] Buyurtma #${order.code} to'landi.`);
+      }
+    } else if (status === "failed" || status === "cancelled") {
+      if (!order.isPaid) {
+        await prisma.order.update({
+          where: { id: order.id },
+          data: {
+            status: "CANCELED",
+            managerNote: order.managerNote
+              ? `${order.managerNote} | inPAY: to'lov bekor qilindi (${status})`
+              : `inPAY: to'lov bekor qilindi (${status})`,
+          },
+        });
+      }
+    }
+
+    return res.status(200).json({ ok: true });
+  } catch (err: any) {
+    console.error("[inPAY Webhook Error]:", err);
+    return res.status(200).json({ ok: false, error: err?.message || "Server xatosi" });
+  }
+});
+
+// To'lov holatini tekshirish
+ordersRouter.get("/check-payment/:code", async (req, res) => {
+  const { code } = req.params;
+  const order = await prisma.order.findUnique({
+    where: { code },
+    select: {
+      code: true,
+      status: true,
+      isPaid: true,
+      paidAt: true,
+      inpayOrderId: true,
+      totalAmount: true,
+    },
+  });
+
+  if (!order) throw new HttpError(404, "Buyurtma topilmadi");
+
+  // Agar hali to'lanmagan bo'lsa va inpayOrderId bo'lsa, inPAY dan so'rab tekshiramiz
+  if (!order.isPaid && order.inpayOrderId) {
+    try {
+      const statusData = (await getInpayTransactionStatus(order.inpayOrderId)) as any;
+      if (statusData && statusData.status === "success") {
+        await prisma.order.update({
+          where: { code },
+          data: {
+            status: "CONFIRMED",
+            isPaid: true,
+            paidAt: new Date(),
+          },
+        });
+        return res.json({ ok: true, isPaid: true, status: "CONFIRMED" });
+      }
+    } catch (e) {
+      // e'tiborsiz qoldiramiz
+    }
+  }
+
+  res.json({ ok: true, isPaid: order.isPaid, status: order.status });
 });

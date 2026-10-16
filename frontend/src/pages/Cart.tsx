@@ -30,7 +30,7 @@ export default function Cart() {
   // Delivery & payment details
   const [organization, setOrganization] = useState("");
   const [deliveryAddress, setDeliveryAddress] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("bank_transfer");
+  const [paymentMethod, setPaymentMethod] = useState<"inpay" | "cash">("inpay");
   const [comment, setComment] = useState("");
   const [website, setWebsite] = useState(""); // honeypot
 
@@ -152,14 +152,14 @@ export default function Cart() {
       const authToken = token || localStorage.getItem(CUSTOMER_TOKEN_KEY);
       if (authToken) headers["Authorization"] = `Bearer ${authToken}`;
 
-      const res = await api<{ code: string }>("/orders", {
+      const res = await api<{ code: string; payUrl?: string }>("/orders", {
         headers,
         json: {
           name: name.trim(),
           phone: cleanPhone,
           organization: organization.trim(),
           deliveryAddress: "Do'kondan olib ketish (Namangan sh., Ozod MFY, Beruniy 2-uy)",
-          paymentMethod: "Do'konda to'lash (Olib ketishda)",
+          paymentMethod: paymentMethod === "inpay" ? "inpay" : "Do'konda to'lash (Olib ketishda)",
           comment: comment.trim(),
           website, // honeypot
           elapsedMs: Date.now() - startedAt.current,
@@ -171,6 +171,13 @@ export default function Cart() {
       setOrderCode(res.code);
       cart.clear();
       refreshCustomer();
+
+      if (res.payUrl) {
+        // inPAY to'lov sahifasiga yo'naltirish
+        window.location.href = res.payUrl;
+        return;
+      }
+
       setStage("done");
     } catch (err) {
       setError((err as ApiError).message || "Buyurtmani rasmiylashtirishda xatolik yuz berdi");
@@ -653,27 +660,89 @@ export default function Cart() {
                   <input type="text" tabIndex={-1} autoComplete="off" value={website} onChange={(e) => setWebsite(e.target.value)} />
                 </div>
 
-                <h3 className="section-subhead" style={{ marginTop: 24 }}>3. To'lov tartibi</h3>
-                <div
-                  style={{
-                    background: "var(--card, #fff)",
-                    border: "1.5px solid var(--line)",
-                    borderRadius: 16,
-                    padding: "18px 20px",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 16,
-                  }}
-                >
-                  <span style={{ fontSize: 32 }}>🏪</span>
-                  <div>
-                    <strong style={{ fontSize: 16, display: "block", color: "var(--ink)" }}>
-                      Do'konda to'lash (Olib ketish paytida)
-                    </strong>
-                    <span style={{ fontSize: 13, color: "var(--ink2)" }}>
-                      Uskunani ko'rib, tekshirib qabul qilgach to'laysiz (Naqd, korporativ karta/terminal yoki bank hisob-faktura orqali).
-                    </span>
-                  </div>
+                <h3 className="section-subhead" style={{ marginTop: 24 }}>3. To'lov usulini tanlang</h3>
+                <div style={{ display: "grid", gap: 12 }}>
+                  {/* inPAY option */}
+                  <label
+                    style={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: 14,
+                      padding: "16px 18px",
+                      borderRadius: 14,
+                      border: paymentMethod === "inpay" ? "2px solid #0284c7" : "1.5px solid var(--line)",
+                      background: paymentMethod === "inpay" ? "rgba(2, 132, 199, 0.05)" : "var(--card, #fff)",
+                      cursor: totalAmount >= 1000 ? "pointer" : "not-allowed",
+                      opacity: totalAmount >= 1000 ? 1 : 0.65,
+                      transition: "all 0.2s ease",
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="inpay"
+                      checked={paymentMethod === "inpay"}
+                      disabled={totalAmount < 1000}
+                      onChange={() => setPaymentMethod("inpay")}
+                      style={{ marginTop: 4, accentColor: "#0284c7", width: 18, height: 18 }}
+                    />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <span style={{ fontSize: 20 }}>💳</span>
+                          <strong style={{ fontSize: 16, color: "var(--ink)" }}>
+                            inPAY — Onlayn to'lov (Click, Payme, Kartalar)
+                          </strong>
+                        </div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                          <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 7px", borderRadius: 4, background: "#00a0e3", color: "#fff" }}>Click</span>
+                          <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 7px", borderRadius: 4, background: "#00cccc", color: "#003b3e" }}>Payme</span>
+                          <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 7px", borderRadius: 4, background: "#1e3a8a", color: "#fff" }}>Uzcard</span>
+                          <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 7px", borderRadius: 4, background: "#ea580c", color: "#fff" }}>Humo</span>
+                        </div>
+                      </div>
+                      <p style={{ margin: "6px 0 0", fontSize: 13, color: "var(--ink2)" }}>
+                        {totalAmount >= 1000
+                          ? `Buyurtma summasi (${money(totalAmount)}) inPAY xavfsiz to'lov tizimi orqali to'lanadi.`
+                          : "Savatdagi mahsulotlar narxi kelishuv asosida bo'lgani uchun do'konda to'lash tavsiya etiladi."}
+                      </p>
+                    </div>
+                  </label>
+
+                  {/* Cash / Store option */}
+                  <label
+                    style={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: 14,
+                      padding: "16px 18px",
+                      borderRadius: 14,
+                      border: paymentMethod === "cash" ? "2px solid #0284c7" : "1.5px solid var(--line)",
+                      background: paymentMethod === "cash" ? "rgba(2, 132, 199, 0.05)" : "var(--card, #fff)",
+                      cursor: "pointer",
+                      transition: "all 0.2s ease",
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="cash"
+                      checked={paymentMethod === "cash"}
+                      onChange={() => setPaymentMethod("cash")}
+                      style={{ marginTop: 4, accentColor: "#0284c7", width: 18, height: 18 }}
+                    />
+                    <div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <span style={{ fontSize: 20 }}>🏪</span>
+                        <strong style={{ fontSize: 16, color: "var(--ink)" }}>
+                          Do'konda to'lash (Olib ketish paytida)
+                        </strong>
+                      </div>
+                      <p style={{ margin: "6px 0 0", fontSize: 13, color: "var(--ink2)" }}>
+                        Uskunani ko'rib, tekshirib qabul qilgach to'laysiz (Naqd pul, korporativ karta/terminal yoki bank hisob-faktura orqali).
+                      </p>
+                    </div>
+                  </label>
                 </div>
 
                 <div style={{ marginTop: 28 }}>
