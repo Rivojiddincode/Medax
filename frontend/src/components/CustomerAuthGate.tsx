@@ -46,6 +46,14 @@ export function CustomerAuthGate({ onShowOnboarding }: CustomerAuthGateProps = {
     setError("");
   };
 
+  const fillRandomPhone = () => {
+    const prefixes = ["90", "91", "93", "94", "95", "97", "98", "99", "88", "33"];
+    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+    const num = Math.floor(1000000 + Math.random() * 9000000);
+    const formatted = `+998 ${prefix} ${String(num).slice(0, 3)} ${String(num).slice(3, 5)} ${String(num).slice(5, 7)}`;
+    setPhone(formatted);
+  };
+
   const switchMode = (newMode: GateMode) => {
     setMode(newMode);
     resetFields();
@@ -77,7 +85,9 @@ export function CustomerAuthGate({ onShowOnboarding }: CustomerAuthGateProps = {
     try {
       const res = await sendOtp(phone, captchaToken || undefined);
       setOtpSent(true);
-      if (res.devCode) setDevCode(res.devCode);
+      const codeToUse = res.devCode || "777777";
+      setDevCode(codeToUse);
+      setOtpCode(codeToUse);
       setCountdown(res.resendIn || 60);
       const timer = setInterval(() => {
         setCountdown((c) => {
@@ -344,7 +354,17 @@ export function CustomerAuthGate({ onShowOnboarding }: CustomerAuthGateProps = {
           {mode === "register" && !otpSent && (
             <form onSubmit={handleSendOtp}>
               <div className="field">
-                <label htmlFor="gate-reg-phone">Telefon raqamingiz</label>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                  <label htmlFor="gate-reg-phone" style={{ margin: 0 }}>Telefon raqamingiz</label>
+                  <button
+                    type="button"
+                    className="link-btn"
+                    onClick={fillRandomPhone}
+                    style={{ fontSize: 12, color: "var(--brand, #0284c7)", fontWeight: 600 }}
+                  >
+                    🎲 Tasodifiy test raqam
+                  </button>
+                </div>
                 <input
                   id="gate-reg-phone"
                   type="tel"
@@ -380,11 +400,36 @@ export function CustomerAuthGate({ onShowOnboarding }: CustomerAuthGateProps = {
 
           {mode === "register" && otpSent && (
             <form onSubmit={handleRegister}>
-              {devCode && (
-                <div className="ok dev-code-badge">
-                  <span>Sinov kodi (Dev):</span> <b>{devCode}</b>
+              <div
+                style={{
+                  background: "rgba(16, 185, 129, 0.1)",
+                  border: "1.5px solid #10b981",
+                  borderRadius: 12,
+                  padding: "12px 14px",
+                  marginBottom: 16,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 8,
+                }}
+              >
+                <div>
+                  <span style={{ fontSize: 12, color: "#065f46", display: "block", fontWeight: 600 }}>
+                    Tasdiqlash kodi (Test):
+                  </span>
+                  <strong style={{ fontSize: 22, letterSpacing: 3, color: "#047857" }}>
+                    {devCode || "777777"}
+                  </strong>
                 </div>
-              )}
+                <button
+                  type="button"
+                  className="btn sm"
+                  style={{ background: "#10b981", color: "#fff", border: "none", borderRadius: 8, fontWeight: 700 }}
+                  onClick={() => setOtpCode(devCode || "777777")}
+                >
+                  Kiritish
+                </button>
+              </div>
 
               <div className="field">
                 <div className="otp-sent-info">
@@ -489,7 +534,17 @@ export function CustomerAuthGate({ onShowOnboarding }: CustomerAuthGateProps = {
           {mode === "forgot_sms" && !otpSent && (
             <form onSubmit={handleSendOtp}>
               <div className="field">
-                <label htmlFor="gate-sms-phone">Telefon raqamingiz</label>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                  <label htmlFor="gate-sms-phone" style={{ margin: 0 }}>Telefon raqamingiz</label>
+                  <button
+                    type="button"
+                    className="link-btn"
+                    onClick={fillRandomPhone}
+                    style={{ fontSize: 12, color: "var(--brand, #0284c7)", fontWeight: 600 }}
+                  >
+                    🎲 Tasodifiy test raqam
+                  </button>
+                </div>
                 <input
                   id="gate-sms-phone"
                   type="tel"
@@ -524,11 +579,36 @@ export function CustomerAuthGate({ onShowOnboarding }: CustomerAuthGateProps = {
 
           {mode === "forgot_sms" && otpSent && (
             <form onSubmit={handleSmsLogin}>
-              {devCode && (
-                <div className="ok dev-code-badge">
-                  <span>Sinov kodi (Dev):</span> <b>{devCode}</b>
+              <div
+                style={{
+                  background: "rgba(16, 185, 129, 0.1)",
+                  border: "1.5px solid #10b981",
+                  borderRadius: 12,
+                  padding: "12px 14px",
+                  marginBottom: 16,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 8,
+                }}
+              >
+                <div>
+                  <span style={{ fontSize: 12, color: "#065f46", display: "block", fontWeight: 600 }}>
+                    Tasdiqlash kodi (Test):
+                  </span>
+                  <strong style={{ fontSize: 22, letterSpacing: 3, color: "#047857" }}>
+                    {devCode || "777777"}
+                  </strong>
                 </div>
-              )}
+                <button
+                  type="button"
+                  className="btn sm"
+                  style={{ background: "#10b981", color: "#fff", border: "none", borderRadius: 8, fontWeight: 700 }}
+                  onClick={() => setOtpCode(devCode || "777777")}
+                >
+                  Kiritish
+                </button>
+              </div>
 
               <div className="field">
                 <div className="otp-sent-info">

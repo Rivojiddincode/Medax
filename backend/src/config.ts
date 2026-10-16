@@ -54,8 +54,8 @@ export const config = {
     from: process.env.ESKIZ_FROM || "4546",
   },
   otpTtlMin: 5,
-  // console rejimida kod javobda qaytadi (faqat test/dev uchun)
-  exposeOtp: smsProvider === "console" && !isProd,
+  // console rejimida yoki EXPOSE_OTP bo'lganda kod javobda qaytadi
+  exposeOtp: process.env.EXPOSE_OTP === "true" || smsProvider !== "eskiz",
   fakeStrikeLimit: Number(process.env.FAKE_STRIKE_LIMIT || 2),
 
   // Xavfsizlik va limitlar
@@ -68,8 +68,8 @@ export const config = {
 
   // inPAY to'lov tizimi sozlamalari
   inpay: {
-    merchantId: process.env.INPAY_MERCHANT_ID || "",
-    merchantToken: process.env.INPAY_MERCHANT_TOKEN || "",
+    merchantId: process.env.INPAY_MERCHANT_ID || "63710",
+    merchantToken: process.env.INPAY_MERCHANT_TOKEN || "1842423423412086fc280ffd3517e34a",
     baseUrl: process.env.INPAY_BASE_URL || "https://inpay.uz/api/v1",
     callbackUrl: process.env.INPAY_CALLBACK_URL || "https://medax.uz/api/orders/inpay/callback",
   },

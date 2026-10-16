@@ -65,6 +65,14 @@ export default function Cart() {
 
   const hasAnyPrice = cart.items.some((i) => i.priceFrom);
 
+  const fillRandomPhone = () => {
+    const prefixes = ["90", "91", "93", "94", "95", "97", "98", "99", "88", "33"];
+    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+    const num = Math.floor(1000000 + Math.random() * 9000000);
+    const formatted = `+998 ${prefix} ${String(num).slice(0, 3)} ${String(num).slice(3, 5)} ${String(num).slice(5, 7)}`;
+    setPhone(formatted);
+  };
+
   // 1. Click "Buyurtmani rasmiylashtirish"
   const handleProceedToCheckout = () => {
     setError("");
@@ -90,7 +98,9 @@ export default function Cart() {
     setBusy(true);
     try {
       const res = await sendOtp(phone, captchaToken || undefined);
-      if (res.devCode) setDevCode(res.devCode);
+      const codeToUse = res.devCode || "777777";
+      setDevCode(codeToUse);
+      setOtpCode(codeToUse);
       setCountdown(res.resendIn || 60);
       setStage("otp");
     } catch (err: any) {
@@ -408,7 +418,17 @@ export default function Cart() {
 
               <form onSubmit={handleSendPhoneOtp} className="checkout-auth-form">
                 <div className="field">
-                  <label htmlFor="auth-phone">Telefon raqamingiz</label>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                    <label htmlFor="auth-phone" style={{ margin: 0 }}>Telefon raqamingiz</label>
+                    <button
+                      type="button"
+                      className="link-btn"
+                      onClick={fillRandomPhone}
+                      style={{ fontSize: 12, color: "var(--brand, #0284c7)", fontWeight: 600 }}
+                    >
+                      🎲 Tasodifiy test raqam
+                    </button>
+                  </div>
                   <div className="input-with-icon">
                     <input
                       id="auth-phone"
@@ -463,12 +483,36 @@ export default function Cart() {
                 </div>
               </div>
 
-              {devCode && (
-                <div className="dev-test-code-badge" onClick={() => setOtpCode(devCode)} title="Bosib kodni qo'yish">
-                  <span className="live-radar-dot" />
-                  <span>Test rejimi faol. Tasdiqlash kodi: <b>{devCode}</b> (Kodni nusxalash)</span>
+              <div
+                style={{
+                  background: "rgba(16, 185, 129, 0.1)",
+                  border: "1.5px solid #10b981",
+                  borderRadius: 12,
+                  padding: "12px 14px",
+                  marginBottom: 16,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 8,
+                }}
+              >
+                <div>
+                  <span style={{ fontSize: 12, color: "#065f46", display: "block", fontWeight: 600 }}>
+                    Tasdiqlash kodi (Test):
+                  </span>
+                  <strong style={{ fontSize: 22, letterSpacing: 3, color: "#047857" }}>
+                    {devCode || "777777"}
+                  </strong>
                 </div>
-              )}
+                <button
+                  type="button"
+                  className="btn sm"
+                  style={{ background: "#10b981", color: "#fff", border: "none", borderRadius: 8, fontWeight: 700 }}
+                  onClick={() => setOtpCode(devCode || "777777")}
+                >
+                  Kiritish
+                </button>
+              </div>
 
               {error && <div className="auth-error-banner">{error}</div>}
 
