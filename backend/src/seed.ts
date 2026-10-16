@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import { prisma } from "./db";
 import { slugify } from "./utils";
 
-async function main() {
+export async function seedDatabase() {
   const email = (process.env.ADMIN_EMAIL || "admin@medtex.uz").toLowerCase();
   const password = process.env.ADMIN_PASSWORD || "ChangeMe123!";
   await prisma.user.upsert({
@@ -71,6 +71,59 @@ async function main() {
   }
 
   const items: SeedItem[] = [
+    {
+      name: "Elektron kontaktsiz termometr va pulsoksimetr to'plami",
+      cat: "Reanimatsiya va anesteziologiya",
+      brand: "Mindray",
+      country: "Xitoy",
+      sku: "MDX-TEST-200K",
+      price: 200000,
+      isHit: true,
+      isNew: true,
+      desc: "Klinika va shaxsiy foydalanish uchun infraqizil tana harorati o'lchagich va qondagi kislorod miqdorini aniqlovchi SpO2 pulsoksimetr to'plami.",
+      specs: [
+        { name: "Turi", value: "Infraqizil kontaktsiz termometr + SpO2 pulsoksimetr" },
+        { name: "O'lchash tezligi", value: "1 soniya" },
+        { name: "Kafolat", value: "12 oy rasmiy kafolat" },
+        { name: "Mavjudligi", value: "Omborda mavjud" },
+        { name: "Holati", value: "Yangi" },
+      ],
+    },
+    {
+      name: "Tibbiy bir martalik steril shpritslar to'plami (100 dona)",
+      cat: "Jarrohlik",
+      brand: "Human",
+      country: "Germaniya",
+      sku: "MDX-SYR-200K",
+      price: 200000,
+      isHit: true,
+      isNew: false,
+      desc: "Tibbiyot muassasalari uchun yuqori sifatli uch komponentli bir martalik steril shpritslar komplekti (100 dona).",
+      specs: [
+        { name: "Ishlab chiqaruvchi", value: "Human Diagnostics (Germaniya)" },
+        { name: "Hajmi", value: "5 ml va 10 ml aralash komplekt" },
+        { name: "Qadoq", value: "100 dona steril alohida qadoqda" },
+        { name: "Mavjudligi", value: "Omborda mavjud" },
+      ],
+    },
+    {
+      name: "Laboratoriya biokimyoviy reagentlar to'plami (Dirui)",
+      cat: "Operatsion raqamli integratsiya",
+      brand: "Dirui",
+      country: "Xitoy",
+      sku: "DIR-REAG-1M",
+      price: 1000000,
+      isHit: true,
+      isNew: true,
+      desc: "Dirui avtomatik biokimyoviy analizatorlari uchun mo'ljallangan yuqori sifatli kalibrator va diagnostik reagentlar komplekti.",
+      specs: [
+        { name: "Ishlab chiqaruvchi", value: "Dirui Industrial Co." },
+        { name: "Qo'llanishi", value: "Klinik-biokimyoviy tahlillar uchun" },
+        { name: "Hajmi", value: "Standart komplekt (6 ta flakon)" },
+        { name: "Saqlash harorati", value: "+2°C dan +8°C gacha" },
+        { name: "Mavjudligi", value: "Omborda mavjud" },
+      ],
+    },
     // 1. Reanimatsiya va anesteziologiya
     {
       name: "Sun'iy nafas apparati Dräger Evita V300",
@@ -503,4 +556,4 @@ async function main() {
   console.log(`Katalog muvaffaqiyatli to'ldirildi: ${items.length} ta tibbiy uskuna mavjud.`);
 }
 
-main().finally(() => prisma.$disconnect());
+seedDatabase().finally(() => prisma.$disconnect());

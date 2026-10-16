@@ -90,4 +90,9 @@ app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
   res.status(500).json({ error: "Serverda xatolik yuz berdi" });
 });
 
-app.listen(config.port, () => console.log(`API muvaffaqiyatli ishga tushdi: http://localhost:${config.port}`));
+import { seedDatabase } from "./seed";
+
+app.listen(config.port, () => {
+  console.log(`API muvaffaqiyatli ishga tushdi: http://localhost:${config.port}`);
+  seedDatabase().catch((err) => console.warn("Startup seed:", err));
+});
