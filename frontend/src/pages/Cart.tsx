@@ -796,10 +796,16 @@ export default function Cart() {
                     style={{ width: "100%", height: 52, fontSize: 17, fontWeight: 700 }}
                     disabled={busy}
                   >
-                    {busy ? "Buyurtma yuborilmoqda…" : "Buyurtma so'rovini yuborish ✓"}
+                    {busy
+                      ? "Buyurtma yuborilmoqda…"
+                      : paymentMethod === "inpay"
+                      ? "💳 inPAY orqali to'lov sahifasiga o'tish →"
+                      : "Buyurtma so'rovini yuborish ✓"}
                   </button>
                   <p className="note" style={{ textAlign: "center", marginTop: 12 }}>
-                    Tugmani bosish orqali siz do'kondan olib ketish qoidalariga rozilik bildirasiz.
+                    {paymentMethod === "inpay"
+                      ? "Tugmani bosgach, to'lov uchun inPAY xavfsiz sahifasiga (Click, Payme, Kartalar) yo'naltirilasiz."
+                      : "Tugmani bosish orqali siz do'kondan olib ketish qoidalariga rozilik bildirasiz."}
                   </p>
                 </div>
               </form>
