@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
+import { Link, Outlet, useLocation } from "react-router-dom";
 import { useCart } from "../cart";
 import { Product, money } from "../api";
 import { MedaxLogo } from "./MedaxLogo";
@@ -10,50 +10,18 @@ import { LanguageSwitcher } from "./LanguageSwitcher";
 import { ThemeToggle } from "./ThemeToggle";
 import { FloatingContactHub } from "./FloatingContactHub";
 import { CartToast } from "./CartToast";
-import { PwaInstallPrompt } from "./PwaInstallPrompt";
 import { CustomerHeaderMenu } from "./CustomerHeaderMenu";
-import { CustomerAuthGate } from "./CustomerAuthGate";
-import { AppOnboarding } from "./AppOnboarding";
 import { UzumSearchBar, useAnimatedPresence } from "./UzumSearchBar";
 import { UzumCatalogModal } from "./UzumCatalogModal";
 import { SITE_CONFIG } from "../siteConfig";
-
-function useIsAppMode(): boolean {
-  const [isApp, setIsApp] = useState(() => {
-    if (typeof window === "undefined") return false;
-    const isStandalone =
-      window.matchMedia("(display-mode: standalone)").matches ||
-      (window.navigator as any).standalone === true;
-    return isStandalone || window.innerWidth <= 768;
-  });
-
-  useEffect(() => {
-    const handleResize = () => {
-      const isStandalone =
-        window.matchMedia("(display-mode: standalone)").matches ||
-        (window.navigator as any).standalone === true;
-      setIsApp(isStandalone || window.innerWidth <= 768);
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  return isApp;
-}
 
 export function Layout() {
   const { count } = useCart();
   const { customer, loading, openAuthModal } = useCustomerAuth();
   const { theme, toggleTheme } = useTheme();
   const { lang, setLang, t } = useI18n();
-  const isApp = useIsAppMode();
   const location = useLocation();
 
-  // Ilovada kirmagan foydalanuvchiga BIRINCHI BO'LIB Onboarding chiqadi!
-  // Onboarding tugagach yoki o'tkazib yuborilgach, KEYIN Kirish oynasi ochiladi.
-  const [onboardStep, setOnboardStep] = useState<"onboard" | "login">(() => {
-    return sessionStorage.getItem("medax_onboard_step") === "login" ? "login" : "onboard";
-  });
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isCatalogOpen, setIsCatalogOpen] = useState(false);
   const isBackdropActive = isSearchOpen || isCatalogOpen;
@@ -83,31 +51,6 @@ export function Layout() {
         <MedaxLogo size="md" />
         <div className="gate-spinner" />
       </div>
-    );
-  }
-
-  // 1. FAQAT ILOVADA: Kirmagan foydalanuvchiga BIRINCHI BO'LIB 4 sahifalik Onboarding chiqadi
-  if (isApp && !customer && onboardStep === "onboard") {
-    return (
-      <AppOnboarding
-        onComplete={() => {
-          sessionStorage.setItem("medax_onboard_step", "login");
-          setOnboardStep("login");
-        }}
-      />
-    );
-  }
-
-  // 2. FAQAT ILOVADA: Onboardingdan so'ng KEYIN Kirish / Ro'yxatdan o'tish oynasi chiqadi.
-  // Saytga (kompyuter / veb brauzer) kirganda esa mehmonlar xohlagancha bemalol ko'rishi mumkin!
-  if (isApp && !customer) {
-    return (
-      <CustomerAuthGate
-        onShowOnboarding={() => {
-          sessionStorage.removeItem("medax_onboard_step");
-          setOnboardStep("onboard");
-        }}
-      />
     );
   }
 
@@ -370,66 +313,8 @@ export function Layout() {
         </div>
       </footer>
 
-      {/* Mobil Bottom Navigation Bar (Xuddi native mobil ilovalardek qulay pastki menyu) */}
-      <nav className="mobile-bottom-nav" aria-label="Mobil menyu">
-        <NavLink to="/" end className={({ isActive }) => `mob-nav-item ${isActive ? "active" : ""}`}>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-            <polyline points="9 22 9 12 15 12 15 22" />
-          </svg>
-          <span>{t("nav_home")}</span>
-        </NavLink>
-
-        <NavLink to="/catalog" className={({ isActive }) => `mob-nav-item ${isActive ? "active" : ""}`}>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="3" y="3" width="7" height="7" rx="1.5" />
-            <rect x="14" y="3" width="7" height="7" rx="1.5" />
-            <rect x="14" y="14" width="7" height="7" rx="1.5" />
-            <rect x="3" y="14" width="7" height="7" rx="1.5" />
-          </svg>
-          <span>{t("nav_catalog")}</span>
-        </NavLink>
-
-        <NavLink to="/cart" className={({ isActive }) => `mob-nav-item ${isActive ? "active" : ""}`}>
-          <div className="mob-cart-badge-wrap">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="9" cy="21" r="1" />
-              <circle cx="20" cy="21" r="1" />
-              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-            </svg>
-            {count > 0 && <span className="mob-cart-badge">{count}</span>}
-          </div>
-          <span>{t("nav_cart")}</span>
-        </NavLink>
-
-        <NavLink to="/contact" className={({ isActive }) => `mob-nav-item ${isActive ? "active" : ""}`}>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-          </svg>
-          <span>{t("nav_contact")}</span>
-        </NavLink>
-
-        {customer ? (
-          <NavLink to="/account" className={({ isActive }) => `mob-nav-item ${isActive ? "active" : ""}`}>
-            <div className="mob-avatar-wrap">
-              {customer.avatar ? <img src={customer.avatar} alt="" /> : customer.name.charAt(0)}
-            </div>
-            <span>{t("nav_account")}</span>
-          </NavLink>
-        ) : (
-          <button type="button" className="mob-nav-item mob-nav-btn" onClick={() => openAuthModal()}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-              <circle cx="12" cy="7" r="4" />
-            </svg>
-            <span>{t("btn_login")}</span>
-          </button>
-        )}
-      </nav>
-
       <FloatingContactHub />
       <CartToast />
-      <PwaInstallPrompt />
     </>
   );
 }

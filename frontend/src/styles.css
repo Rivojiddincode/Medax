@@ -4397,8 +4397,11 @@ table.tbl {
   .brands-shell { flex-direction: column; align-items: flex-start; gap: 14px; }
 }
 @media (max-width:560px){
-  .grid, .catalog .grid { grid-template-columns: 1fr; }
+  .grid, .catalog .grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
   .formgrid { grid-template-columns: 1fr; }
+}
+@media (max-width:340px){
+  .grid, .catalog .grid { grid-template-columns: 1fr !important; }
 }
 
 /* Customer Auth & Account Styles */
@@ -6496,131 +6499,20 @@ table.tbl {
 }
 
 /* ==========================================================================
-   Mobile Bottom Navigation Bar (App Experience)
+   Responsive Floating Elements (Clean Web E-Commerce)
    ========================================================================== */
 .mobile-bottom-nav {
-  display: none;
+  display: none !important;
 }
 
-@media (max-width: 768px), (display-mode: standalone) {
-  /* Ilova rejimida veb brauzer headeri (.top) umuman ko'rinmaydi — 100% native ilova */
-  .top {
-    display: none !important;
-  }
-
+@media (max-width: 768px) {
   body {
-    padding-top: calc(env(safe-area-inset-top, 0px) + 8px);
-    padding-bottom: calc(74px + env(safe-area-inset-bottom, 0px)); /* Pastki menyu uchun joy qoldirish */
+    padding-bottom: 0 !important;
   }
 
-  .account-page {
-    padding-top: 8px;
-  }
-
-  .mobile-bottom-nav {
-    display: flex;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 64px;
-    background: color-mix(in srgb, var(--card) 95%, transparent);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-top: 1px solid var(--line);
-    z-index: 9999;
-    align-items: center;
-    justify-content: space-around;
-    padding: 0 4px calc(env(safe-area-inset-bottom, 0px));
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
-  }
-
-  .mob-nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 3px;
-    color: var(--ink2);
-    text-decoration: none;
-    font-size: 11px;
-    font-weight: 600;
-    padding: 6px 12px;
-    border-radius: 12px;
-    transition: all 0.18s ease;
-    background: none;
-    border: none;
-    cursor: pointer;
-    flex: 1;
-  }
-
-  .mob-nav-item svg {
-    stroke: var(--ink2);
-    transition: stroke 0.18s ease, transform 0.18s ease;
-  }
-
-  .mob-nav-item:hover,
-  .mob-nav-item.active {
-    color: var(--med-blue);
-  }
-
-  .mob-nav-item:hover svg,
-  .mob-nav-item.active svg {
-    stroke: var(--med-blue);
-    transform: scale(1.08);
-  }
-
-  .mob-cart-badge-wrap {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .mob-cart-badge {
-    position: absolute;
-    top: -4px;
-    right: -8px;
-    background: var(--med-green);
-    color: #fff;
-    font-size: 10px;
-    font-weight: 800;
-    min-width: 17px;
-    height: 17px;
-    border-radius: 999px;
-    display: grid;
-    place-items: center;
-    line-height: 1;
-    border: 2px solid var(--card);
-  }
-
-  .mob-avatar-wrap {
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--med-blue), var(--med-green));
-    color: #fff;
-    font-size: 11px;
-    font-weight: 700;
-    display: grid;
-    place-items: center;
-    overflow: hidden;
-  }
-
-  .mob-avatar-wrap img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  /* Mobil uchun suzuvchi aloqa tugmasini pastki menyudan yuqoriroqqa surish */
   .floating-hub-container {
-    bottom: 82px !important;
-  }
-
-  /* PWA bannerini pastki menyudan yuqoriroqqa surish */
-  .pwa-install-banner {
-    bottom: 74px !important;
+    bottom: 20px !important;
+    right: 16px !important;
   }
 }
 
