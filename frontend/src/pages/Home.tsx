@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api, Brand, Category, Product } from "../api";
+import { MOCK_BRANDS } from "../mockData";
 import { ProductCard } from "../components/Shell";
 import { useI18n } from "../context/I18nContext";
 import { useTheme } from "../context/ThemeContext";
@@ -407,10 +408,15 @@ export default function Home() {
           </div>
 
           <div className="brands-clean-grid stagger-items">
-            {data?.brands?.map((b) => {
+            {((data?.brands && data.brands.length > 0) ? data.brands : MOCK_BRANDS).map((b) => {
               const logoMap: Record<string, string> = {
-                drager: "/brands/drager.svg",
+                dirui: "/brands/dirui.png",
+                rayto: "/brands/rayto.png",
+                chison: "/brands/chison.png",
+                human: "/brands/human.png",
+                cypress: "/brands/cypress.png",
                 mindray: "/brands/mindray.png",
+                drager: "/brands/drager.svg",
                 philips: "/brands/philips.svg",
                 siemens: "/brands/siemens.svg",
                 "ge-healthcare": "/brands/ge-healthcare.svg",
@@ -419,11 +425,6 @@ export default function Home() {
                 "samsung-medison": "/brands/samsung.svg",
                 olympus: "/brands/olympus.svg",
                 "nihon-kohden": "/brands/nihon-kohden.svg",
-                dirui: "/brands/dirui.png",
-                rayto: "/brands/rayto.png",
-                chison: "/brands/chison.png",
-                human: "/brands/human.png",
-                cypress: "/brands/cypress.png",
               };
               const logoSrc = logoMap[b.slug];
 

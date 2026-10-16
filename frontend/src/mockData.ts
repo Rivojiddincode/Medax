@@ -9,14 +9,16 @@ export const MOCK_CATEGORIES: Category[] = [
 ];
 
 export const MOCK_BRANDS: Brand[] = [
-  { id: 1, name: "Dräger", slug: "drager", country: "Germaniya", count: 4 },
-  { id: 2, name: "Mindray", slug: "mindray", country: "Xitoy", count: 5 },
-  { id: 3, name: "Philips", slug: "philips", country: "Niderlandiya", count: 3 },
-  { id: 4, name: "Siemens", slug: "siemens", country: "Germaniya", count: 3 },
-  { id: 5, name: "GE Healthcare", slug: "ge-healthcare", country: "AQSH", count: 3 },
-  { id: 6, name: "Samsung Medison", slug: "samsung-medison", country: "Janubiy Koreya", count: 2 },
-  { id: 7, name: "Olympus", slug: "olympus", country: "Yaponiya", count: 2 },
-  { id: 8, name: "Nihon Kohden", slug: "nihon-kohden", country: "Yaponiya", count: 1 },
+  { id: 1, name: "Dirui", slug: "dirui", country: "Xitoy", count: 4 },
+  { id: 2, name: "Rayto", slug: "rayto", country: "Xitoy", count: 4 },
+  { id: 3, name: "Chison", slug: "chison", country: "Xitoy", count: 5 },
+  { id: 4, name: "Human", slug: "human", country: "Germaniya", count: 3 },
+  { id: 5, name: "Cypress", slug: "cypress", country: "Belgiya", count: 3 },
+  { id: 6, name: "Mindray", slug: "mindray", country: "Xitoy", count: 5 },
+  { id: 7, name: "Dräger", slug: "drager", country: "Germaniya", count: 4 },
+  { id: 8, name: "Philips", slug: "philips", country: "Niderlandiya", count: 3 },
+  { id: 9, name: "Siemens", slug: "siemens", country: "Germaniya", count: 3 },
+  { id: 10, name: "GE Healthcare", slug: "ge-healthcare", country: "AQSH", count: 3 },
 ];
 
 export const MOCK_PRODUCTS: Product[] = [

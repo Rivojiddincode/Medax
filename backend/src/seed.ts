@@ -31,10 +31,15 @@ async function main() {
   }
 
   const brands: [string, string][] = [
+    ["Dirui", "Xitoy"],
+    ["Rayto", "Xitoy"],
+    ["Chison", "Xitoy"],
+    ["Human", "Germaniya"],
+    ["Cypress", "Belgiya"],
+    ["Mindray", "Xitoy"],
     ["Philips", "Niderlandiya"],
     ["Siemens", "Germaniya"],
     ["Dräger", "Germaniya"],
-    ["Mindray", "Xitoy"],
     ["GE Healthcare", "AQSH"],
     ["Samsung", "Janubiy Koreya"],
     ["Olympus", "Yaponiya"],
