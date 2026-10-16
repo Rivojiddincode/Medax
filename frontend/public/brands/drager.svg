@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 50" width="200" height="50">
+  <defs>
+    <linearGradient id="dragerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0c2340"/>
+      <stop offset="100%" stop-color="#163964"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(10, 8)">
+    <!-- Drager Cross/Hex symbol -->
+    <path d="M12 4 L22 10 L22 24 L12 30 L2 24 L2 10 Z" fill="#0c2340" stroke="#0072ce" stroke-width="2"/>
+    <path d="M12 11 L12 23 M6 17 L18 17" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+  </g>
+  <text x="46" y="34" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="29" font-weight="800" letter-spacing="1" fill="url(#dragerGrad)">Dräger</text>
+</svg>

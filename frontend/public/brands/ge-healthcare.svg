@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 54" width="240" height="54">
+  <defs>
+    <linearGradient id="geGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#005eb8"/>
+      <stop offset="100%" stop-color="#003b7a"/>
+    </linearGradient>
+  </defs>
+  <!-- GE Monogram Circle -->
+  <g transform="translate(14, 7)">
+    <circle cx="20" cy="20" r="19" fill="#005eb8"/>
+    <!-- Flourishes inside GE mark -->
+    <text x="20" y="27" text-anchor="middle" font-family="'Brush Script MT', 'Palatino', 'Georgia', cursive, serif" font-size="24" font-weight="bold" font-style="italic" fill="#ffffff" letter-spacing="-1">GE</text>
+  </g>
+  <!-- GE Healthcare Text -->
+  <text x="64" y="27" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="900" letter-spacing="1.5" fill="#005eb8">GE</text>
+  <text x="96" y="27" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="18" font-weight="600" letter-spacing="0.5" fill="#1e293b">Healthcare</text>
+  <text x="64" y="43" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" font-weight="700" letter-spacing="2.5" fill="#64748b">PRECISION HEALTH</text>
+</svg>

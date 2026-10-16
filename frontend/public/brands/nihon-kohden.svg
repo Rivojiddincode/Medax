@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 230 50" width="230" height="50">
+  <g transform="translate(10, 8)">
+    <!-- Nihon Kohden red wing/cross icon -->
+    <circle cx="17" cy="17" r="16" fill="#d90000"/>
+    <path d="M9 17 C13 10 21 10 25 17 C21 24 13 24 9 17 Z" fill="#ffffff"/>
+    <circle cx="17" cy="17" r="4" fill="#d90000"/>
+  </g>
+  <text x="50" y="27" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="16" font-weight="900" letter-spacing="1.5" fill="#1e293b">NIHON KOHDEN</text>
+  <text x="50" y="40" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" font-weight="700" letter-spacing="2" fill="#d90000">FIGHTING DISEASE WITH ELECTRONICS</text>
+</svg>

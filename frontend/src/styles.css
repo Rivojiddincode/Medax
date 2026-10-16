@@ -2952,6 +2952,13 @@ footer {
 .brand-clean-card:hover .brand-logo-box img {
   transform: scale(1.08);
 }
+.brand-fallback-badge {
+  font-family: var(--head);
+  font-size: 16px;
+  font-weight: 800;
+  color: #0284c7;
+  letter-spacing: 0.5px;
+}
 .brand-clean-name {
   font-family: var(--head);
   font-size: 15px;

@@ -409,7 +409,16 @@ export default function Home() {
           <div className="brands-clean-grid stagger-items">
             {data?.brands?.map((b) => {
               const logoMap: Record<string, string> = {
+                drager: "/brands/drager.svg",
                 mindray: "/brands/mindray.png",
+                philips: "/brands/philips.svg",
+                siemens: "/brands/siemens.svg",
+                "ge-healthcare": "/brands/ge-healthcare.svg",
+                ge: "/brands/ge-healthcare.svg",
+                samsung: "/brands/samsung.svg",
+                "samsung-medison": "/brands/samsung.svg",
+                olympus: "/brands/olympus.svg",
+                "nihon-kohden": "/brands/nihon-kohden.svg",
                 dirui: "/brands/dirui.png",
                 rayto: "/brands/rayto.png",
                 chison: "/brands/chison.png",
@@ -425,11 +434,13 @@ export default function Home() {
                   to={`/catalog?brand=${b.slug}`}
                   title={`${b.name} (${b.country || ""})`}
                 >
-                  {logoSrc ? (
-                    <div className="brand-logo-box">
+                  <div className="brand-logo-box">
+                    {logoSrc ? (
                       <img src={logoSrc} alt={b.name} loading="lazy" />
-                    </div>
-                  ) : null}
+                    ) : (
+                      <span className="brand-fallback-badge">{b.name}</span>
+                    )}
+                  </div>
                   <strong className="brand-clean-name">{b.name}</strong>
                   {b.country && <span className="brand-clean-country">{b.country}</span>}
                 </Link>

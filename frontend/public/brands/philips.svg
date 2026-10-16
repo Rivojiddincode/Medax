@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 54" width="220" height="54">
+  <defs>
+    <linearGradient id="phGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0b5fff"/>
+      <stop offset="100%" stop-color="#0046b8"/>
+    </linearGradient>
+  </defs>
+  <!-- Philips Crest / Shield Icon -->
+  <g transform="translate(10, 7)">
+    <path d="M4 2 C4 2 20 2 20 2 C20 18 16 32 4 40 C-8 32 -12 18 -12 2 Z" fill="#0b5fff" transform="translate(14, 0) scale(0.9)"/>
+    <circle cx="26" cy="19" r="14" fill="#ffffff" fill-opacity="0.2"/>
+    <path d="M18 19 Q22 14 26 19 T34 19" stroke="#ffffff" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <path d="M18 23 Q22 18 26 23 T34 23" stroke="#ffffff" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <polygon points="26,10 27.5,14 31,14 28,16 29,20 26,17.5 23,20 24,16 21,14 24.5,14" fill="#ffffff" transform="scale(0.7) translate(11, -2)"/>
+    <polygon points="26,10 27.5,14 31,14 28,16 29,20 26,17.5 23,20 24,16 21,14 24.5,14" fill="#ffffff" transform="scale(0.7) translate(11, 16)"/>
+  </g>
+  <!-- Brand Text -->
+  <text x="64" y="37" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="28" font-weight="900" letter-spacing="3.5" fill="url(#phGrad)">PHILIPS</text>
+</svg>
