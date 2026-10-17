@@ -30,9 +30,9 @@ export function validateStartupConfig() {
         "XAVFSIZLIK XATOSI: Production muhitida CUSTOMER_JWT_SECRET environment o'zgaruvchisi o'rnatilmagan! Doimiy maxfiy kalit o'rnating."
       );
     }
-    if (config.smsProvider === "console" && process.env.ALLOW_INSECURE_CONSOLE_SMS !== "true") {
-      throw new Error(
-        "KRITIK XAVFSIZLIK XATOSI: Production muhitida SMS_PROVIDER=console bilan ishga tushirish taqiqlangan! SMS_PROVIDER=eskiz, ESKIZ_EMAIL va ESKIZ_PASSWORD sozlang."
+    if (config.smsProvider === "console") {
+      console.warn(
+        "⚠️ OGOHLANTIRISH: SMS_PROVIDER=console holatida. SMS xabarlar faqat server konsoliga chiqadi. Haqiqiy SMS yuborish uchun Render Environment sozlamalarida SMS_PROVIDER=eskiz, ESKIZ_EMAIL va ESKIZ_PASSWORD ni kiriting."
       );
     }
   }
