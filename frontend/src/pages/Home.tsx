@@ -1,7 +1,6 @@
 import { FormEvent, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api, Brand, Category, Product } from "../api";
-import { MOCK_BRANDS } from "../mockData";
 import { ProductCard } from "../components/Shell";
 import { useI18n } from "../context/I18nContext";
 import { useTheme } from "../context/ThemeContext";

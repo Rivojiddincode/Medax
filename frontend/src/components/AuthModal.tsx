@@ -18,7 +18,6 @@ export function AuthModal() {
   const [captchaToken, setCaptchaToken] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [otpCode, setOtpCode] = useState("");
-  const [devCode, setDevCode] = useState<string | null>(null);
 
   // Profile & Password fields
   const [name, setName] = useState("");
@@ -37,18 +36,9 @@ export function AuthModal() {
   const resetFields = () => {
     setOtpSent(false);
     setOtpCode("");
-    setDevCode(null);
     setPassword("");
     setConfirmPassword("");
     setError("");
-  };
-
-  const fillRandomPhone = () => {
-    const prefixes = ["90", "91", "93", "94", "95", "97", "98", "99", "88", "33"];
-    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
-    const num = Math.floor(1000000 + Math.random() * 9000000);
-    const formatted = `+998 ${prefix} ${String(num).slice(0, 3)} ${String(num).slice(3, 5)} ${String(num).slice(5, 7)}`;
-    setPhone(formatted);
   };
 
   const switchMode = (newMode: AuthMode) => {
@@ -95,9 +85,7 @@ export function AuthModal() {
     try {
       const res = await sendOtp(phone, captchaToken || undefined);
       setOtpSent(true);
-      const codeToUse = res.devCode || "777777";
-      setDevCode(codeToUse);
-      setOtpCode(codeToUse);
+      setOtpCode("");
       setCountdown(res.resendIn || 60);
       const timer = setInterval(() => {
         setCountdown((c) => {
@@ -333,17 +321,7 @@ export function AuthModal() {
           {mode === "register" && !otpSent && (
             <form onSubmit={handleSendOtp}>
               <div className="field">
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
-                  <label htmlFor="auth-reg-phone" style={{ margin: 0 }}>{t("auth_phone_label")}</label>
-                  <button
-                    type="button"
-                    className="link-btn"
-                    onClick={fillRandomPhone}
-                    style={{ fontSize: 12, color: "var(--brand, #0284c7)", fontWeight: 600 }}
-                  >
-                    🎲 Tasodifiy test raqam
-                  </button>
-                </div>
+                <label htmlFor="auth-reg-phone">{t("auth_phone_label")}</label>
                 <input
                   id="auth-reg-phone"
                   type="tel"
@@ -379,37 +357,6 @@ export function AuthModal() {
 
           {mode === "register" && otpSent && (
             <form onSubmit={handleRegisterWithOtp}>
-              <div
-                style={{
-                  background: "rgba(16, 185, 129, 0.1)",
-                  border: "1.5px solid #10b981",
-                  borderRadius: 12,
-                  padding: "12px 14px",
-                  marginBottom: 16,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  gap: 8,
-                }}
-              >
-                <div>
-                  <span style={{ fontSize: 12, color: "#065f46", display: "block", fontWeight: 600 }}>
-                    {lang === "ru" ? "Код подтверждения (Test):" : lang === "en" ? "Verification code (Test):" : "Tasdiqlash kodi (Test):"}
-                  </span>
-                  <strong style={{ fontSize: 22, letterSpacing: 3, color: "#047857" }}>
-                    {devCode || "777777"}
-                  </strong>
-                </div>
-                <button
-                  type="button"
-                  className="btn sm"
-                  style={{ background: "#10b981", color: "#fff", border: "none", borderRadius: 8, fontWeight: 700 }}
-                  onClick={() => setOtpCode(devCode || "777777")}
-                >
-                  {lang === "ru" ? "Kiritish" : lang === "en" ? "Insert" : "Kiritish"}
-                </button>
-              </div>
-
               <div className="field">
                 <div className="otp-sent-info">
                   <span>{t("auth_enter_code")} <b>{phone}</b></span>
@@ -516,17 +463,7 @@ export function AuthModal() {
           {mode === "sms_login" && !otpSent && (
             <form onSubmit={handleSendOtp}>
               <div className="field">
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
-                  <label htmlFor="auth-sms-phone" style={{ margin: 0 }}>{t("auth_phone_label")}</label>
-                  <button
-                    type="button"
-                    className="link-btn"
-                    onClick={fillRandomPhone}
-                    style={{ fontSize: 12, color: "var(--brand, #0284c7)", fontWeight: 600 }}
-                  >
-                    🎲 Tasodifiy test raqam
-                  </button>
-                </div>
+                <label htmlFor="auth-sms-phone">{t("auth_phone_label")}</label>
                 <input
                   id="auth-sms-phone"
                   type="tel"
@@ -561,37 +498,6 @@ export function AuthModal() {
 
           {mode === "sms_login" && otpSent && (
             <form onSubmit={handleSmsOnlyLogin}>
-              <div
-                style={{
-                  background: "rgba(16, 185, 129, 0.1)",
-                  border: "1.5px solid #10b981",
-                  borderRadius: 12,
-                  padding: "12px 14px",
-                  marginBottom: 16,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  gap: 8,
-                }}
-              >
-                <div>
-                  <span style={{ fontSize: 12, color: "#065f46", display: "block", fontWeight: 600 }}>
-                    {lang === "ru" ? "Код подтверждения (Test):" : lang === "en" ? "Verification code (Test):" : "Tasdiqlash kodi (Test):"}
-                  </span>
-                  <strong style={{ fontSize: 22, letterSpacing: 3, color: "#047857" }}>
-                    {devCode || "777777"}
-                  </strong>
-                </div>
-                <button
-                  type="button"
-                  className="btn sm"
-                  style={{ background: "#10b981", color: "#fff", border: "none", borderRadius: 8, fontWeight: 700 }}
-                  onClick={() => setOtpCode(devCode || "777777")}
-                >
-                  {lang === "ru" ? "Kiritish" : lang === "en" ? "Insert" : "Kiritish"}
-                </button>
-              </div>
-
               <div className="field">
                 <div className="otp-sent-info">
                   <span>{t("auth_enter_code")} <b>{phone}</b></span>

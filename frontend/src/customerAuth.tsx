@@ -17,7 +17,7 @@ interface CustomerAuthContextType {
   openAuthModal: () => void;
   closeAuthModal: () => void;
   refreshCustomer: () => Promise<void>;
-  sendOtp: (phone: string, captchaToken?: string) => Promise<{ ok: boolean; resendIn: number; devCode?: string }>;
+  sendOtp: (phone: string, captchaToken?: string) => Promise<{ ok: boolean; resendIn: number }>;
   verifyOtp: (data: { phone: string; code: string; name?: string; organization?: string; password?: string }) => Promise<{ ok: boolean; token: string; customer: Customer }>;
   loginWithPassword: (phone: string, password: string) => Promise<{ ok: boolean; token: string; customer: Customer }>;
   changePassword: (data: { currentPassword?: string; newPassword: string }) => Promise<void>;

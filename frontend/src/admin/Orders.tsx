@@ -17,6 +17,9 @@ interface Order {
   ip?: string | null;
   flags: string[];
   createdAt: string;
+  totalAmount?: number | string | null;
+  isPaid?: boolean;
+  paidAt?: string | null;
   items: { id: number; productName: string; quantity: number }[];
 }
 
@@ -85,6 +88,8 @@ export default function Orders() {
               <th>{t("customer")}</th>
               <th>{t("phone")}</th>
               <th>Mahsulotlar</th>
+              <th>Jami summa</th>
+              <th>To'lov</th>
               <th>{t("date")}</th>
               <th>{t("status")}</th>
             </tr>
@@ -96,11 +101,25 @@ export default function Orders() {
                 <td>{o.customerName}{o.organization && <div className="muted" style={{ fontSize: 13 }}>{o.organization}</div>}</td>
                 <td>{o.phone}</td>
                 <td>{o.items.length} ta ({o.items.reduce((s, i) => s + i.quantity, 0)} dona)</td>
+                <td style={{ fontWeight: 600 }}>
+                  {o.totalAmount && Number(o.totalAmount) > 0 ? Number(o.totalAmount).toLocaleString() + " so'm" : <span className="muted">Kelishuv</span>}
+                </td>
+                <td>
+                  {o.isPaid ? (
+                    <span style={{ color: "#16a34a", fontWeight: 700, fontSize: 12, background: "#dcfce7", padding: "3px 8px", borderRadius: 6 }}>
+                      To'langan ✅
+                    </span>
+                  ) : (
+                    <span style={{ color: "#ca8a04", fontWeight: 600, fontSize: 12, background: "#fef9c3", padding: "3px 8px", borderRadius: 6 }}>
+                      Kutilmoqda ⏳
+                    </span>
+                  )}
+                </td>
                 <td>{fmt(o.createdAt)}</td>
                 <td><span className={`st ${o.status}`}>{getStatusLabel(o.status)}</span></td>
               </tr>
             ))}
-            {data && data.items.length === 0 && <tr><td colSpan={6} className="muted" style={{ textAlign: "center", padding: 32 }}>{t("no_orders_yet")}</td></tr>}
+            {data && data.items.length === 0 && <tr><td colSpan={8} className="muted" style={{ textAlign: "center", padding: 32 }}>{t("no_orders_yet")}</td></tr>}
           </tbody>
         </table>
       </div>
@@ -109,6 +128,7 @@ export default function Orders() {
     </>
   );
 }
+
 
 function Detail({ order, onClose, onChanged }: { order: Order; onClose: () => void; onChanged: () => void }) {
   const [note, setNote] = useState(order.managerNote);
@@ -119,7 +139,7 @@ function Detail({ order, onClose, onChanged }: { order: Order; onClose: () => vo
   const [cancelReasonPreset, setCancelReasonPreset] = useState("Mijoz rad etdi / O'zi bekor qildi");
   const [cancelReasonText, setCancelReasonText] = useState("");
 
-  const patch = async (body: { status?: string; managerNote?: string }) => {
+  const patch = async (body: { status?: string; managerNote?: string; isPaid?: boolean }) => {
     setBusy(true); setError("");
     try {
       const r = await api<{ blocked: boolean }>(`/admin/orders/${order.id}`, { method: "PATCH", json: body, admin: true });
@@ -183,6 +203,29 @@ function Detail({ order, onClose, onChanged }: { order: Order; onClose: () => vo
         <table className="specs"><tbody>
           {order.items.map((i) => <tr key={i.id}><td style={{ width: "auto", color: "var(--ink)" }}>{i.productName}</td><td style={{ width: 70, textAlign: "right" }}>{i.quantity} dona</td></tr>)}
         </tbody></table>
+
+        {/* Jami summa va to'lov holati */}
+        <div style={{ background: "var(--sea, #f0f9ff)", border: "1px solid rgba(2, 132, 199, 0.25)", borderRadius: 12, padding: "12px 16px", margin: "12px 0", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
+          <div>
+            <strong style={{ display: "block", fontSize: 13, color: "var(--ink-muted, #64748b)" }}>💰 Buyurtma summasi:</strong>
+            <span style={{ fontSize: 19, fontWeight: 800, color: "var(--ink, #0f172a)" }}>
+              {order.totalAmount && Number(order.totalAmount) > 0 ? Number(order.totalAmount).toLocaleString() + " so'm" : "Kelishuv asosida"}
+            </span>
+          </div>
+          <div>
+            <strong style={{ display: "block", fontSize: 13, color: "var(--ink-muted, #64748b)", textAlign: "right" }}>To'lov holati:</strong>
+            {order.isPaid ? (
+              <span style={{ color: "#16a34a", fontWeight: 800, fontSize: 14, background: "#dcfce7", padding: "4px 10px", borderRadius: 8 }}>
+                ✅ TO'LANGAN ({order.paymentMethod === "inpay" ? "inPAY orqali" : "Kassada"})
+              </span>
+            ) : (
+              <span style={{ color: "#ca8a04", fontWeight: 700, fontSize: 14, background: "#fef9c3", padding: "4px 10px", borderRadius: 8 }}>
+                ⏳ TO'LOV KUTILMOQDA
+              </span>
+            )}
+          </div>
+        </div>
+
         {order.deliveryAddress && (
           <div style={{ background: "var(--sea, #f0f9ff)", border: "1px solid rgba(2, 132, 199, 0.2)", borderRadius: 10, padding: "10px 14px", margin: "10px 0" }}>
             <strong style={{ display: "block", fontSize: 13, color: "var(--ink-muted, #64748b)", marginBottom: 4 }}>
@@ -269,12 +312,26 @@ function Detail({ order, onClose, onChanged }: { order: Order; onClose: () => vo
               )}
               {order.status === "CONFIRMED" && (
                 <button className="btn" style={{ background: "#0284c7" }} disabled={busy} onClick={() => patch({ status: "READY", managerNote: note })}>
-                  📦 Olib ketishga tayyor qilish
+                  📦 Olib ketishga tayyor qilish (SMS yuborish)
                 </button>
               )}
               {order.status === "READY" && (
                 <button className="btn" style={{ background: "#16a34a" }} disabled={busy} onClick={() => patch({ status: "DONE", managerNote: note })}>
                   ✅ Bajarildi (Mijoz olib ketdi)
+                </button>
+              )}
+              {!order.isPaid && order.status !== "CANCELED" && order.status !== "FAKE" && (
+                <button
+                  className="btn sm"
+                  style={{ background: "#059669", color: "#fff" }}
+                  disabled={busy}
+                  onClick={() => {
+                    if (confirm("Buyurtmani 'To'langan' deb belgilaysizmi?")) {
+                      patch({ isPaid: true, managerNote: note });
+                    }
+                  }}
+                >
+                  💵 Kassada to'landi deb belgilash
                 </button>
               )}
               {(order.status === "NEW" || order.status === "CONFIRMED" || order.status === "READY") && (

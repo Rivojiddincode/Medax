@@ -136,7 +136,7 @@ customerRouter.post("/auth/send-otp", authLimiter, async (req, res) => {
     },
   });
 
-  res.json({ ok: true, resendIn: 60, devCode: code });
+  res.json({ ok: true, resendIn: 60 });
 });
 
 // 2. Telefon raqam + OTP orqali kirish / ro'yxatdan o'tish (parol bilan yoki parolsiz)
@@ -154,23 +154,19 @@ customerRouter.post("/auth/verify-otp", authLimiter, async (req, res) => {
   const phone = normalizePhone(raw);
   if (!phone) throw new HttpError(400, "Telefon raqami noto'g'ri.");
 
-  const isMasterCode = code === "777777" || code === "111111";
+  const otp = await prisma.otpCode.findFirst({
+    where: { phone, usedAt: null, expiresAt: { gt: new Date() } },
+    orderBy: { createdAt: "desc" },
+  });
 
-  if (!isMasterCode) {
-    const otp = await prisma.otpCode.findFirst({
-      where: { phone, usedAt: null, expiresAt: { gt: new Date() } },
-      orderBy: { createdAt: "desc" },
-    });
-
-    if (!otp) throw new HttpError(400, "Kod eskirgan yoki topilmadi. Sinov kodi: 777777");
-    if (otp.attempts >= 5) throw new HttpError(429, "Kod ko'p marta noto'g'ri kiritildi. Sinov kodi: 777777");
-    if (otp.codeHash !== hashCode(phone, code)) {
-      await prisma.otpCode.update({ where: { id: otp.id }, data: { attempts: { increment: 1 } } });
-      throw new HttpError(400, "Kod noto'g'ri. Sinov kodi: 777777");
-    }
-
-    await prisma.otpCode.update({ where: { id: otp.id }, data: { usedAt: new Date() } });
+  if (!otp) throw new HttpError(400, "Tasdiqlash kodi eskirgan yoki topilmadi. Yangi kod so'rang.");
+  if (otp.attempts >= 5) throw new HttpError(429, "Kod ko'p marta noto'g'ri kiritildi. Yangi kod so'rang.");
+  if (otp.codeHash !== hashCode(phone, code)) {
+    await prisma.otpCode.update({ where: { id: otp.id }, data: { attempts: { increment: 1 } } });
+    throw new HttpError(400, "Tasdiqlash kodi noto'g'ri.");
   }
+
+  await prisma.otpCode.update({ where: { id: otp.id }, data: { usedAt: new Date() } });
 
   const passwordHash = password ? await bcrypt.hash(password, 10) : undefined;
 

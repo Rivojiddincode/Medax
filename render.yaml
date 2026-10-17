@@ -11,7 +11,7 @@ services:
     plan: free
     rootDir: backend
     buildCommand: npm install --include=dev && npm run build
-    startCommand: npx prisma db push --accept-data-loss && npm run seed && npm run start
+    startCommand: npx prisma db push && npm run start
     envVars:
       - key: NODE_ENV
         value: production
@@ -28,8 +28,21 @@ services:
       - key: CORS_ORIGIN
         value: "https://medax.uz,https://www.medax.uz,https://medtex-xi.vercel.app"
       - key: ADMIN_EMAIL
-        value: "admin@medtex.uz"
+        value: "admin@medax.uz"
       - key: ADMIN_PASSWORD
-        value: "Medax2026Admin!"
+        sync: false
       - key: SMS_PROVIDER
-        value: "console"
+        value: "eskiz"
+      - key: ESKIZ_EMAIL
+        sync: false
+      - key: ESKIZ_PASSWORD
+        sync: false
+      - key: ESKIZ_FROM
+        value: "4546"
+      - key: INPAY_MERCHANT_ID
+        sync: false
+      - key: INPAY_MERCHANT_TOKEN
+        sync: false
+      - key: INPAY_CALLBACK_URL
+        value: "https://medax-backend-c803.onrender.com/api/orders/inpay/callback"
+

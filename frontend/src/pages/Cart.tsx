@@ -24,7 +24,6 @@ export default function Cart() {
   const [captchaToken, setCaptchaToken] = useState("");
   const [name, setName] = useState("");
   const [otpCode, setOtpCode] = useState("");
-  const [devCode, setDevCode] = useState("");
   const [countdown, setCountdown] = useState(0);
 
   // Delivery & payment details
@@ -55,7 +54,10 @@ export default function Cart() {
     return () => clearTimeout(t);
   }, [countdown]);
 
-  // Calculate totals
+  // Calculate totals and pricing mode
+  const isEveryPriceFixed = cart.items.length > 0 && cart.items.every((i) => i.priceFrom && Number(i.priceFrom) > 0);
+  const hasUnpricedItems = cart.items.some((i) => !i.priceFrom || Number(i.priceFrom) <= 0);
+
   const totalAmount = cart.items.reduce((acc, item) => {
     if (item.priceFrom) {
       return acc + Number(item.priceFrom) * item.quantity;
@@ -63,15 +65,14 @@ export default function Cart() {
     return acc;
   }, 0);
 
-  const hasAnyPrice = cart.items.some((i) => i.priceFrom);
+  // Agar savatda narxi kelishiladigan mahsulot bo'lsa, to'lov usulini avtomatik "cash" ga o'tkazamiz
+  useEffect(() => {
+    if (hasUnpricedItems && paymentMethod === "inpay") {
+      setPaymentMethod("cash");
+    }
+  }, [hasUnpricedItems]);
 
-  const fillRandomPhone = () => {
-    const prefixes = ["90", "91", "93", "94", "95", "97", "98", "99", "88", "33"];
-    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
-    const num = Math.floor(1000000 + Math.random() * 9000000);
-    const formatted = `+998 ${prefix} ${String(num).slice(0, 3)} ${String(num).slice(3, 5)} ${String(num).slice(5, 7)}`;
-    setPhone(formatted);
-  };
+  const hasAnyPrice = cart.items.some((i) => i.priceFrom);
 
   // 1. Click "Buyurtmani rasmiylashtirish"
   const handleProceedToCheckout = () => {
@@ -98,9 +99,7 @@ export default function Cart() {
     setBusy(true);
     try {
       const res = await sendOtp(phone, captchaToken || undefined);
-      const codeToUse = res.devCode || "777777";
-      setDevCode(codeToUse);
-      setOtpCode(codeToUse);
+      setOtpCode("");
       setCountdown(res.resendIn || 60);
       setStage("otp");
     } catch (err: any) {
@@ -418,17 +417,7 @@ export default function Cart() {
 
               <form onSubmit={handleSendPhoneOtp} className="checkout-auth-form">
                 <div className="field">
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
-                    <label htmlFor="auth-phone" style={{ margin: 0 }}>Telefon raqamingiz</label>
-                    <button
-                      type="button"
-                      className="link-btn"
-                      onClick={fillRandomPhone}
-                      style={{ fontSize: 12, color: "var(--brand, #0284c7)", fontWeight: 600 }}
-                    >
-                      🎲 Tasodifiy test raqam
-                    </button>
-                  </div>
+                  <label htmlFor="auth-phone">Telefon raqamingiz</label>
                   <div className="input-with-icon">
                     <input
                       id="auth-phone"
@@ -481,37 +470,6 @@ export default function Cart() {
                     <b>{phone}</b> raqamiga yuborilgan 6 xonali kodni kiriting.
                   </p>
                 </div>
-              </div>
-
-              <div
-                style={{
-                  background: "rgba(16, 185, 129, 0.1)",
-                  border: "1.5px solid #10b981",
-                  borderRadius: 12,
-                  padding: "12px 14px",
-                  marginBottom: 16,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  gap: 8,
-                }}
-              >
-                <div>
-                  <span style={{ fontSize: 12, color: "#065f46", display: "block", fontWeight: 600 }}>
-                    Tasdiqlash kodi (Test):
-                  </span>
-                  <strong style={{ fontSize: 22, letterSpacing: 3, color: "#047857" }}>
-                    {devCode || "777777"}
-                  </strong>
-                </div>
-                <button
-                  type="button"
-                  className="btn sm"
-                  style={{ background: "#10b981", color: "#fff", border: "none", borderRadius: 8, fontWeight: 700 }}
-                  onClick={() => setOtpCode(devCode || "777777")}
-                >
-                  Kiritish
-                </button>
               </div>
 
               {error && <div className="auth-error-banner">{error}</div>}
@@ -705,6 +663,13 @@ export default function Cart() {
                 </div>
 
                 <h3 className="section-subhead" style={{ marginTop: 24 }}>3. To'lov usulini tanlang</h3>
+
+                {hasUnpricedItems && (
+                  <div style={{ background: "#fffbeb", border: "1.5px solid #fde68a", borderRadius: 12, padding: "12px 16px", marginBottom: 12, color: "#92400e", fontSize: 13, lineHeight: 1.5 }}>
+                    <strong>ℹ️ Narxi kelishiladigan mahsulotlar:</strong> Savatingizda narxi aniq belgilanmagan uskunalar mavjud. Shuning uchun onlayn karta to'lovi yopiq va buyurtma <b>"Do'konda to'lash / Shartnoma asosida"</b> qabul qilinadi. Mutaxassisimiz siz bilan narxni kelishish uchun bog'lanadi.
+                  </div>
+                )}
+
                 <div style={{ display: "grid", gap: 12 }}>
                   {/* inPAY option */}
                   <label
@@ -716,8 +681,8 @@ export default function Cart() {
                       borderRadius: 14,
                       border: paymentMethod === "inpay" ? "2px solid #0284c7" : "1.5px solid var(--line)",
                       background: paymentMethod === "inpay" ? "rgba(2, 132, 199, 0.05)" : "var(--card, #fff)",
-                      cursor: totalAmount >= 1000 ? "pointer" : "not-allowed",
-                      opacity: totalAmount >= 1000 ? 1 : 0.65,
+                      cursor: isEveryPriceFixed && totalAmount >= 1000 ? "pointer" : "not-allowed",
+                      opacity: isEveryPriceFixed && totalAmount >= 1000 ? 1 : 0.5,
                       transition: "all 0.2s ease",
                     }}
                   >
@@ -726,7 +691,7 @@ export default function Cart() {
                       name="paymentMethod"
                       value="inpay"
                       checked={paymentMethod === "inpay"}
-                      disabled={totalAmount < 1000}
+                      disabled={!isEveryPriceFixed || totalAmount < 1000}
                       onChange={() => setPaymentMethod("inpay")}
                       style={{ marginTop: 4, accentColor: "#0284c7", width: 18, height: 18 }}
                     />
@@ -746,9 +711,9 @@ export default function Cart() {
                         </div>
                       </div>
                       <p style={{ margin: "6px 0 0", fontSize: 13, color: "var(--ink2)" }}>
-                        {totalAmount >= 1000
+                        {isEveryPriceFixed && totalAmount >= 1000
                           ? `Buyurtma summasi (${money(totalAmount)}) inPAY xavfsiz to'lov tizimi orqali to'lanadi.`
-                          : "Savatdagi mahsulotlar narxi kelishuv asosida bo'lgani uchun do'konda to'lash tavsiya etiladi."}
+                          : "Savatda narxi kelishiladigan mahsulotlar bo'lgani sababli faqat do'konda to'lash mumkin."}
                       </p>
                     </div>
                   </label>

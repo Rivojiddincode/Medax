@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /account
+Disallow: /cart
+
+Sitemap: https://medax.uz/sitemap.xml

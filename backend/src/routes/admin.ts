@@ -9,6 +9,7 @@ import { requireAdmin, requireAuth } from "../auth";
 import { applyFakeStrike, normalizePhone } from "../antispam";
 import { memoryUpload, removeFile, saveImage, savePdf } from "../upload";
 import { uniqueSlug } from "../utils";
+import { sendSms } from "../sms";
 
 export const adminRouter = Router();
 adminRouter.use(requireAuth);
@@ -321,7 +322,7 @@ adminRouter.post("/products/import", memoryUpload.single("file"), async (req, re
 
 adminRouter.get("/orders", async (req, res) => {
   const q = z.object({
-    status: z.enum(["NEW", "CONFIRMED", "DONE", "CANCELED", "FAKE"]).optional(),
+    status: z.enum(["NEW", "CONFIRMED", "READY", "DONE", "CANCELED", "FAKE"]).optional(),
     q: z.string().trim().optional(),
     page,
   }).parse(req.query);
@@ -343,14 +344,42 @@ adminRouter.get("/orders", async (req, res) => {
 
 adminRouter.patch("/orders/:id", async (req, res) => {
   const d = z.object({
-    status: z.enum(["NEW", "CONFIRMED", "DONE", "CANCELED", "FAKE"]).optional(),
+    status: z.enum(["NEW", "CONFIRMED", "READY", "DONE", "CANCELED", "FAKE"]).optional(),
     managerNote: z.string().max(2000).optional(),
+    isPaid: z.boolean().optional(),
   }).parse(req.body);
-  const order = await prisma.order.update({ where: { id: id(req.params.id) }, data: d, include: { items: true } });
+
+  const prevOrder = await prisma.order.findUnique({ where: { id: id(req.params.id) } });
+  if (!prevOrder) throw new HttpError(404, "Buyurtma topilmadi");
+
+  const order = await prisma.order.update({
+    where: { id: prevOrder.id },
+    data: {
+      ...d,
+      ...(d.isPaid !== undefined && d.isPaid && !prevOrder.isPaid ? { paidAt: new Date() } : {}),
+    },
+    include: { items: true },
+  });
+
   let blocked = false;
   if (d.status === "FAKE") blocked = await applyFakeStrike(order.phone);
+
+  // Agar holat "READY" ga o'zgargan bo'lsa va avval READY bo'lmagan bo'lsa, mijozga avtomatik SMS yuboramiz
+  if (d.status === "READY" && prevOrder.status !== "READY") {
+    try {
+      const smsText = order.isPaid
+        ? `Medax: ${order.code} buyurtmangiz tayyor. To'lov qabul qilingan, olib ketishingiz mumkin. Manzil: Namangan, Beruniy 2. Kodni ko'rsating.`
+        : `Medax: ${order.code} buyurtmangiz tayyor. To'lovni do'konda qilasiz. 3 kun ichida olib keting.`;
+      await sendSms(order.phone, smsText);
+      console.log(`[Order READY SMS sent] ${order.phone} -> ${smsText}`);
+    } catch (smsErr) {
+      console.error("[Order READY SMS error]:", smsErr);
+    }
+  }
+
   res.json({ order, blocked });
 });
+
 
 /* -------------------------------- Blocklist ------------------------------ */
 

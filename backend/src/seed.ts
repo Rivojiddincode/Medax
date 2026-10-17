@@ -3,13 +3,20 @@ import { prisma } from "./db";
 import { slugify } from "./utils";
 
 export async function seedDatabase() {
-  const email = (process.env.ADMIN_EMAIL || "admin@medtex.uz").toLowerCase();
+  const email = (process.env.ADMIN_EMAIL || "admin@medax.uz").toLowerCase();
   const password = process.env.ADMIN_PASSWORD || "ChangeMe123!";
   await prisma.user.upsert({
     where: { email },
     create: { email, name: "Administrator", role: "ADMIN", passwordHash: await bcrypt.hash(password, 10) },
     update: {},
   });
+
+  // Agar bazada allaqachon mahsulotlar mavjud bo'lsa, qayta yozilmaydi (admin o'zgartirgan narx va tavsiflar saqlanadi)
+  const existingProducts = await prisma.product.count();
+  if (existingProducts > 0) {
+    console.log(`[Seed] Bazada allaqachon ${existingProducts} ta mahsulot mavjud. Qayta yozish o'tkazib yuborildi.`);
+    return;
+  }
 
   const cats = [
     "Reanimatsiya va anesteziologiya",
@@ -556,4 +563,6 @@ export async function seedDatabase() {
   console.log(`Katalog muvaffaqiyatli to'ldirildi: ${items.length} ta tibbiy uskuna mavjud.`);
 }
 
-seedDatabase().finally(() => prisma.$disconnect());
+if (process.argv[1] && (process.argv[1].endsWith("seed.ts") || process.argv[1].endsWith("seed.js"))) {
+  seedDatabase().finally(() => prisma.$disconnect());
+}

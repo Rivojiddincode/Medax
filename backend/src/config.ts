@@ -21,24 +21,24 @@ const customerJwtSecret =
 export function validateStartupConfig() {
   if (isProd) {
     if (!process.env.JWT_SECRET) {
-      console.warn(
-        "OGOHLANTIRISH: JWT_SECRET environment o'zgaruvchisi o'rnatilmagan, avtomatik tasodifiy kalit ishlatilmoqda."
+      console.error(
+        "XAVFSIZLIK XATOSI: Production muhitida JWT_SECRET environment o'zgaruvchisi o'rnatilmagan! Doimiy maxfiy kalit o'rnating."
       );
     }
     if (!process.env.CUSTOMER_JWT_SECRET) {
-      console.warn(
-        "OGOHLANTIRISH: CUSTOMER_JWT_SECRET environment o'zgaruvchisi o'rnatilmagan, avtomatik tasodifiy kalit ishlatilmoqda."
+      console.error(
+        "XAVFSIZLIK XATOSI: Production muhitida CUSTOMER_JWT_SECRET environment o'zgaruvchisi o'rnatilmagan! Doimiy maxfiy kalit o'rnating."
       );
     }
-    if (config.smsProvider === "console") {
-      console.warn(
-        "OGOHLANTIRISH: Production muhitida SMS_PROVIDER=console sozlagansiz! Haqiqiy mijozlar SMS kod ololmaydi. Eskiz SMS provayderini sozlang."
+    if (config.smsProvider === "console" && process.env.ALLOW_INSECURE_CONSOLE_SMS !== "true") {
+      throw new Error(
+        "KRITIK XAVFSIZLIK XATOSI: Production muhitida SMS_PROVIDER=console bilan ishga tushirish taqiqlangan! SMS_PROVIDER=eskiz, ESKIZ_EMAIL va ESKIZ_PASSWORD sozlang."
       );
     }
   }
 }
 
-const smsProvider = process.env.SMS_PROVIDER || "console";
+const smsProvider = process.env.SMS_PROVIDER || (isProd ? "eskiz" : "console");
 
 export const config = {
   isProd,
@@ -54,8 +54,6 @@ export const config = {
     from: process.env.ESKIZ_FROM || "4546",
   },
   otpTtlMin: 5,
-  // console rejimida yoki EXPOSE_OTP bo'lganda kod javobda qaytadi
-  exposeOtp: process.env.EXPOSE_OTP === "true" || smsProvider !== "eskiz",
   fakeStrikeLimit: Number(process.env.FAKE_STRIKE_LIMIT || 2),
 
   // Xavfsizlik va limitlar
@@ -66,11 +64,12 @@ export const config = {
   dailyIpSmsLimit: Number(process.env.DAILY_IP_SMS_LIMIT || 8), // 1 ta IP dan kunlik max SMS
   hourlyPhoneOtpLimit: Number(process.env.HOURLY_PHONE_OTP_LIMIT || 4), // 1 ta raqamga soatlik max OTP
 
-  // inPAY to'lov tizimi sozlamalari
+  // inPAY to'lov tizimi sozlamalari (faqat environment o'zgaruvchilaridan olinadi)
   inpay: {
-    merchantId: process.env.INPAY_MERCHANT_ID || "63710",
-    merchantToken: process.env.INPAY_MERCHANT_TOKEN || "1842423423412086fc280ffd3517e34a",
+    merchantId: process.env.INPAY_MERCHANT_ID || "",
+    merchantToken: process.env.INPAY_MERCHANT_TOKEN || "",
     baseUrl: process.env.INPAY_BASE_URL || "https://inpay.uz/api/v1",
-    callbackUrl: process.env.INPAY_CALLBACK_URL || "https://medax.uz/api/orders/inpay/callback",
+    callbackUrl: process.env.INPAY_CALLBACK_URL || "https://medax-backend-c803.onrender.com/api/orders/inpay/callback",
   },
 };
+
