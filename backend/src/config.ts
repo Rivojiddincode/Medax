@@ -64,12 +64,12 @@ export const config = {
   dailyIpSmsLimit: Number(process.env.DAILY_IP_SMS_LIMIT || 8), // 1 ta IP dan kunlik max SMS
   hourlyPhoneOtpLimit: Number(process.env.HOURLY_PHONE_OTP_LIMIT || 4), // 1 ta raqamga soatlik max OTP
 
-  // inPAY to'lov tizimi sozlamalari (faqat environment o'zgaruvchilaridan olinadi)
+  // inPAY to'lov tizimi sozlamalari
   inpay: {
-    merchantId: process.env.INPAY_MERCHANT_ID || "",
-    merchantToken: process.env.INPAY_MERCHANT_TOKEN || "",
+    merchantId: process.env.INPAY_MERCHANT_ID || "63710",
+    merchantToken: process.env.INPAY_MERCHANT_TOKEN || "1842423423412086fc280ffd3517e34a",
     baseUrl: process.env.INPAY_BASE_URL || "https://inpay.uz/api/v1",
-    callbackUrl: process.env.INPAY_CALLBACK_URL || "https://medax-backend-c803.onrender.com/api/orders/inpay/callback",
+    callbackUrl: process.env.INPAY_CALLBACK_URL || "https://medax.uz/api/orders/inpay/callback",
   },
 };
 

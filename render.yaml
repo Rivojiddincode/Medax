@@ -40,9 +40,9 @@ services:
       - key: ESKIZ_FROM
         value: "4546"
       - key: INPAY_MERCHANT_ID
-        sync: false
+        value: "63710"
       - key: INPAY_MERCHANT_TOKEN
-        sync: false
+        value: "1842423423412086fc280ffd3517e34a"
       - key: INPAY_CALLBACK_URL
-        value: "https://medax-backend-c803.onrender.com/api/orders/inpay/callback"
+        value: "https://medax.uz/api/orders/inpay/callback"
 
