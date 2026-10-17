@@ -55,7 +55,7 @@ adminRouter.put("/categories/:id", async (req, res) => {
   const d = catSchema.parse(req.body);
   res.json(await prisma.category.update({ where: { id: id(req.params.id) }, data: d }));
 });
-adminRouter.delete("/categories/:id", async (req, res) => {
+adminRouter.delete("/categories/:id", requireAdmin, async (req, res) => {
   const cid = id(req.params.id);
   if (await prisma.product.count({ where: { categoryId: cid } })) throw new HttpError(409, "Bu kategoriyada mahsulotlar bor. Avval ularni boshqa kategoriyaga o'tkazing.");
   await prisma.category.delete({ where: { id: cid } });
@@ -74,7 +74,7 @@ adminRouter.put("/brands/:id", async (req, res) => {
   const d = brandSchema.parse(req.body);
   res.json(await prisma.brand.update({ where: { id: id(req.params.id) }, data: { name: d.name, country: d.country || null } }));
 });
-adminRouter.delete("/brands/:id", async (req, res) => {
+adminRouter.delete("/brands/:id", requireAdmin, async (req, res) => {
   const bid = id(req.params.id);
   if (await prisma.product.count({ where: { brandId: bid } })) throw new HttpError(409, "Bu brendda mahsulotlar bor.");
   await prisma.brand.delete({ where: { id: bid } });
@@ -189,7 +189,7 @@ adminRouter.put("/products/:id", async (req, res) => {
   res.json(await prisma.product.update({ where: { id: id(req.params.id) }, data: productData(d) }));
 });
 
-adminRouter.delete("/products/:id", async (req, res) => {
+adminRouter.delete("/products/:id", requireAdmin, async (req, res) => {
   const pid = id(req.params.id);
   if (await prisma.orderItem.count({ where: { productId: pid } })) {
     // Buyurtma tarixi saqlanishi uchun o'chirmaymiz, yashiramiz
@@ -242,7 +242,7 @@ adminRouter.delete("/documents/:docId", async (req, res) => {
 });
 
 /* Excel orqali ommaviy yuklash */
-adminRouter.post("/products/import", memoryUpload.single("file"), async (req, res) => {
+adminRouter.post("/products/import", requireAdmin, memoryUpload.single("file"), async (req, res) => {
   if (!req.file) throw new HttpError(400, "Excel fayl tanlanmadi");
   const wb = new ExcelJS.Workbook();
   try {
@@ -386,7 +386,7 @@ adminRouter.patch("/orders/:id", async (req, res) => {
 adminRouter.get("/blocklist", async (_req, res) => {
   res.json(await prisma.blocked.findMany({ orderBy: { createdAt: "desc" }, take: 500 }));
 });
-adminRouter.post("/blocklist", async (req, res) => {
+adminRouter.post("/blocklist", requireAdmin, async (req, res) => {
   const d = z.object({ type: z.enum(["PHONE", "IP"]), value: z.string().trim().min(3).max(60), reason: z.string().max(200).default("") }).parse(req.body);
   const value = d.type === "PHONE" ? normalizePhone(d.value) : d.value;
   if (!value) throw new HttpError(400, "Telefon raqami noto'g'ri");
@@ -397,7 +397,7 @@ adminRouter.post("/blocklist", async (req, res) => {
   });
   res.status(201).json(row);
 });
-adminRouter.delete("/blocklist/:id", async (req, res) => {
+adminRouter.delete("/blocklist/:id", requireAdmin, async (req, res) => {
   await prisma.blocked.delete({ where: { id: id(req.params.id) } });
   res.json({ ok: true });
 });

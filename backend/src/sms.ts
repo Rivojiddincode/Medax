@@ -5,7 +5,11 @@ let eskizToken: { value: string; at: number } | null = null;
 async function eskizLogin(): Promise<string> {
   if (eskizToken && Date.now() - eskizToken.at < 20 * 24 * 3600 * 1000) return eskizToken.value;
   const body = new URLSearchParams({ email: config.eskiz.email, password: config.eskiz.password });
-  const r = await fetch("https://notify.eskiz.uz/api/auth/login", { method: "POST", body });
+  const r = await fetch("https://notify.eskiz.uz/api/auth/login", {
+    method: "POST",
+    body,
+    signal: AbortSignal.timeout(10000),
+  });
   const j: any = await r.json();
   const token = j?.data?.token;
   if (!token) throw new Error("Eskiz login xatosi");
@@ -25,6 +29,7 @@ export async function sendSms(phone: string, text: string): Promise<void> {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
       body,
+      signal: AbortSignal.timeout(10000),
     });
     if (!r.ok) throw new Error(`SMS yuborilmadi (${r.status})`);
     return;

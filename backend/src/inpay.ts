@@ -29,6 +29,7 @@ export async function getInpayBearerToken(): Promise<string> {
   const res = await fetch(url, {
     method: "GET",
     headers: { Accept: "application/json" },
+    signal: AbortSignal.timeout(12000),
   });
 
   const data = (await res.json().catch(() => ({}))) as any;
@@ -90,6 +91,7 @@ export async function createInpayPayment(
       Authorization: `Bearer ${bearerToken}`,
     },
     body: JSON.stringify(payload),
+    signal: AbortSignal.timeout(12000),
   });
 
   const data = (await res.json().catch(() => ({}))) as any;
@@ -115,7 +117,9 @@ export async function getInpayTransactionStatus(orderId: string) {
     `${baseUrl.replace(/\/+$/, "")}/transactions/?order_id=${encodeURIComponent(orderId)}`,
     {
       headers: { Accept: "application/json" },
+      signal: AbortSignal.timeout(10000),
     }
   );
   return await res.json().catch(() => ({}));
 }
+

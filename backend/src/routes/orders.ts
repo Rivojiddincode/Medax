@@ -216,6 +216,9 @@ ordersRouter.post("/", orderIpLimiter, optionalCustomerAuth, async (req, res) =>
     }
 
     const flags = await customerFlags(phone, tx);
+    if (otpRecordId || req.customer) {
+      flags.push("OTP_VERIFIED");
+    }
 
     const ord = await tx.order.create({
       data: {

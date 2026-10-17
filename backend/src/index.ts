@@ -94,8 +94,10 @@ app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
 });
 
 import { seedDatabase } from "./seed";
+import { startBackgroundTasks } from "./tasks";
 
 app.listen(config.port, () => {
   console.log(`API muvaffaqiyatli ishga tushdi: http://localhost:${config.port}`);
   seedDatabase().catch((err) => console.warn("Startup seed:", err));
+  startBackgroundTasks();
 });

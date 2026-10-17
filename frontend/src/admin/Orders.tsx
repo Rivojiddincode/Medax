@@ -25,7 +25,11 @@ interface Order {
 
 import { useAdminI18n } from "./i18n";
 
-const FLAG_LABEL: Record<string, string> = { FIRST: "Birinchi buyurtma", TRUSTED: "Ishonchli mijoz" };
+const FLAG_LABEL: Record<string, string> = {
+  FIRST: "Yangi mijoz (1-buyurtma)",
+  TRUSTED: "Ishonchli mijoz",
+  OTP_VERIFIED: "SMS kod bilan tasdiqlangan",
+};
 const fmt = (s: string) => new Date(s).toLocaleString("ru-RU", { dateStyle: "short", timeStyle: "short" });
 
 export default function Orders() {
@@ -106,12 +110,12 @@ export default function Orders() {
                 </td>
                 <td>
                   {o.isPaid ? (
-                    <span style={{ color: "#16a34a", fontWeight: 700, fontSize: 12, background: "#dcfce7", padding: "3px 8px", borderRadius: 6 }}>
-                      To'langan ✅
+                    <span style={{ color: "var(--moss, #065f46)", fontWeight: 700, fontSize: 12, background: "var(--mint, #ecfdf5)", padding: "3px 8px", borderRadius: 6 }}>
+                      To'langan
                     </span>
                   ) : (
-                    <span style={{ color: "#ca8a04", fontWeight: 600, fontSize: 12, background: "#fef9c3", padding: "3px 8px", borderRadius: 6 }}>
-                      Kutilmoqda ⏳
+                    <span style={{ color: "#854d0e", fontWeight: 600, fontSize: 12, background: "#fef9c3", padding: "3px 8px", borderRadius: 6 }}>
+                      Kutilmoqda
                     </span>
                   )}
                 </td>
@@ -138,12 +142,20 @@ function Detail({ order, onClose, onChanged }: { order: Order; onClose: () => vo
   const [canceling, setCanceling] = useState(false);
   const [cancelReasonPreset, setCancelReasonPreset] = useState("Mijoz rad etdi / O'zi bekor qildi");
   const [cancelReasonText, setCancelReasonText] = useState("");
+  const [confirmAction, setConfirmAction] = useState<{
+    title: string;
+    message: string;
+    danger?: boolean;
+    onConfirm: () => void;
+  } | null>(null);
 
   const patch = async (body: { status?: string; managerNote?: string; isPaid?: boolean }) => {
     setBusy(true); setError("");
     try {
       const r = await api<{ blocked: boolean }>(`/admin/orders/${order.id}`, { method: "PATCH", json: body, admin: true });
-      if (r.blocked) alert(`${order.phone} raqami soxta buyurtmalar sababli avtomatik bloklandi.`);
+      if (r.blocked) {
+        setInfo(`${order.phone} raqami soxta buyurtmalar sababli avtomatik bloklandi.`);
+      }
       onChanged();
     } catch (e) { setError((e as ApiError).message); setBusy(false); }
   };
@@ -157,15 +169,42 @@ function Detail({ order, onClose, onChanged }: { order: Order; onClose: () => vo
   };
 
   const markFake = () => {
-    if (confirm("Bu buyurtma soxta deb belgilansinmi? Raqam takror soxta bo'lsa avtomatik bloklanadi.")) patch({ status: "FAKE", managerNote: note });
+    setConfirmAction({
+      title: "Soxta buyurtma deb belgilash",
+      message: "Bu buyurtma soxta deb belgilansinmi? Raqam takror soxta bo'lsa tizim tomonidan avtomatik bloklanadi.",
+      danger: true,
+      onConfirm: () => {
+        setConfirmAction(null);
+        patch({ status: "FAKE", managerNote: note });
+      },
+    });
   };
 
-  const blockNow = async () => {
-    if (!confirm(`${order.phone} raqamini darhol bloklaysizmi?`)) return;
-    try {
-      await api("/admin/blocklist", { json: { type: "PHONE", value: order.phone, reason: `Buyurtma ${order.code}` }, admin: true });
-      setInfo("Raqam bloklandi.");
-    } catch (e) { setError((e as ApiError).message); }
+  const blockNow = () => {
+    setConfirmAction({
+      title: "Raqamni bloklash",
+      message: `${order.phone} raqamini bloklashni tasdiqlaysizmi? Bu raqamdan yangi buyurtmalar qabul qilinmaydi.`,
+      danger: true,
+      onConfirm: async () => {
+        setConfirmAction(null);
+        try {
+          await api("/admin/blocklist", { json: { type: "PHONE", value: order.phone, reason: `Buyurtma ${order.code}` }, admin: true });
+          setInfo("Raqam bloklandi.");
+        } catch (e) { setError((e as ApiError).message); }
+      },
+    });
+  };
+
+  const markPaid = () => {
+    setConfirmAction({
+      title: "To'lovni tasdiqlash",
+      message: "Buyurtma kassada to'landi deb belgilansinmi?",
+      danger: false,
+      onConfirm: () => {
+        setConfirmAction(null);
+        patch({ isPaid: true, managerNote: note });
+      },
+    });
   };
 
   return (
@@ -184,15 +223,22 @@ function Detail({ order, onClose, onChanged }: { order: Order; onClose: () => vo
         <p className="muted" style={{ margin: "0 0 12px", fontSize: 14 }}>
           {fmt(order.createdAt)}{order.ip ? ` · IP ${order.ip}` : ""}
         </p>
-        <div style={{ marginBottom: 12 }}>
-          <span className="flag" style={{ background: "var(--mint)", color: "var(--moss)" }}>Telefon SMS bilan tasdiqlangan</span>
-          {order.flags.map((f) => <span key={f} className={`flag ${f}`}>{FLAG_LABEL[f] || f}</span>)}
+        <div style={{ marginBottom: 12, display: "flex", flexWrap: "wrap", gap: 6 }}>
+          {order.flags.map((f) => (
+            <span
+              key={f}
+              className={`flag ${f}`}
+              style={f === "OTP_VERIFIED" ? { background: "var(--mint, #ecfdf5)", color: "var(--moss, #065f46)" } : undefined}
+            >
+              {FLAG_LABEL[f] || f}
+            </span>
+          ))}
         </div>
 
         {order.status === "CANCELED" && (
           <div style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 10, padding: "12px 14px", margin: "10px 0" }}>
             <strong style={{ color: "#b91c1c", display: "block", fontSize: 13, marginBottom: 4 }}>
-              ❌ Buyurtma bekor qilingan
+              Buyurtma bekor qilingan
             </strong>
             <span style={{ color: "#7f1d1d", fontSize: 14 }}>
               <b>Sababi:</b> {order.managerNote || "Sabab yozilmagan"}
@@ -207,7 +253,7 @@ function Detail({ order, onClose, onChanged }: { order: Order; onClose: () => vo
         {/* Jami summa va to'lov holati */}
         <div style={{ background: "var(--sea, #f0f9ff)", border: "1px solid rgba(2, 132, 199, 0.25)", borderRadius: 12, padding: "12px 16px", margin: "12px 0", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
           <div>
-            <strong style={{ display: "block", fontSize: 13, color: "var(--ink-muted, #64748b)" }}>💰 Buyurtma summasi:</strong>
+            <strong style={{ display: "block", fontSize: 13, color: "var(--ink-muted, #64748b)" }}>Buyurtma summasi:</strong>
             <span style={{ fontSize: 19, fontWeight: 800, color: "var(--ink, #0f172a)" }}>
               {order.totalAmount && Number(order.totalAmount) > 0 ? Number(order.totalAmount).toLocaleString() + " so'm" : "Kelishuv asosida"}
             </span>
@@ -215,12 +261,12 @@ function Detail({ order, onClose, onChanged }: { order: Order; onClose: () => vo
           <div>
             <strong style={{ display: "block", fontSize: 13, color: "var(--ink-muted, #64748b)", textAlign: "right" }}>To'lov holati:</strong>
             {order.isPaid ? (
-              <span style={{ color: "#16a34a", fontWeight: 800, fontSize: 14, background: "#dcfce7", padding: "4px 10px", borderRadius: 8 }}>
-                ✅ TO'LANGAN ({order.paymentMethod === "inpay" ? "inPAY orqali" : "Kassada"})
+              <span style={{ color: "var(--moss, #065f46)", fontWeight: 800, fontSize: 14, background: "var(--mint, #ecfdf5)", padding: "4px 10px", borderRadius: 8 }}>
+                To'langan ({order.paymentMethod === "inpay" ? "inPAY orqali" : "Kassada"})
               </span>
             ) : (
-              <span style={{ color: "#ca8a04", fontWeight: 700, fontSize: 14, background: "#fef9c3", padding: "4px 10px", borderRadius: 8 }}>
-                ⏳ TO'LOV KUTILMOQDA
+              <span style={{ color: "#854d0e", fontWeight: 700, fontSize: 14, background: "#fef9c3", padding: "4px 10px", borderRadius: 8 }}>
+                To'lov kutilmoqda
               </span>
             )}
           </div>
@@ -229,7 +275,7 @@ function Detail({ order, onClose, onChanged }: { order: Order; onClose: () => vo
         {order.deliveryAddress && (
           <div style={{ background: "var(--sea, #f0f9ff)", border: "1px solid rgba(2, 132, 199, 0.2)", borderRadius: 10, padding: "10px 14px", margin: "10px 0" }}>
             <strong style={{ display: "block", fontSize: 13, color: "var(--ink-muted, #64748b)", marginBottom: 4 }}>
-              📍 Yetkazib berish manzili:
+              Yetkazib berish manzili:
             </strong>
             <span style={{ fontSize: 15, fontWeight: 600, color: "var(--ink, #0f172a)" }}>{order.deliveryAddress}</span>
           </div>
@@ -238,15 +284,15 @@ function Detail({ order, onClose, onChanged }: { order: Order; onClose: () => vo
         {order.paymentMethod && (
           <div style={{ background: "var(--sea, #f0f9ff)", border: "1px solid rgba(2, 132, 199, 0.2)", borderRadius: 10, padding: "10px 14px", margin: "10px 0" }}>
             <strong style={{ display: "block", fontSize: 13, color: "var(--ink-muted, #64748b)", marginBottom: 4 }}>
-              💳 To'lov usuli:
+              To'lov usuli:
             </strong>
             <span style={{ fontSize: 15, fontWeight: 600, color: "var(--ink, #0f172a)" }}>
-              {order.paymentMethod === "bank_transfer"
+              {order.paymentMethod === "inpay"
+                ? "inPAY — Onlayn to'lov (Click, Payme, Kartalar)"
+                : order.paymentMethod.includes("Do'konda to'lash") || order.paymentMethod === "cash"
+                ? "Do'konda to'lash (Olib ketish paytida)"
+                : order.paymentMethod === "bank_transfer"
                 ? "Bank hisob-faktura (Shartnoma / B2B)"
-                : order.paymentMethod === "upon_delivery"
-                ? "Yetkazib berilganda to'lash (Qabul qilgach)"
-                : order.paymentMethod === "contract_quote"
-                ? "Tijoriy taklif va hisob-kitob"
                 : order.paymentMethod}
             </span>
           </div>
@@ -255,15 +301,30 @@ function Detail({ order, onClose, onChanged }: { order: Order; onClose: () => vo
         {order.comment && (
           <div style={{ background: "var(--sea, #f0f9ff)", borderRadius: 10, padding: "10px 14px", margin: "10px 0" }}>
             <strong style={{ display: "block", fontSize: 13, color: "var(--ink-muted, #64748b)", marginBottom: 4 }}>
-              💬 Qo'shimcha izoh:
+              Qo'shimcha izoh:
             </strong>
             <span style={{ fontSize: 14 }}>{order.comment}</span>
           </div>
         )}
 
+        {confirmAction && (
+          <div style={{ background: confirmAction.danger ? "#fff1f2" : "var(--sea, #f0f9ff)", border: `1px solid ${confirmAction.danger ? "#fda4af" : "rgba(2, 132, 199, 0.3)"}`, borderRadius: 12, padding: "16px", margin: "16px 0" }}>
+            <h4 style={{ margin: "0 0 8px", color: confirmAction.danger ? "#be123c" : "var(--ink, #0f172a)", fontSize: 16 }}>{confirmAction.title}</h4>
+            <p style={{ margin: "0 0 14px", fontSize: 14, color: "var(--ink)" }}>{confirmAction.message}</p>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button className={`btn ${confirmAction.danger ? "danger" : ""}`} disabled={busy} onClick={confirmAction.onConfirm}>
+                Tasdiqlash
+              </button>
+              <button className="btn ghost" disabled={busy} onClick={() => setConfirmAction(null)}>
+                Bekor qilish
+              </button>
+            </div>
+          </div>
+        )}
+
         {canceling ? (
           <div style={{ background: "#fff1f2", border: "1px solid #fda4af", borderRadius: 12, padding: "16px", margin: "16px 0" }}>
-            <h4 style={{ margin: "0 0 10px", color: "#be123c", fontSize: 16 }}>⚠️ Buyurtmani bekor qilish sababini ko'rsating</h4>
+            <h4 style={{ margin: "0 0 10px", color: "#be123c", fontSize: 16 }}>Buyurtmani bekor qilish sababini ko'rsating</h4>
             <div className="field" style={{ marginBottom: 10 }}>
               <label htmlFor="cancel-preset">Asosiy sabab:</label>
               <select
@@ -307,17 +368,17 @@ function Detail({ order, onClose, onChanged }: { order: Order; onClose: () => vo
             <div className="row" style={{ flexWrap: "wrap", gap: 8 }}>
               {order.status === "NEW" && (
                 <button className="btn" disabled={busy} onClick={() => patch({ status: "CONFIRMED", managerNote: note })}>
-                  📞 Tasdiqlash (Menejer qo'ng'iroq qildi)
+                  Tasdiqlash (Menejer qo'ng'iroq qildi)
                 </button>
               )}
               {order.status === "CONFIRMED" && (
                 <button className="btn" style={{ background: "#0284c7" }} disabled={busy} onClick={() => patch({ status: "READY", managerNote: note })}>
-                  📦 Olib ketishga tayyor qilish (SMS yuborish)
+                  Olib ketishga tayyor qilish (SMS yuborish)
                 </button>
               )}
               {order.status === "READY" && (
                 <button className="btn" style={{ background: "#16a34a" }} disabled={busy} onClick={() => patch({ status: "DONE", managerNote: note })}>
-                  ✅ Bajarildi (Mijoz olib ketdi)
+                  Bajarildi (Mijoz olib ketdi)
                 </button>
               )}
               {!order.isPaid && order.status !== "CANCELED" && order.status !== "FAKE" && (
@@ -325,13 +386,9 @@ function Detail({ order, onClose, onChanged }: { order: Order; onClose: () => vo
                   className="btn sm"
                   style={{ background: "#059669", color: "#fff" }}
                   disabled={busy}
-                  onClick={() => {
-                    if (confirm("Buyurtmani 'To'langan' deb belgilaysizmi?")) {
-                      patch({ isPaid: true, managerNote: note });
-                    }
-                  }}
+                  onClick={markPaid}
                 >
-                  💵 Kassada to'landi deb belgilash
+                  Kassada to'landi deb belgilash
                 </button>
               )}
               {(order.status === "NEW" || order.status === "CONFIRMED" || order.status === "READY") && (
