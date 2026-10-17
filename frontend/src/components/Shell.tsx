@@ -201,25 +201,25 @@ export function Layout() {
               <img src="/icons/new.png" alt="" className="uz-catstrip-icon-img" />
               <b>{t("strip_new_models")}</b>
             </Link>
-            <Link to="/catalog?category=nogironlar-aravachasi" className="uz-catstrip-pill standard">
-              <img src="/icons/wheelchair.png" alt="" className="uz-catstrip-icon-img" />
-              <span>{t("strip_wheelchairs")}</span>
+            <Link to="/catalog?category=tibbiy-buyumlar" className="uz-catstrip-pill standard">
+              <img src="/icons/consumables.png" alt="" className="uz-catstrip-icon-img" />
+              <span>{t("strip_consumables")}</span>
             </Link>
-            <Link to="/catalog?category=jarrohlik" className="uz-catstrip-pill standard">
+            <Link to="/catalog?category=tibbiy-apparaturalar" className="uz-catstrip-pill standard">
               <img src="/icons/surgery.png" alt="" className="uz-catstrip-icon-img" />
               <span>{t("strip_surgery")}</span>
             </Link>
-            <Link to="/catalog?category=tibbiy-mebel" className="uz-catstrip-pill standard">
+            <Link to="/catalog?category=tibbiy-jihozlar" className="uz-catstrip-pill standard">
               <img src="/icons/furniture.png" alt="" className="uz-catstrip-icon-img" />
               <span>{t("strip_furniture")}</span>
             </Link>
-            <Link to="/catalog?category=laboratoriya" className="uz-catstrip-pill standard">
+            <Link to="/catalog?category=laboratoriya-reagentlari" className="uz-catstrip-pill standard">
               <img src="/icons/lab.png" alt="" className="uz-catstrip-icon-img" />
               <span>{t("strip_laboratory")}</span>
             </Link>
-            <Link to="/catalog?category=nitril-qolqoplar" className="uz-catstrip-pill standard">
-              <img src="/icons/consumables.png" alt="" className="uz-catstrip-icon-img" />
-              <span>{t("strip_consumables")}</span>
+            <Link to="/catalog?category=ortopedik-mahsulotlar" className="uz-catstrip-pill standard">
+              <img src="/icons/wheelchair.png" alt="" className="uz-catstrip-icon-img" />
+              <span>{t("strip_wheelchairs")}</span>
             </Link>
             <Link to="/catalog" className="uz-catstrip-more">
               {t("strip_all")}
@@ -266,11 +266,11 @@ export function Layout() {
             <div className="footer-col">
               <h4>{t("footer_catalog")}</h4>
               <nav className="footer-links">
-                <Link to="/catalog?category=reanimatsiya-va-anesteziologiya">Reanimatsiya va IVL</Link>
-                <Link to="/catalog?category=ultratovush-diagnostikasi">Ultratovush diagnostikasi</Link>
-                <Link to="/catalog?category=jarrohlik">Jarrohlik uskunalari</Link>
-                <Link to="/catalog?category=reabilitatsiya-va-ortopediya">Reabilitatsiya va ortopediya</Link>
-                <Link to="/catalog?category=tibbiy-mebel">Tibbiy mebel</Link>
+                <Link to="/catalog?category=tibbiy-buyumlar">{t("strip_consumables")}</Link>
+                <Link to="/catalog?category=tibbiy-apparaturalar">{t("strip_surgery")}</Link>
+                <Link to="/catalog?category=tibbiy-jihozlar">{t("strip_furniture")}</Link>
+                <Link to="/catalog?category=laboratoriya-reagentlari">{t("strip_laboratory")}</Link>
+                <Link to="/catalog?category=ortopedik-mahsulotlar">{t("strip_wheelchairs")}</Link>
               </nav>
             </div>
 

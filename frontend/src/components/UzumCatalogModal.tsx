@@ -21,231 +21,39 @@ export interface MegaCategory {
 
 export const MEGA_CATEGORIES: MegaCategory[] = [
   {
-    id: "wheelchairs",
-    name: "Nogironlar aravachalari",
-    slug: "nogironlar-aravachasi",
-    iconImg: "/icons/wheelchair.png",
-    groups: [
-      {
-        id: "w-electric",
-        name: "Elektr va pultli aravachalar",
-        items: [
-          "Masofaviy pultli aravachalar",
-          "Akkumulyatorli zamonaviy modellar",
-          "Buklanadigan yengil elektr aravachalar",
-          "Avtomatik tormozli modellar"
-        ]
-      },
-      {
-        id: "w-manual",
-        name: "Mexanik aravachalar",
-        items: [
-          "Standart xona va ko'cha aravachalari",
-          "Faol (aktiv) sport aravachalari",
-          "Sanitariya jihozli aravachalar",
-          "Qo'zg'aluvchan suyanchiqli modellar"
-        ]
-      },
-      {
-        id: "w-pediatric",
-        name: "Bolalar reabilitatsiyasi",
-        items: [
-          "DMO (DSP) bolalar aravachalari",
-          "Bolalar vertikalizatorlari",
-          "Fiksatsiyalovchi bolalar kreslolari",
-          "Reabilitatsiya o'rindiqlari"
-        ]
-      },
-      {
-        id: "w-parts",
-        name: "Aksessuarlar va qismlar",
-        items: [
-          "Litiy-ion akkumulyatorlar",
-          "Quyma va pnevmatik g'ildiraklar",
-          "Ortopedik xavfsizlik kamarlari",
-          "Antiproleyjin o'rindiq yostiqlari"
-        ]
-      }
-    ]
-  },
-  {
-    id: "surgery",
-    name: "Jarrohlik jihozlari",
-    slug: "jarrohlik",
-    iconImg: "/icons/surgery.png",
-    groups: [
-      {
-        id: "s-instruments",
-        name: "Jarrohlik asboblari",
-        items: [
-          "Skalpellar va almashtiriluvchi tig'lar",
-          "Qisqichlar va anatomik pinsetlar",
-          "Jarrohlik qaychilari",
-          "Igna ushlagichlar va kuretkalar"
-        ]
-      },
-      {
-        id: "s-electrosurgery",
-        name: "Elektrojarrohlik",
-        items: [
-          "Yuqori chastotali koagulyatorlar",
-          "Bipolyar va monopol pinsetlar",
-          "Jarrohlik tutunini evakuatorlari",
-          "Koagulyatsiya elektrodlari"
-        ]
-      },
-      {
-        id: "s-lighting",
-        name: "Operatsiya yoritgichlari",
-        items: [
-          "Shiftga o'rnatiladigan LED chiroqlar",
-          "Mobil portativ operatsiya chiroqlari",
-          "Jarrohlik binokulyar lupalari",
-          "Kamera bilan jihozlangan chiroqlar"
-        ]
-      },
-      {
-        id: "s-sterilization",
-        name: "Sterilizatsiya uskunalari",
-        items: [
-          "Bug'li avtoklavlar (B-klass)",
-          "Ultratovushli yuvish vannalari",
-          "Quruq issiq havoli shkaflar",
-          "Plazmali sterilizatorlar"
-        ]
-      }
-    ]
-  },
-  {
-    id: "furniture",
-    name: "Tibbiy mebellar",
-    slug: "tibbiy-mebel",
-    iconImg: "/icons/furniture.png",
-    groups: [
-      {
-        id: "f-tables",
-        name: "Operatsiya stollari",
-        items: [
-          "Elektr-gidravlik operatsiya stollari",
-          "Mexanik universal stollar",
-          "Rentgen-shaffof jarrohlik stollari",
-          "Ortopedik qo'shimcha moslamalar"
-        ]
-      },
-      {
-        id: "f-beds",
-        name: "Funksional karavotlar",
-        items: [
-          "3 va 4 motorli elektr karavotlar",
-          "Mexanik boshqaruvli karavotlar",
-          "Reanimatsiya maxsus karavotlari",
-          "Prolejinlarga qarshi matraslar"
-        ]
-      },
-      {
-        id: "f-couches",
-        name: "Kreslo va kuchetkalar",
-        items: [
-          "Ginekologik ko'rik kreslolari",
-          "Tibbiy ko'rik kuchetkalari",
-          "Donor va dializ kreslolari",
-          "Kosmetologik ko'p funksiyali kuchetkalar"
-        ]
-      },
-      {
-        id: "f-storage",
-        name: "Aravacha va shkaflar",
-        items: [
-          "Anesteziolog va muolaja aravachalari",
-          "Dori-darmon saqlash shkaflari",
-          "Zanglamas po'lat stolchalar",
-          "Tibbiy infuzion shtativlar"
-        ]
-      }
-    ]
-  },
-  {
-    id: "lab",
-    name: "Laboratoriya jihozlari",
-    slug: "laboratoriya",
-    iconImg: "/icons/lab.png",
-    groups: [
-      {
-        id: "l-analyzers",
-        name: "Tahlil analizatorlari",
-        items: [
-          "Biokimyoviy avtomatik analizatorlar",
-          "Gematologik analizatorlar (3/5-diff)",
-          "Siydik analizatorlari",
-          "Koagulometrlar va elektrolit tahlili"
-        ]
-      },
-      {
-        id: "l-general",
-        name: "Umumiy laboratoriya",
-        items: [
-          "Laboratoriya mikroskoplari",
-          "Tezkor sentrifugalar",
-          "Termostatlar va quritish shkaflari",
-          "Vorteks va suyuqlik chayqatgichlar"
-        ]
-      },
-      {
-        id: "l-rapid",
-        name: "Ekspress test & asboblar",
-        items: [
-          "Professional glyukometrlar",
-          "Avtomatik mexanik pipetkalar (dozatorlar)",
-          "Laboratoriya elektron tarozilari",
-          "Raqamli pH-metrlar"
-        ]
-      },
-      {
-        id: "l-consumables",
-        name: "Idishlar va sarflovlar",
-        items: [
-          "Vakuumli probirkalar (vakutayner)",
-          "Laboratoriya shisha idishlari",
-          "PZR tahlil sarflov materiallari",
-          "Mikroskop buyum va yopqich oynalari"
-        ]
-      }
-    ]
-  },
-  {
-    id: "consumables",
-    name: "Sarflov materiallari",
-    slug: "nitril-qolqoplar",
+    id: "supplies",
+    name: "Tibbiy buyumlar",
+    slug: "tibbiy-buyumlar",
     iconImg: "/icons/consumables.png",
     groups: [
       {
-        id: "c-gloves",
-        name: "Qo'lqoplar va himoya",
-        items: [
-          "Nitril ko'rik qo'lqoplari (kukunsiz)",
-          "Lateks steril jarrohlik qo'lqoplari",
-          "Vinil diagnostika qo'lqoplari",
-          "Tibbiy himoya niqoblari va qalpoqlar"
-        ]
-      },
-      {
         id: "c-injection",
-        name: "Inyeksiya va infuziya",
+        name: "Inyeksiya va infuziya vositalari",
         items: [
           "Bir martalik 2/5/10/20ml shpritslar",
           "Eritma quyish sistemalari (kapelnitsa)",
           "Periferik venoz kateterlar (braunyulya)",
-          "Kapalak ignalar (babochka)"
+          "Kapalak ignalar va infuzion shtativlar"
+        ]
+      },
+      {
+        id: "c-gloves",
+        name: "Qo'lqoplar va tibbiy kiyimlar",
+        items: [
+          "Nitril ko'rik qo'lqoplari (kukunsiz)",
+          "Lateks steril jarrohlik qo'lqoplari",
+          "Tibbiy himoya niqoblari va qalpoqlar",
+          "Bir martalik baxila va steril xalatlar"
         ]
       },
       {
         id: "c-dressing",
-        name: "Bog'lov vositalari",
+        name: "Bog'lov va fiksatsiya vositalari",
         items: [
-          "Steril doka va bintlar",
-          "Gipoallergen leykoplastirlar",
+          "Steril doka va tibbiy bintlar",
+          "Gipoallergen jarrohlik leykoplastirlari",
           "Elastik fiksator bintlar",
-          "Geparin tiqinlari va bog'ichlar"
+          "Geparin tiqinlari va qon to'xtatuvchi bog'lamlar"
         ]
       },
       {
@@ -254,152 +62,200 @@ export const MEGA_CATEGORIES: MegaCategory[] = [
         items: [
           "Teri va qo'l antiseptiklari",
           "Uskuna va yuzalarni tozalash vositalari",
-          "Bir martalik baxila va fartuklar",
-          "Tibbiy bir martalik choyshablar"
+          "Tibbiy bir martalik choyshablar",
+          "Chiqindilarni utilizatsiya qilish paketlari"
         ]
       }
     ]
   },
   {
-    id: "ultrasound",
-    name: "UZI va diagnostika",
-    slug: "ultratovush-diagnostikasi",
+    id: "apparatus",
+    name: "Tibbiy apparaturalar",
+    slug: "tibbiy-apparaturalar",
     iconEmoji: "🔬",
     groups: [
       {
-        id: "u-machines",
-        name: "UZI apparatlari",
+        id: "u-ultrasound",
+        name: "Ultratovush diagnostika (UZI)",
         items: [
           "Statsionar rangli doppler UZI",
-          "Portativ noutbuk tipidagi UZI",
+          "Portativ noutbuk tipidagi UZI apparatlari",
           "Simsiz cho'ntak UZI datchiklari",
-          "4D akusherlik va ginekologiya UZI"
+          "4D akusherlik va kardiologik datchiklar"
         ]
       },
-      {
-        id: "u-probes",
-        name: "UZI datchiklari",
-        items: [
-          "Konveks qorin datchiklari",
-          "Lineyniy yuzaki to'qima datchiklari",
-          "Transvaginal mikro-konveks datchiklar",
-          "Fazalashtirilgan kardiologik datchiklar"
-        ]
-      },
-      {
-        id: "u-functional",
-        name: "Funksional diagnostika",
-        items: [
-          "3/6/12-kanalli raqamli EKG apparatlari",
-          "Xolter sutkalik EKG va QBosim monitorlari",
-          "Kompyuterli spirometrlar",
-          "Elektroensefalograf (EEG) apparatlari"
-        ]
-      },
-      {
-        id: "u-xray",
-        name: "Rentgen apparatlari",
-        items: [
-          "Mobil palata rentgen apparatlari",
-          "Raqamli tekis panelli detektorlar (DR)",
-          "Rentgen himoya kiyimlari (fartuklar)",
-          "Rentgenplyonka skanerlari"
-        ]
-      }
-    ]
-  },
-  {
-    id: "icu",
-    name: "Reanimatsiya va IVL",
-    slug: "reanimatsiya-va-anesteziologiya",
-    iconEmoji: "🫀",
-    groups: [
       {
         id: "i-ventilator",
         name: "IVL va nafas apparatlari",
         items: [
           "Statsionar intensiv o'pka ventilyatsiyasi",
           "Portativ tez yordam IVL apparatlari",
-          "CPAP va BiPAP uy sharoiti apparatlari",
+          "CPAP va BiPAP noinvaziv apparatlar",
           "Kislorod konsentratorlari (5L/10L)"
         ]
       },
       {
         id: "i-monitors",
-        name: "Bemor monitorlari",
+        name: "Bemor monitorlari va EKG",
         items: [
           "Ko'p parametrli reanimatsiya monitorlari",
-          "Kapnografiya (EtCO2) modullari",
-          "Markaziy monitoring stansiyalari",
-          "Barmoq va statsionar pulsoksimetrlar"
+          "3/6/12-kanalli raqamli EKG apparatlari",
+          "Xolter sutkalik EKG monitorlari",
+          "Statsionar va barmoq pulsoksimetrlari"
         ]
       },
       {
         id: "i-defibrillators",
-        name: "Defibrillyatorlar",
+        name: "Defibrillyator va nasoslar",
         items: [
           "Professional bifazik defibrillyatorlar",
           "Avtomatik tashqi defibrillyatorlar (AED)",
-          "Monitorli kardioversiya apparatlari",
-          "Bir martalik defibrillyatsiya elektrodlari"
-        ]
-      },
-      {
-        id: "i-infusion",
-        name: "Infuzion uskunalar",
-        items: [
-          "Shprisli mikrodozator nasoslar",
-          "Volumetrik tomchi infuzion nasoslar",
-          "Infuzion suyuqlik va qon isitgichlar",
-          "Ko'p kanalli infuzion stansiyalar"
+          "Shpritsli mikrodozator nasoslar",
+          "Volumetrik tomchi infuzion nasoslar"
         ]
       }
     ]
   },
   {
-    id: "rehab",
-    name: "Ortopediya va reabilitatsiya",
-    slug: "reabilitatsiya-va-ortopediya",
-    iconEmoji: "🏃",
+    id: "equipment",
+    name: "Tibbiy jihozlar",
+    slug: "tibbiy-jihozlar",
+    iconImg: "/icons/surgery.png",
     groups: [
       {
-        id: "r-walking",
-        name: "Yurish vositalari",
+        id: "f-tables",
+        name: "Operatsiya stollari va chiroqlar",
         items: [
-          "Yengil buklanuvchi alyuminiy xodunoklar",
-          "G'ildirakli rollatorlar (tormozli)",
+          "Elektr-gidravlik operatsiya stollari",
+          "Mexanik universal jarrohlik stollari",
+          "Shiftga o'rnatiladigan LED jarrohlik chiroqlari",
+          "Mobil portativ operatsiya yoritgichlari"
+        ]
+      },
+      {
+        id: "f-beds",
+        name: "Funksional karavotlar va mebellar",
+        items: [
+          "3 va 4 motorli elektr reanimatsiya karavotlari",
+          "Gidravlik bemor aravachalari (katalka)",
+          "Anesteziolog va muolaja aravachalari",
+          "Ginekologik ko'rik kreslolari va kuchetkalar"
+        ]
+      },
+      {
+        id: "s-endoscopy",
+        name: "Endoskopiya va jarrohlik majmualari",
+        items: [
+          "4K Laparoskopik jarrohlik minoralari",
+          "Yuqori chastotali elektrojarrohlik koagulyatorlari",
+          "Operatsiya xonasi video integratsiya tizimlari",
+          "4K tibbiy jarrohlik monitorlari"
+        ]
+      },
+      {
+        id: "s-sterilization",
+        name: "Sterilizatsiya jihozlari",
+        items: [
+          "Bug'li avtoklavlar (B-klass)",
+          "Ultratovushli yuvish vannalari",
+          "Quruq issiq havoli sterilizatsiya shkaflari",
+          "Plazmali past haroratli sterilizatorlar"
+        ]
+      }
+    ]
+  },
+  {
+    id: "reagents",
+    name: "Laboratoriya reagentlari",
+    slug: "laboratoriya-reagentlari",
+    iconImg: "/icons/lab.png",
+    groups: [
+      {
+        id: "l-biochem",
+        name: "Biokimyoviy reagentlar",
+        items: [
+          "Klinik-biokimyoviy tahlil reagentlari",
+          "Jigar va buyrak funksiyasi test to'plamlari",
+          "Lipid spektri va fermentlar reaktivlari",
+          "Standart kalibratorlar va nazorat zardoblari"
+        ]
+      },
+      {
+        id: "l-hematology",
+        name: "Gematologik reagentlar",
+        items: [
+          "3-diff va 5-diff gematologik analizator reagentlari",
+          "Izotonik erituvchi (Diluent) va Lizislovchi eritma",
+          "Tozalovchi (Cleaner) va yuvuvchi eritmalar",
+          "Gematologik nazorat qoni (Control Blood)"
+        ]
+      },
+      {
+        id: "l-rapid",
+        name: "Ekspress testlar va PZR",
+        items: [
+          "Infeksion kasalliklar tezkor ekspress testlari",
+          "Gormonal va onkomarker PZR to'plamlari",
+          "Kardiospesifik markerlar (Troponin, D-Dimer)",
+          "Siydik tahlili indikator test-tasmachalari"
+        ]
+      },
+      {
+        id: "l-glassware",
+        name: "Laboratoriya sarflov vositalari",
+        items: [
+          "Vakuumli qon olish probirkalari (vakutayner)",
+          "Avtomatik dozator pipetka uchliklari (tips)",
+          "Mikroskop buyum va yopqich oynalari",
+          "Sentrifuga probirkalari va Petri kosachalari"
+        ]
+      }
+    ]
+  },
+  {
+    id: "orthopedics",
+    name: "Ortopedik mahsulotlar",
+    slug: "ortopedik-mahsulotlar",
+    iconImg: "/icons/wheelchair.png",
+    groups: [
+      {
+        id: "o-corsets",
+        name: "Korset va bandajlar",
+        items: [
+          "Umurtqa pog'onasi va bel fiksator korsetlari",
+          "Tizza va to'piq bo'g'imi elastik bandajlari",
+          "Bo'yin fiksator yoqalari (Shans yoqasi)",
+          "Yelka va tirsak bo'g'imi bandajlari"
+        ]
+      },
+      {
+        id: "o-wheelchairs",
+        name: "Nogironlar aravachalari",
+        items: [
+          "Mexanik buklanadigan xona va ko'cha aravachalari",
+          "Masofaviy pultli akkumulyatorli elektr aravachalar",
+          "Faol va sport nogironlar aravachalari",
+          "Sanitariya moslamali ko'p funksiyali aravachalar"
+        ]
+      },
+      {
+        id: "o-walking",
+        name: "Yurish tayanch vositalari",
+        items: [
+          "Yengil alyuminiy buklanuvchi xodunoklar",
+          "Tormozli to'rt g'ildirakli rollatorlar",
           "Qo'ltiqtayoq va tirsak tayanchlari",
           "Balandligi sozlanuvchi teleskopik hassalar"
         ]
       },
       {
-        id: "r-physio",
-        name: "Fizioterapiya apparatlari",
+        id: "o-rehab",
+        name: "Reabilitatsiya va parvarish",
         items: [
-          "Magnitoterapiya apparatlari (Almag)",
-          "Elektroforez va amplipuls apparatlari",
-          "Ultratovushli terapiya apparatlari",
-          "Lazeroterapiya apparatlari"
-        ]
-      },
-      {
-        id: "r-exercise",
-        name: "Tiklash trenajyorlari",
-        items: [
-          "Qo'l va oyoq pedal trenajyorlari",
-          "Passiv bo'g'im harakatlantirgichlar (CPM)",
-          "Reabilitatsiya yurish yo'laklari",
-          "Gimnastika to'plari va elastik lentalar"
-        ]
-      },
-      {
-        id: "r-orthotics",
-        name: "Bandaj va fiksatorlar",
-        items: [
-          "Tizza va to'piq bo'g'imi bandajlari",
-          "Umurtqa pog'onasi va bel korsetlari",
-          "Bo'yin fiksatorlari (Shans yoqasi)",
-          "Yelka va bilak fiksatorlari"
+          "Prolejinlarga qarshi kompressorli matraslar",
+          "Bo'g'im harakatini tiklash trenajyorlari",
+          "Ortopedik uyqu yostiqlari va to'shaklar",
+          "Bolalar DMO (DSP) reabilitatsiya vositalari"
         ]
       }
     ]
@@ -407,45 +263,30 @@ export const MEGA_CATEGORIES: MegaCategory[] = [
 ];
 
 const LOCALIZED_CATS: Record<string, Record<"uz" | "ru" | "en", string>> = {
-  wheelchairs: {
-    uz: "Nogironlar aravachalari",
-    ru: "Инвалидные коляски",
-    en: "Wheelchairs"
+  supplies: {
+    uz: "Tibbiy buyumlar",
+    ru: "Медицинские изделия",
+    en: "Medical Supplies"
   },
-  surgery: {
-    uz: "Jarrohlik jihozlari",
-    ru: "Хирургическое оборудование",
-    en: "Surgical Equipment"
+  apparatus: {
+    uz: "Tibbiy apparaturalar",
+    ru: "Медицинская аппаратура",
+    en: "Medical Apparatus"
   },
-  furniture: {
-    uz: "Tibbiy mebellar",
-    ru: "Медицинская мебель",
-    en: "Medical Furniture"
+  equipment: {
+    uz: "Tibbiy jihozlar",
+    ru: "Медицинское оборудование",
+    en: "Medical Equipment"
   },
-  lab: {
-    uz: "Laboratoriya jihozlari",
-    ru: "Лабораторное оборудование",
-    en: "Laboratory Equipment"
+  reagents: {
+    uz: "Laboratoriya reagentlari",
+    ru: "Лабораторные реагенты",
+    en: "Laboratory Reagents"
   },
-  consumables: {
-    uz: "Sarflov materiallari",
-    ru: "Расходные материалы",
-    en: "Consumables"
-  },
-  ultrasound: {
-    uz: "UZI va diagnostika",
-    ru: "УЗИ и диагностика",
-    en: "Ultrasound & Diagnostics"
-  },
-  icu: {
-    uz: "Reanimatsiya va IVL",
-    ru: "Реанимация и ИВЛ",
-    en: "ICU & Ventilators"
-  },
-  rehab: {
-    uz: "Ortopediya va reabilitatsiya",
-    ru: "Ортопедия и реабилитация",
-    en: "Orthopedics & Rehab"
+  orthopedics: {
+    uz: "Ortopedik mahsulotlar",
+    ru: "Ортопедическая продукция",
+    en: "Orthopedic Products"
   }
 };
 

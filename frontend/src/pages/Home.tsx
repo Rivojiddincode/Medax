@@ -254,32 +254,32 @@ export default function Home() {
 
           {/* Uzum-style 4 Quick Category Cards below banner */}
           <div className="uz-quick-tiles">
-            <Link to="/catalog?category=reanimatsiya-va-anesteziologiya" className="uz-quick-tile">
-              <div className="tile-icon-wrap">🫁</div>
+            <Link to="/catalog?category=tibbiy-buyumlar" className="uz-quick-tile">
+              <div className="tile-icon-wrap">🩹</div>
               <div className="tile-info">
                 <strong>{t("quick_ventilator_title")}</strong>
                 <span>{t("quick_ventilator_sub")}</span>
               </div>
             </Link>
 
-            <Link to="/catalog?category=ultratovush-diagnostikasi" className="uz-quick-tile">
-              <div className="tile-icon-wrap">🩺</div>
+            <Link to="/catalog?category=tibbiy-apparaturalar" className="uz-quick-tile">
+              <div className="tile-icon-wrap">🔬</div>
               <div className="tile-info">
                 <strong>{t("quick_ultrasound_title")}</strong>
                 <span>{t("quick_ultrasound_sub")}</span>
               </div>
             </Link>
 
-            <Link to="/catalog?category=jarrohlik" className="uz-quick-tile">
-              <div className="tile-icon-wrap">🔬</div>
+            <Link to="/catalog?category=tibbiy-jihozlar" className="uz-quick-tile">
+              <div className="tile-icon-wrap">🛏️</div>
               <div className="tile-info">
                 <strong>{t("quick_surgery_title")}</strong>
                 <span>{t("quick_surgery_sub")}</span>
               </div>
             </Link>
 
-            <Link to="/catalog?category=tibbiy-mebel" className="uz-quick-tile">
-              <div className="tile-icon-wrap">🛏️</div>
+            <Link to="/catalog?category=ortopedik-mahsulotlar" className="uz-quick-tile">
+              <div className="tile-icon-wrap">♿</div>
               <div className="tile-info">
                 <strong>{t("quick_furniture_title")}</strong>
                 <span>{t("quick_furniture_sub")}</span>

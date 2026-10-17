@@ -1,11 +1,11 @@
 import { Brand, Category, Product } from "./api";
 
 export const MOCK_CATEGORIES: Category[] = [
-  { id: 1, name: "Reanimatsiya va anesteziologiya", slug: "reanimatsiya-va-anesteziologiya", count: 5 },
-  { id: 2, name: "Ultratovush diagnostikasi", slug: "ultratovush-diagnostikasi", count: 4 },
-  { id: 3, name: "Jarrohlik", slug: "jarrohlik", count: 5 },
-  { id: 4, name: "Tibbiy mebel", slug: "tibbiy-mebel", count: 4 },
-  { id: 5, name: "Operatsion raqamli integratsiya", slug: "operatsion-raqamli-integratsiya", count: 3 },
+  { id: 1, name: "Tibbiy buyumlar", slug: "tibbiy-buyumlar", count: 6 },
+  { id: 2, name: "Tibbiy apparaturalar", slug: "tibbiy-apparaturalar", count: 12 },
+  { id: 3, name: "Tibbiy jihozlar", slug: "tibbiy-jihozlar", count: 8 },
+  { id: 4, name: "Laboratoriya reagentlari", slug: "laboratoriya-reagentlari", count: 4 },
+  { id: 5, name: "Ortopedik mahsulotlar", slug: "ortopedik-mahsulotlar", count: 5 },
 ];
 
 export const MOCK_BRANDS: Brand[] = [

@@ -2,6 +2,142 @@ import bcrypt from "bcryptjs";
 import { prisma } from "./db";
 import { slugify } from "./utils";
 
+export const TARGET_CATEGORIES = [
+  { name: "Tibbiy buyumlar", slug: "tibbiy-buyumlar", sortOrder: 0 },
+  { name: "Tibbiy apparaturalar", slug: "tibbiy-apparaturalar", sortOrder: 1 },
+  { name: "Tibbiy jihozlar", slug: "tibbiy-jihozlar", sortOrder: 2 },
+  { name: "Laboratoriya reagentlari", slug: "laboratoriya-reagentlari", sortOrder: 3 },
+  { name: "Ortopedik mahsulotlar", slug: "ortopedik-mahsulotlar", sortOrder: 4 },
+];
+
+export async function syncCategories(): Promise<Record<string, number>> {
+  const catMap: Record<string, number> = {};
+  for (const c of TARGET_CATEGORIES) {
+    const row = await prisma.category.upsert({
+      where: { slug: c.slug },
+      create: { name: c.name, slug: c.slug, sortOrder: c.sortOrder },
+      update: { name: c.name, sortOrder: c.sortOrder },
+    });
+    catMap[c.slug] = row.id;
+    catMap[c.name] = row.id;
+  }
+
+  // Barcha mahsulotlarni yangi 5 ta yo'nalishga ko'chirish
+  const products = await prisma.product.findMany({
+    include: { category: true },
+  });
+
+  for (const p of products) {
+    let targetSlug = "tibbiy-jihozlar";
+    const nameLower = p.name.toLowerCase();
+    const currentCatSlug = p.category?.slug || "";
+
+    if (
+      nameLower.includes("reagent") ||
+      nameLower.includes("kalibrator") ||
+      nameLower.includes("analizator") ||
+      nameLower.includes("test to'plami") ||
+      currentCatSlug === "laboratoriya-reagentlari"
+    ) {
+      targetSlug = "laboratoriya-reagentlari";
+    } else if (
+      nameLower.includes("shprits") ||
+      nameLower.includes("termometr") ||
+      nameLower.includes("pulsoksimetr") ||
+      nameLower.includes("qo'lqop") ||
+      nameLower.includes("bint") ||
+      nameLower.includes("doka") ||
+      nameLower.includes("kateter") ||
+      nameLower.includes("igna") ||
+      currentCatSlug === "tibbiy-buyumlar"
+    ) {
+      targetSlug = "tibbiy-buyumlar";
+    } else if (
+      nameLower.includes("korset") ||
+      nameLower.includes("bandaj") ||
+      nameLower.includes("ortoped") ||
+      nameLower.includes("xassa") ||
+      nameLower.includes("qo'ltiqtayoq") ||
+      nameLower.includes("fiksator") ||
+      nameLower.includes("aravacha") ||
+      nameLower.includes("invalit") ||
+      nameLower.includes("nogiron") ||
+      currentCatSlug === "ortopedik-mahsulotlar"
+    ) {
+      targetSlug = "ortopedik-mahsulotlar";
+    } else if (
+      nameLower.includes("uzi") ||
+      nameLower.includes("ivl") ||
+      nameLower.includes("ventilyator") ||
+      nameLower.includes("monitor") ||
+      nameLower.includes("defibrillyator") ||
+      nameLower.includes("tomograf") ||
+      nameLower.includes("apparat") ||
+      nameLower.includes("rentgen") ||
+      nameLower.includes("nasos") ||
+      nameLower.includes("dozator") ||
+      currentCatSlug === "tibbiy-apparaturalar"
+    ) {
+      targetSlug = "tibbiy-apparaturalar";
+    } else {
+      targetSlug = "tibbiy-jihozlar";
+    }
+
+    const newCatId = catMap[targetSlug];
+    if (newCatId && p.categoryId !== newCatId) {
+      await prisma.product.update({
+        where: { id: p.id },
+        data: { categoryId: newCatId },
+      });
+    }
+  }
+
+  // Eskirgan va mahsuloti qolmagan kategoriyalarni tozalash
+  const targetSlugs = TARGET_CATEGORIES.map((c) => c.slug);
+  const oldCats = await prisma.category.findMany({
+    where: { slug: { notIn: targetSlugs } },
+    include: { _count: { select: { products: true } } },
+  });
+
+  for (const oc of oldCats) {
+    if (oc._count.products === 0) {
+      await prisma.category.delete({ where: { id: oc.id } });
+      console.log(`[CategorySync] Eski bo'sh kategoriya o'chirildi: ${oc.name} (${oc.slug})`);
+    }
+  }
+
+  // Ortopedik mahsulotlar bo'sh bo'lsa, namunaviy tovar qo'shamiz
+  const ortoId = catMap["ortopedik-mahsulotlar"];
+  const ortoCount = await prisma.product.count({ where: { categoryId: ortoId } });
+  if (ortoCount === 0) {
+    const brand = await prisma.brand.findFirst();
+    await prisma.product.create({
+      data: {
+        name: "Ortopedik fiksator korset va dinamik bandaj to'plami",
+        slug: "ortopedik-fiksator-korset-va-dinamik-bandaj-to-plami",
+        sku: "MDX-ORT-350K",
+        priceFrom: 350000,
+        country: "Germaniya",
+        isHit: true,
+        isNew: true,
+        isActive: true,
+        categoryId: ortoId,
+        brandId: brand ? brand.id : null,
+        description: "Umurtqa pog'onasi, bel va bo'g'im jarohatlaridan keyin tiklanish uchun nafas oluvchi tibbiy elastik korset va ortopedik fiksator komplekti.",
+        specs: [
+          { name: "Turi", value: "Tibbiy bel-umurtqa korseti va elastik fiksator" },
+          { name: "O'lchamlari", value: "S, M, L, XL, XXL (sozlanuvchi)" },
+          { name: "Material", value: "Hipoallergen nafas oluvchi neopren mato" },
+          { name: "Kafolat", value: "12 oy rasmiy kafolat" },
+          { name: "Mavjudligi", value: "Omborda mavjud" },
+        ],
+      },
+    });
+  }
+
+  return catMap;
+}
+
 export async function seedDatabase() {
   const email = (process.env.ADMIN_EMAIL || "admin@medax.uz").toLowerCase();
   const password = process.env.ADMIN_PASSWORD || "ChangeMe123!";
@@ -11,30 +147,14 @@ export async function seedDatabase() {
     update: {},
   });
 
+  // 1. Kategoriyalarni har doim 5 ta yo'nalishga sinxronlashtiramiz
+  const catMap = await syncCategories();
+
   // Agar bazada allaqachon mahsulotlar mavjud bo'lsa, qayta yozilmaydi (admin o'zgartirgan narx va tavsiflar saqlanadi)
   const existingProducts = await prisma.product.count();
   if (existingProducts > 0) {
-    console.log(`[Seed] Bazada allaqachon ${existingProducts} ta mahsulot mavjud. Qayta yozish o'tkazib yuborildi.`);
+    console.log(`[Seed] Bazada allaqachon ${existingProducts} ta mahsulot mavjud. 5 ta kategoriya yangilandi va mahsulotlar taqsimlandi.`);
     return;
-  }
-
-  const cats = [
-    "Reanimatsiya va anesteziologiya",
-    "Ultratovush diagnostikasi",
-    "Jarrohlik",
-    "Tibbiy mebel",
-    "Operatsion raqamli integratsiya",
-  ];
-
-  const catMap: Record<string, number> = {};
-  for (const [i, name] of cats.entries()) {
-    const slug = slugify(name);
-    const c = await prisma.category.upsert({
-      where: { slug },
-      create: { name, slug, sortOrder: i },
-      update: { name, sortOrder: i },
-    });
-    catMap[name] = c.id;
   }
 
   const brands: [string, string][] = [
