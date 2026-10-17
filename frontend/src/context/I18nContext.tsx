@@ -303,6 +303,62 @@ export interface Translations {
   auth_new_pwd_opt_ph: string;
   auth_new_pwd_opt_hint: string;
   auth_modal_close: string;
+
+  // Customer Account & Profile
+  acc_login_prompt_title: string;
+  acc_login_prompt_desc: string;
+  acc_login_prompt_btn: string;
+  acc_my_orders: string;
+  acc_profile_settings: string;
+  acc_logout: string;
+  acc_logout_confirm: string;
+  acc_loading_orders: string;
+  acc_no_orders_title: string;
+  acc_no_orders_desc: string;
+  acc_go_catalog: string;
+  acc_order_title: string;
+  acc_qty_items: string;
+  acc_order_comment: string;
+  acc_order_canceled_badge: string;
+  acc_order_cancel_reason: string;
+  acc_btn_cancel_order: string;
+  acc_cancel_prompt: string;
+  acc_cancel_reason_ph: string;
+  acc_confirm_cancel_btn: string;
+  acc_back_btn: string;
+  acc_personal_info_title: string;
+  acc_personal_info_desc: string;
+  acc_name_label: string;
+  acc_org_label: string;
+  acc_org_ph: string;
+  acc_phone_label: string;
+  acc_phone_hint: string;
+  acc_save_changes_btn: string;
+  acc_saving_btn: string;
+  acc_profile_saved_ok: string;
+  acc_pwd_title: string;
+  acc_pwd_desc: string;
+  acc_curr_pwd_label: string;
+  acc_curr_pwd_ph: string;
+  acc_new_pwd_label: string;
+  acc_new_pwd_ph: string;
+  acc_conf_pwd_label: string;
+  acc_conf_pwd_ph: string;
+  acc_save_pwd_btn: string;
+  acc_pwd_saved_ok: string;
+  acc_app_settings_title: string;
+  acc_app_settings_desc: string;
+  acc_ui_lang_label: string;
+  acc_ui_theme_label: string;
+  acc_theme_light: string;
+  acc_theme_dark: string;
+  acc_security_title: string;
+  acc_security_desc: string;
+  acc_st_new: string;
+  acc_st_confirmed: string;
+  acc_st_ready: string;
+  acc_st_done: string;
+  acc_st_canceled: string;
 }
 
 export const translations: Record<Lang, Translations> = {
@@ -589,6 +645,61 @@ export const translations: Record<Lang, Translations> = {
     auth_new_pwd_opt_ph: "Parolni yangilamoqchi bo'lsangiz yozing",
     auth_new_pwd_opt_hint: "Agar parol kiritsangiz, kelgusida parol orqali kirishingiz mumkin bo'ladi",
     auth_modal_close: "Yopish",
+
+    acc_login_prompt_title: "Shaxsiy kabinetga xush kelibsiz",
+    acc_login_prompt_desc: "Buyurtmalaringiz tarixini ko'rish va ma'lumotlaringizni boshqarish uchun tizimga kiring.",
+    acc_login_prompt_btn: "Kirish yoki Ro'yxatdan o'tish →",
+    acc_my_orders: "Buyurtmalarim",
+    acc_profile_settings: "Profil sozlamalari",
+    acc_logout: "Hisobdan chiqish",
+    acc_logout_confirm: "Haqiqatan ham hisobingizdan chiqmoqchimisiz?",
+    acc_loading_orders: "Buyurtmalar yuklanmoqda…",
+    acc_no_orders_title: "Hozircha buyurtmalaringiz yo'q",
+    acc_no_orders_desc: "Katalogdan kerakli uskunalarni tanlab buyurtma ro'yxatiga qo'shing.",
+    acc_go_catalog: "Katalogga o'tish →",
+    acc_order_title: "Buyurtma",
+    acc_qty_items: "dona",
+    acc_order_comment: "Ma'lumot",
+    acc_order_canceled_badge: "Buyurtma bekor qilingan",
+    acc_order_cancel_reason: "Sababi",
+    acc_btn_cancel_order: "Buyurtmani bekor qilish",
+    acc_cancel_prompt: "Bekor qilish sababini yozing:",
+    acc_cancel_reason_ph: "Masalan: Boshqa modelni tanlamoqchiman...",
+    acc_confirm_cancel_btn: "Bekor qilishni tasdiqlash",
+    acc_back_btn: "Orqaga",
+    acc_personal_info_title: "Klinika va shaxsiy ma'lumotlar",
+    acc_personal_info_desc: "Ushbu ma'lumotlar hisob-fakturalar va kafolat hujjatlarida avtomatik aks etadi.",
+    acc_name_label: "Ism-familiyangiz",
+    acc_org_label: "Klinika / Tashkilot nomi",
+    acc_org_ph: "Masalan: Shifo Medikal Servis MCHJ",
+    acc_phone_label: "Telefon raqam (SMS bilan tasdiqlangan)",
+    acc_phone_hint: "Telefon raqam hisobingizning asosiy xavfsiz kalitidir.",
+    acc_save_changes_btn: "O'zgarishlarni saqlash ✓",
+    acc_saving_btn: "Saqlanmoqda…",
+    acc_profile_saved_ok: "Ma'lumotlar muvaffaqiyatli saqlandi!",
+    acc_pwd_title: "Kirish parolini o'rnatish / yangilash",
+    acc_pwd_desc: "Ushbu parol orqali SMS kutmasdan telefon raqam va parol yordamida tezkor kira olasiz.",
+    acc_curr_pwd_label: "Joriy parolingiz",
+    acc_curr_pwd_ph: "Amaldagi parolingiz",
+    acc_new_pwd_label: "Yangi parol",
+    acc_new_pwd_ph: "Kamida 6 ta belgi",
+    acc_conf_pwd_label: "Yangi parolni tasdiqlang",
+    acc_conf_pwd_ph: "Parolni qayta tering",
+    acc_save_pwd_btn: "Parolni saqlash ✓",
+    acc_pwd_saved_ok: "Parol muvaffaqiyatli saqlandi!",
+    acc_app_settings_title: "Ilova sozlamalari",
+    acc_app_settings_desc: "Interfeys tili va dizayn mavzusini o'zingizga moslashtiring.",
+    acc_ui_lang_label: "Interfeys tili:",
+    acc_ui_theme_label: "Ilova mavzusi (Dizayn):",
+    acc_theme_light: "☀️ Kunduzgi (Yorug')",
+    acc_theme_dark: "🌙 Tungi (Qorong'i)",
+    acc_security_title: "Hisob xavfsizligi va Seans",
+    acc_security_desc: "Ushbu qurilmadagi shaxsiy kabinet seansini yakunlash uchun hisobdan chiqish tugmasini bosing.",
+    acc_st_new: "Yangi (Kutilmoqda)",
+    acc_st_confirmed: "Tasdiqlangan (Tayyorlanmoqda)",
+    acc_st_ready: "Do'kondan olib ketishga tayyor ✓",
+    acc_st_done: "Qabul qilingan (Olib ketildi) ✓",
+    acc_st_canceled: "Bekor qilingan",
   },
   ru: {
     nav_catalog: "Каталог",
@@ -873,6 +984,61 @@ export const translations: Record<Lang, Translations> = {
     auth_new_pwd_opt_ph: "Введите, если хотите обновить пароль",
     auth_new_pwd_opt_hint: "Если вы укажете пароль, в будущем сможете входить по нему",
     auth_modal_close: "Закрыть",
+
+    acc_login_prompt_title: "Добро пожаловать в личный кабинет",
+    acc_login_prompt_desc: "Войдите в систему, чтобы просматривать историю заказов и управлять данными.",
+    acc_login_prompt_btn: "Войти или Зарегистрироваться →",
+    acc_my_orders: "Мои заказы",
+    acc_profile_settings: "Настройки профиля",
+    acc_logout: "Выйти из аккаунта",
+    acc_logout_confirm: "Вы действительно хотите выйти из своего аккаунта?",
+    acc_loading_orders: "Загрузка заказов…",
+    acc_no_orders_title: "У вас пока нет заказов",
+    acc_no_orders_desc: "Выберите необходимое оборудование в каталоге и оформите заказ.",
+    acc_go_catalog: "Перейти в каталог →",
+    acc_order_title: "Заказ",
+    acc_qty_items: "шт.",
+    acc_order_comment: "Примечание",
+    acc_order_canceled_badge: "Заказ отменен",
+    acc_order_cancel_reason: "Причина",
+    acc_btn_cancel_order: "Отменить заказ",
+    acc_cancel_prompt: "Укажите причину отмены:",
+    acc_cancel_reason_ph: "Например: хочу выбрать другую модель...",
+    acc_confirm_cancel_btn: "Подтвердить отмену",
+    acc_back_btn: "Назад",
+    acc_personal_info_title: "Данные клиники и профиля",
+    acc_personal_info_desc: "Эти данные автоматически указываются в счетах-фактурах и гарантийных документах.",
+    acc_name_label: "Ваше имя и фамилия",
+    acc_org_label: "Название клиники / организации",
+    acc_org_ph: "Например: ООО Shifo Medikal Servis",
+    acc_phone_label: "Номер телефона (подтвержден по SMS)",
+    acc_phone_hint: "Номер телефона является основным ключом безопасности вашего аккаунта.",
+    acc_save_changes_btn: "Сохранить изменения ✓",
+    acc_saving_btn: "Сохранение…",
+    acc_profile_saved_ok: "Данные успешно сохранены!",
+    acc_pwd_title: "Установка / смена пароля",
+    acc_pwd_desc: "С паролем вы сможете входить мгновенно без ожидания SMS-кода.",
+    acc_curr_pwd_label: "Текущий пароль",
+    acc_curr_pwd_ph: "Действующий пароль",
+    acc_new_pwd_label: "Новый пароль",
+    acc_new_pwd_ph: "Не менее 6 символов",
+    acc_conf_pwd_label: "Подтвердите новый пароль",
+    acc_conf_pwd_ph: "Повторите пароль",
+    acc_save_pwd_btn: "Сохранить пароль ✓",
+    acc_pwd_saved_ok: "Пароль успешно сохранен!",
+    acc_app_settings_title: "Настройки приложения",
+    acc_app_settings_desc: "Настройте язык интерфейса и тему оформления под себя.",
+    acc_ui_lang_label: "Язык интерфейса:",
+    acc_ui_theme_label: "Тема оформления (Дизайн):",
+    acc_theme_light: "☀️ Светлая",
+    acc_theme_dark: "🌙 Темная",
+    acc_security_title: "Безопасность аккаунта и сеанс",
+    acc_security_desc: "Нажмите кнопку выхода, чтобы завершить текущий сеанс на этом устройстве.",
+    acc_st_new: "Новый (В обработке)",
+    acc_st_confirmed: "Подтвержден (Готовится)",
+    acc_st_ready: "Готов к выдаче в магазине ✓",
+    acc_st_done: "Получен (Выдан) ✓",
+    acc_st_canceled: "Отменен",
   },
   en: {
     nav_catalog: "Catalog",
@@ -1157,6 +1323,61 @@ export const translations: Record<Lang, Translations> = {
     auth_new_pwd_opt_ph: "Enter if you want to update password",
     auth_new_pwd_opt_hint: "If you set a password, you can use it to sign in later",
     auth_modal_close: "Close",
+
+    acc_login_prompt_title: "Welcome to your Account",
+    acc_login_prompt_desc: "Sign in to view your order history and manage your profile details.",
+    acc_login_prompt_btn: "Sign In or Register →",
+    acc_my_orders: "My Orders",
+    acc_profile_settings: "Profile Settings",
+    acc_logout: "Log Out",
+    acc_logout_confirm: "Are you sure you want to log out of your account?",
+    acc_loading_orders: "Loading orders…",
+    acc_no_orders_title: "You have no orders yet",
+    acc_no_orders_desc: "Choose equipment from the catalog and place an order.",
+    acc_go_catalog: "Go to Catalog →",
+    acc_order_title: "Order",
+    acc_qty_items: "pcs",
+    acc_order_comment: "Note",
+    acc_order_canceled_badge: "Order Canceled",
+    acc_order_cancel_reason: "Reason",
+    acc_btn_cancel_order: "Cancel Order",
+    acc_cancel_prompt: "Enter cancellation reason:",
+    acc_cancel_reason_ph: "For example: I would like to choose another model...",
+    acc_confirm_cancel_btn: "Confirm Cancellation",
+    acc_back_btn: "Back",
+    acc_personal_info_title: "Clinic & Personal Information",
+    acc_personal_info_desc: "This information will automatically appear on invoices and warranty certificates.",
+    acc_name_label: "Full Name",
+    acc_org_label: "Clinic / Organization Name",
+    acc_org_ph: "e.g., Shifo Medical Service LLC",
+    acc_phone_label: "Phone Number (Verified via SMS)",
+    acc_phone_hint: "Your phone number is the primary security key of your account.",
+    acc_save_changes_btn: "Save Changes ✓",
+    acc_saving_btn: "Saving…",
+    acc_profile_saved_ok: "Information saved successfully!",
+    acc_pwd_title: "Set / Update Password",
+    acc_pwd_desc: "With a password, you can log in quickly with phone and password without waiting for SMS.",
+    acc_curr_pwd_label: "Current Password",
+    acc_curr_pwd_ph: "Existing password",
+    acc_new_pwd_label: "New Password",
+    acc_new_pwd_ph: "At least 6 characters",
+    acc_conf_pwd_label: "Confirm New Password",
+    acc_conf_pwd_ph: "Re-enter password",
+    acc_save_pwd_btn: "Save Password ✓",
+    acc_pwd_saved_ok: "Password saved successfully!",
+    acc_app_settings_title: "Application Settings",
+    acc_app_settings_desc: "Customize the interface language and design theme to your preference.",
+    acc_ui_lang_label: "Interface Language:",
+    acc_ui_theme_label: "App Theme (Design):",
+    acc_theme_light: "☀️ Light Mode",
+    acc_theme_dark: "🌙 Dark Mode",
+    acc_security_title: "Account Security & Session",
+    acc_security_desc: "Click log out to end your session on this device.",
+    acc_st_new: "New (Pending)",
+    acc_st_confirmed: "Confirmed (In Preparation)",
+    acc_st_ready: "Ready for Store Pickup ✓",
+    acc_st_done: "Completed (Picked Up) ✓",
+    acc_st_canceled: "Canceled",
   },
 };
 

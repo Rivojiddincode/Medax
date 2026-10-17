@@ -34,8 +34,9 @@ interface CustomerOrder {
 
 export default function CustomerAccount() {
   const { customer, token, updateProfile, changePassword, logout, openAuthModal, refreshCustomer } = useCustomerAuth();
-  const { lang, setLang } = useI18n();
+  const { lang, setLang, t } = useI18n();
   const { theme, toggleTheme } = useTheme();
+  const dateLocale = lang === "ru" ? "ru-RU" : lang === "en" ? "en-US" : "uz-UZ";
   const nav = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get("tab");
@@ -135,12 +136,12 @@ export default function CustomerAccount() {
     return (
       <main className="wrap account-login-prompt">
         <div className="prompt-card">
-          <h2>Shaxsiy kabinetga xush kelibsiz</h2>
+          <h2>{t("acc_login_prompt_title")}</h2>
           <p className="muted">
-            Buyurtmalaringiz tarixini ko'rish va ma'lumotlaringizni boshqarish uchun tizimga kiring.
+            {t("acc_login_prompt_desc")}
           </p>
           <button className="btn btn-primary-sheen" onClick={() => openAuthModal()}>
-            Kirish yoki Ro'yxatdan o'tish →
+            {t("acc_login_prompt_btn")}
           </button>
         </div>
       </main>
@@ -157,7 +158,7 @@ export default function CustomerAccount() {
         name: name.trim(),
         organization: org.trim() || undefined,
       });
-      setProfileMsg("Ma'lumotlar muvaffaqiyatli saqlandi ✓");
+      setProfileMsg(t("acc_profile_saved_ok"));
     } catch (err: any) {
       setProfileErr(err.message || "Xatolik yuz berdi");
     } finally {
@@ -183,7 +184,7 @@ export default function CustomerAccount() {
         currentPassword: currPassword ? currPassword : undefined,
         newPassword,
       });
-      setPwdMsg("Parol muvaffaqiyatli saqlandi ✓");
+      setPwdMsg(t("acc_pwd_saved_ok"));
       setCurrPassword("");
       setNewPassword("");
       setConfPassword("");
@@ -197,15 +198,15 @@ export default function CustomerAccount() {
   const getStatusBadge = (st: string) => {
     switch (st) {
       case "NEW":
-        return <span className="st NEW">Yangi (Kutilmoqda)</span>;
+        return <span className="st NEW">{t("acc_st_new")}</span>;
       case "CONFIRMED":
-        return <span className="st CONFIRMED">Tasdiqlangan (Tayyorlanmoqda)</span>;
+        return <span className="st CONFIRMED">{t("acc_st_confirmed")}</span>;
       case "READY":
-        return <span className="st CONFIRMED" style={{ background: "#e0f2fe", color: "#0284c7", fontWeight: 700 }}>Do'kondan olib ketishga tayyor ✓</span>;
+        return <span className="st CONFIRMED" style={{ background: "#e0f2fe", color: "#0284c7", fontWeight: 700 }}>{t("acc_st_ready")}</span>;
       case "DONE":
-        return <span className="st DONE">Qabul qilingan (Olib ketildi) ✓</span>;
+        return <span className="st DONE">{t("acc_st_done")}</span>;
       case "CANCELED":
-        return <span className="st CANCELED">Bekor qilingan</span>;
+        return <span className="st CANCELED">{t("acc_st_canceled")}</span>;
       default:
         return <span className="st">{st}</span>;
     }
@@ -247,19 +248,19 @@ export default function CustomerAccount() {
           type="button"
           className="account-logout-btn"
           onClick={() => {
-            if (window.confirm("Haqiqatan ham hisobingizdan chiqmoqchimisiz?")) {
+            if (window.confirm(t("acc_logout_confirm"))) {
               logout();
               nav("/");
             }
           }}
-          title="Hisobdan chiqish"
+          title={t("acc_logout")}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
             <polyline points="16 17 21 12 16 7" />
             <line x1="21" y1="12" x2="9" y2="12" />
           </svg>
-          <span>Hisobdan chiqish</span>
+          <span>{t("acc_logout")}</span>
         </button>
       </div>
 
@@ -270,7 +271,7 @@ export default function CustomerAccount() {
           onClick={() => switchTab("orders")}
         >
           <OrderBoxIcon size={18} />
-          <span>Buyurtmalarim ({orders.length})</span>
+          <span>{t("acc_my_orders")} ({orders.length})</span>
         </button>
 
         <button
@@ -278,7 +279,7 @@ export default function CustomerAccount() {
           onClick={() => switchTab("profile")}
         >
           <SettingsIcon size={18} />
-          <span>Profil sozlamalari</span>
+          <span>{t("acc_profile_settings")}</span>
         </button>
       </div>
 
@@ -287,7 +288,7 @@ export default function CustomerAccount() {
         <section className="account-orders-section">
           {loadingOrders ? (
             <p className="muted" style={{ padding: 40, textAlign: "center" }}>
-              Buyurtmalar yuklanmoqda…
+              {t("acc_loading_orders")}
             </p>
           ) : orders.length === 0 ? (
             <div className="empty-orders-card">
@@ -295,10 +296,10 @@ export default function CustomerAccount() {
                 <rect x="2" y="7" width="20" height="14" rx="2" />
                 <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
               </svg>
-              <h3>Hozircha buyurtmalaringiz yo'q</h3>
-              <p className="muted">Katalogdan kerakli uskunalarni tanlab buyurtma ro'yxatiga qo'shing.</p>
+              <h3>{t("acc_no_orders_title")}</h3>
+              <p className="muted">{t("acc_no_orders_desc")}</p>
               <Link to="/catalog" className="btn btn-primary-sheen">
-                Katalogga o'tish →
+                {t("acc_go_catalog")}
               </Link>
             </div>
           ) : (
@@ -307,9 +308,9 @@ export default function CustomerAccount() {
                 <article key={o.id} className="customer-order-card">
                   <div className="order-card-header">
                     <div className="order-code-group">
-                      <span className="order-code">Buyurtma: <b>{o.code}</b></span>
+                      <span className="order-code">{t("acc_order_title")}: <b>{o.code}</b></span>
                       <span className="order-date">
-                        {new Date(o.createdAt).toLocaleDateString("uz-UZ", {
+                        {new Date(o.createdAt).toLocaleDateString(dateLocale, {
                           day: "numeric",
                           month: "long",
                           year: "numeric",
@@ -335,7 +336,7 @@ export default function CustomerAccount() {
                           </div>
                           <div className="order-item-desc">
                             <b>{item.productName}</b>
-                            <span className="muted">Miqdori: {item.quantity} dona</span>
+                            <span className="muted">{t("acc_qty_items")}: {item.quantity}</span>
                           </div>
                         </div>
                       );
@@ -344,7 +345,7 @@ export default function CustomerAccount() {
 
                   {o.comment && (
                     <div className="order-card-comment">
-                      <span className="muted">Ma'lumot:</span> {o.comment}
+                      <span className="muted">{t("acc_order_comment")}:</span> {o.comment}
                     </div>
                   )}
 
@@ -352,10 +353,10 @@ export default function CustomerAccount() {
                   {o.status === "CANCELED" && (
                     <div style={{ background: "rgba(239, 68, 68, 0.08)", border: "1px solid rgba(239, 68, 68, 0.2)", borderRadius: 10, padding: "10px 14px", marginTop: 10 }}>
                       <strong style={{ color: "#ef4444", display: "block", fontSize: 13, marginBottom: 3 }}>
-                        ❌ Buyurtma bekor qilingan
+                        ❌ {t("acc_order_canceled_badge")}
                       </strong>
                       <span style={{ fontSize: 13, color: "var(--ink)" }}>
-                        <b>Sababi:</b> {o.cancelReason || "Menejer tomonidan ko'rib chiqilib bekor qilindi"}
+                        <b>{t("acc_order_cancel_reason")}:</b> {o.cancelReason || "Menejer tomonidan ko'rib chiqilib bekor qilindi"}
                       </span>
                     </div>
                   )}
@@ -366,13 +367,13 @@ export default function CustomerAccount() {
                       {cancelingOrderId === o.id ? (
                         <div style={{ background: "var(--bg)", border: "1px solid var(--line)", borderRadius: 10, padding: "12px", marginTop: 6 }}>
                           <span style={{ display: "block", fontSize: 13, fontWeight: 600, marginBottom: 6, color: "#be123c" }}>
-                            Bekor qilish sababini yozing:
+                            {t("acc_cancel_prompt")}
                           </span>
                           <input
                             type="text"
                             value={cancelReasonText}
                             onChange={(e) => setCancelReasonText(e.target.value)}
-                            placeholder="Masalan: Boshqa modelni tanlamoqchiman..."
+                            placeholder={t("acc_cancel_reason_ph")}
                             style={{ width: "100%", padding: "8px 12px", borderRadius: 8, fontSize: 13, marginBottom: 8 }}
                             autoFocus
                           />
@@ -383,7 +384,7 @@ export default function CustomerAccount() {
                               disabled={cancelBusy}
                               onClick={() => handleCancelOrder(o.id)}
                             >
-                              Bekor qilishni tasdiqlash
+                              {t("acc_confirm_cancel_btn")}
                             </button>
                             <button
                               type="button"
@@ -394,7 +395,7 @@ export default function CustomerAccount() {
                                 setCancelReasonText("");
                               }}
                             >
-                              Orqaga
+                              {t("acc_back_btn")}
                             </button>
                           </div>
                         </div>
@@ -408,7 +409,7 @@ export default function CustomerAccount() {
                             setCancelReasonText("");
                           }}
                         >
-                          Buyurtmani bekor qilish
+                          {t("acc_btn_cancel_order")}
                         </button>
                       )}
                     </div>
@@ -425,9 +426,9 @@ export default function CustomerAccount() {
       {tab === "profile" && (
         <section className="account-profile-section">
           <div className="profile-edit-card">
-            <h3>Klinika va shaxsiy ma'lumotlar</h3>
+            <h3>{t("acc_personal_info_title")}</h3>
             <p className="muted">
-              Ushbu ma'lumotlar hisob-fakturalar va kafolat hujjatlarida avtomatik aks etadi.
+              {t("acc_personal_info_desc")}
             </p>
 
             {profileMsg && <div className="ok">{profileMsg}</div>}
@@ -435,7 +436,7 @@ export default function CustomerAccount() {
 
             <form onSubmit={handleSaveProfile}>
               <div className="field">
-                <label htmlFor="p-name">Ism-familiyangiz</label>
+                <label htmlFor="p-name">{t("acc_name_label")}</label>
                 <input
                   id="p-name"
                   type="text"
@@ -446,18 +447,18 @@ export default function CustomerAccount() {
               </div>
 
               <div className="field">
-                <label htmlFor="p-org">Klinika / Tashkilot nomi</label>
+                <label htmlFor="p-org">{t("acc_org_label")}</label>
                 <input
                   id="p-org"
                   type="text"
                   value={org}
                   onChange={(e) => setOrg(e.target.value)}
-                  placeholder="Masalan: Shifo Medikal Servis MCHJ"
+                  placeholder={t("acc_org_ph")}
                 />
               </div>
 
               <div className="field">
-                <label htmlFor="p-phone">Telefon raqam (SMS bilan tasdiqlangan)</label>
+                <label htmlFor="p-phone">{t("acc_phone_label")}</label>
                 <input
                   id="p-phone"
                   type="tel"
@@ -465,19 +466,19 @@ export default function CustomerAccount() {
                   disabled
                   style={{ opacity: 0.7, cursor: "not-allowed" }}
                 />
-                <small className="field-hint">Telefon raqam hisobingizning asosiy xavfsiz kalitidir.</small>
+                <small className="field-hint">{t("acc_phone_hint")}</small>
               </div>
 
               <button className="btn btn-primary-sheen" type="submit" disabled={saving}>
-                {saving ? "Saqlanmoqda…" : "O'zgarishlarni saqlash ✓"}
+                {saving ? t("acc_saving_btn") : t("acc_save_changes_btn")}
               </button>
             </form>
           </div>
 
           <div className="profile-edit-card" style={{ marginTop: 20 }}>
-            <h3>Kirish parolini o'rnatish / yangilash</h3>
+            <h3>{t("acc_pwd_title")}</h3>
             <p className="muted">
-              Ushbu parol orqali SMS kutmasdan telefon raqam va parol yordamida tezkor kira olasiz.
+              {t("acc_pwd_desc")}
             </p>
 
             {pwdMsg && <div className="ok">{pwdMsg}</div>}
@@ -486,13 +487,13 @@ export default function CustomerAccount() {
             <form onSubmit={handleChangePassword}>
               {customer?.hasPassword && (
                 <div className="field">
-                  <label htmlFor="p-curr-pwd">Joriy parolingiz</label>
+                  <label htmlFor="p-curr-pwd">{t("acc_curr_pwd_label")}</label>
                   <input
                     id="p-curr-pwd"
                     type="password"
                     value={currPassword}
                     onChange={(e) => setCurrPassword(e.target.value)}
-                    placeholder="Amaldagi parolingiz"
+                    placeholder={t("acc_curr_pwd_ph")}
                     required
                   />
                 </div>
@@ -500,45 +501,45 @@ export default function CustomerAccount() {
 
               <div className="formgrid">
                 <div className="field">
-                  <label htmlFor="p-new-pwd">Yangi parol</label>
+                  <label htmlFor="p-new-pwd">{t("acc_new_pwd_label")}</label>
                   <input
                     id="p-new-pwd"
                     type="password"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Kamida 6 ta belgi"
+                    placeholder={t("acc_new_pwd_ph")}
                     required
                   />
                 </div>
                 <div className="field">
-                  <label htmlFor="p-conf-pwd">Yangi parolni tasdiqlang</label>
+                  <label htmlFor="p-conf-pwd">{t("acc_conf_pwd_label")}</label>
                   <input
                     id="p-conf-pwd"
                     type="password"
                     value={confPassword}
                     onChange={(e) => setConfPassword(e.target.value)}
-                    placeholder="Parolni qayta tering"
+                    placeholder={t("acc_conf_pwd_ph")}
                     required
                   />
                 </div>
               </div>
 
               <button className="btn btn-primary-sheen" type="submit" disabled={pwdSaving}>
-                {pwdSaving ? "Saqlanmoqda…" : "Parolni saqlash ✓"}
+                {pwdSaving ? t("acc_saving_btn") : t("acc_save_pwd_btn")}
               </button>
             </form>
           </div>
 
           {/* 3. ILOVA SOZLAMALARI (TIL VA MAVZU) */}
           <div className="profile-edit-card" style={{ marginTop: 20 }}>
-            <h3>Ilova sozlamalari</h3>
+            <h3>{t("acc_app_settings_title")}</h3>
             <p className="muted">
-              Interfeys tili va dizayn mavzusini o'zingizga moslashtiring.
+              {t("acc_app_settings_desc")}
             </p>
 
             <div style={{ marginTop: 16 }}>
               <label style={{ display: "block", fontSize: 13, fontWeight: 600, marginBottom: 8, color: "var(--ink)" }}>
-                Interfeys tili:
+                {t("acc_ui_lang_label")}
               </label>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                 {[
@@ -561,7 +562,7 @@ export default function CustomerAccount() {
 
             <div style={{ marginTop: 20, paddingTop: 16, borderTop: "1px dashed var(--line)" }}>
               <label style={{ display: "block", fontSize: 13, fontWeight: 600, marginBottom: 8, color: "var(--ink)" }}>
-                Ilova mavzusi (Dizayn):
+                {t("acc_ui_theme_label")}
               </label>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                 <button
@@ -570,7 +571,7 @@ export default function CustomerAccount() {
                   onClick={() => theme === "dark" && toggleTheme()}
                   style={{ borderRadius: 10, padding: "8px 16px", display: "inline-flex", alignItems: "center", gap: 6, fontWeight: theme === "light" ? 700 : 500 }}
                 >
-                  ☀️ Kunduzgi (Yorug')
+                  {t("acc_theme_light")}
                 </button>
                 <button
                   type="button"
@@ -578,7 +579,7 @@ export default function CustomerAccount() {
                   onClick={() => theme === "light" && toggleTheme()}
                   style={{ borderRadius: 10, padding: "8px 16px", display: "inline-flex", alignItems: "center", gap: 6, fontWeight: theme === "dark" ? 700 : 500 }}
                 >
-                  🌙 Tungi (Qorong'i)
+                  {t("acc_theme_dark")}
                 </button>
               </div>
             </div>
@@ -586,16 +587,16 @@ export default function CustomerAccount() {
 
           <div className="profile-edit-card profile-security-card">
             <div className="profile-sec-info">
-              <h3>Hisob xavfsizligi va Seans</h3>
+              <h3>{t("acc_security_title")}</h3>
               <p className="muted">
-                Ushbu qurilmadagi shaxsiy kabinet seansini yakunlash uchun hisobdan chiqish tugmasini bosing.
+                {t("acc_security_desc")}
               </p>
             </div>
             <button
               type="button"
               className="btn danger"
               onClick={() => {
-                if (window.confirm("Haqiqatan ham hisobingizdan chiqmoqchimisiz?")) {
+                if (window.confirm(t("acc_logout_confirm"))) {
                   logout();
                   nav("/");
                 }
@@ -606,7 +607,7 @@ export default function CustomerAccount() {
                 <polyline points="16 17 21 12 16 7" />
                 <line x1="21" y1="12" x2="9" y2="12" />
               </svg>
-              <span>Hisobdan chiqish</span>
+              <span>{t("acc_logout")}</span>
             </button>
           </div>
         </section>
