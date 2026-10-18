@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text } from "react-native";
+import { View, Text, Platform } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { HomeScreen } from "../screens/HomeScreen";
@@ -14,6 +15,8 @@ const Stack = createNativeStackNavigator();
 
 function MainTabs() {
   const { totalItems } = useCart();
+  const insets = useSafeAreaInsets();
+  const bottomPadding = Math.max(insets.bottom, 8);
 
   return (
     <Tab.Navigator
@@ -24,14 +27,20 @@ function MainTabs() {
         tabBarStyle: {
           backgroundColor: "#ffffff",
           borderTopWidth: 1,
-          borderTopColor: "#f1f5f9",
-          height: 60,
-          paddingBottom: 8,
+          borderTopColor: "#e2e8f0",
+          height: 56 + bottomPadding,
+          paddingBottom: bottomPadding,
           paddingTop: 6,
+          elevation: 12,
+          shadowColor: "#0f172a",
+          shadowOffset: { width: 0, height: -3 },
+          shadowOpacity: 0.08,
+          shadowRadius: 12,
         },
         tabBarLabelStyle: {
           fontSize: 11,
           fontWeight: "600",
+          marginTop: -2,
         },
       }}
     >
@@ -39,30 +48,51 @@ function MainTabs() {
         name="Asosiy"
         component={HomeScreen}
         options={{
-          tabBarIcon: ({ color }) => <Text style={{ fontSize: 20 }}>🏠</Text>,
+          tabBarLabel: "Asosiy",
+          tabBarIcon: ({ color, focused }) => (
+            <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.75 }}>🏠</Text>
+          ),
         }}
       />
       <Tab.Screen
         name="Katalog"
         component={CatalogScreen}
         options={{
-          tabBarIcon: ({ color }) => <Text style={{ fontSize: 20 }}>📑</Text>,
+          tabBarLabel: "Katalog",
+          tabBarIcon: ({ color, focused }) => (
+            <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.75 }}>📑</Text>
+          ),
         }}
       />
       <Tab.Screen
         name="Savatcha"
         component={CartScreen}
         options={{
+          tabBarLabel: "Savatcha",
           tabBarBadge: totalItems > 0 ? totalItems : undefined,
-          tabBarBadgeStyle: { backgroundColor: "#0284c7", fontSize: 10 },
-          tabBarIcon: ({ color }) => <Text style={{ fontSize: 20 }}>🛒</Text>,
+          tabBarBadgeStyle: {
+            backgroundColor: "#ef4444",
+            color: "#ffffff",
+            fontSize: 10,
+            fontWeight: "700",
+            minWidth: 18,
+            height: 18,
+            borderRadius: 9,
+            lineHeight: 18,
+          },
+          tabBarIcon: ({ color, focused }) => (
+            <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.75 }}>🛒</Text>
+          ),
         }}
       />
       <Tab.Screen
         name="Profil"
         component={ProfileScreen}
         options={{
-          tabBarIcon: ({ color }) => <Text style={{ fontSize: 20 }}>👤</Text>,
+          tabBarLabel: "Profil",
+          tabBarIcon: ({ color, focused }) => (
+            <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.75 }}>👤</Text>
+          ),
         }}
       />
     </Tab.Navigator>

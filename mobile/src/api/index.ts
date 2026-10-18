@@ -53,11 +53,25 @@ export async function fetchProducts(params: { categoryId?: number; search?: stri
 
     const res = await fetch(`${API_BASE}/products?${query.toString()}`);
     const data = await res.json();
-    return Array.isArray(data) ? data : data.products || [];
+    return Array.isArray(data) ? data : (data.items || data.products || []);
   } catch (err) {
     console.error("fetchProducts error:", err);
     return [];
   }
+}
+
+export function getImageUrl(path?: string | null): string {
+  if (!path) return "https://medax.uz/logo.png";
+  if (path.startsWith("http://") || path.startsWith("https://")) return path;
+  if (path.startsWith("/")) return `https://medax.uz${path}`;
+  return `https://medax.uz/${path}`;
+}
+
+export function formatPrice(price?: number | string | null): string {
+  if (price === undefined || price === null || price === "") return "Kelishilgan narxda";
+  const num = typeof price === "number" ? price : parseFloat(String(price));
+  if (isNaN(num) || num <= 0) return "Kelishilgan narxda";
+  return num.toLocaleString("uz-UZ") + " UZS";
 }
 
 export async function fetchProductDetail(slug: string): Promise<Product | null> {

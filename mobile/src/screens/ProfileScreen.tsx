@@ -7,11 +7,14 @@ import {
   Linking,
   ActivityIndicator,
   Alert,
+  ScrollView,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "../context/AuthContext";
 import { startTelegramAuth, pollTelegramAuth } from "../api";
 
 export function ProfileScreen() {
+  const insets = useSafeAreaInsets();
   const { customer, logout, loginWithToken } = useAuth();
   const [loading, setLoading] = useState(false);
   const [waitingTelegram, setWaitingTelegram] = useState(false);
@@ -53,7 +56,11 @@ export function ProfileScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={[styles.content, { paddingTop: insets.top + 12 }]}
+      showsVerticalScrollIndicator={false}
+    >
       {customer ? (
         /* Foydalanuvchi tizimga kirgan holat */
         <View style={styles.profileCard}>
@@ -88,7 +95,7 @@ export function ProfileScreen() {
           <Text style={styles.loginIcon}>🏥</Text>
           <Text style={styles.loginTitle}>Shaxsiy kabinetga kirish</Text>
           <Text style={styles.loginSub}>
-            Buyurtmalaringizni kuzatish va xaridlarni boshqarish uchun Telegram orqali kiring
+            Buyurtmalaringizni kuzatish va tezkor buyurtma berish uchun Telegram orqali kiring
           </Text>
 
           {!waitingTelegram ? (
@@ -100,7 +107,7 @@ export function ProfileScreen() {
               {loading ? (
                 <ActivityIndicator color="#ffffff" />
               ) : (
-                <Text style={styles.telegramBtnText}>✈️ Telegram orqali 1-klikda kirish</Text>
+                <Text style={styles.telegramBtnText}>✈️ Telegram orqali kirish</Text>
               )}
             </TouchableOpacity>
           ) : (
@@ -108,7 +115,7 @@ export function ProfileScreen() {
               <ActivityIndicator color="#0284c7" size="small" style={{ marginBottom: 10 }} />
               <Text style={styles.waitingTitle}>Telegram bot kutilmoqda...</Text>
               <Text style={styles.waitingDesc}>
-                Ochilgan botda <b>«📱 Telefon raqamni yuborish»</b> tugmasini bosing
+                Ochilgan botda <Text style={{ fontWeight: "700", color: "#0284c7" }}>«📱 Telefon raqamni yuborish»</Text> tugmasini bosing
               </Text>
               {tgSession && (
                 <TouchableOpacity
@@ -125,18 +132,27 @@ export function ProfileScreen() {
           )}
 
           <View style={styles.benefitList}>
-            <Text style={styles.benefitItem}>⚡ SMS kutmasdan bir zumda kirish</Text>
-            <Text style={styles.benefitItem}>🔒 Xavfsiz va 100% bepul</Text>
-            <Text style={styles.benefitItem}>📱 Telefon raqamingiz bot orqali tasdiqlanadi</Text>
+            <Text style={styles.benefitItem}>⚡ SMS kutmasdan bir zumda tasdiqlash</Text>
+            <Text style={styles.benefitItem}>🔒 Xavfsiz va 100% rasmiy</Text>
+            <Text style={styles.benefitItem}>📱 Telefon raqamingiz bot orqali bog'lanadi</Text>
           </View>
         </View>
       )}
-    </View>
+
+      {/* Kontaktlar qismi */}
+      <View style={styles.contactCard}>
+        <Text style={styles.contactCardTitle}>Bog'lanish va qo'llab-quvvatlash</Text>
+        <Text style={styles.contactItem}>📞 Telefon: +998 71 200-00-00</Text>
+        <Text style={styles.contactItem}>💬 Telegram: @medax_admin</Text>
+        <Text style={styles.contactItem}>📍 Manzil: Toshkent sh., Chilonzor tumani</Text>
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f8fafc", padding: 20 },
+  container: { flex: 1, backgroundColor: "#f8fafc" },
+  content: { padding: 16, paddingBottom: 32 },
   loginCard: {
     backgroundColor: "#ffffff",
     borderRadius: 24,
@@ -148,7 +164,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.04,
     shadowRadius: 10,
     elevation: 2,
-    marginTop: 20,
+    marginBottom: 16,
   },
   loginIcon: { fontSize: 44, marginBottom: 12 },
   loginTitle: { fontSize: 20, fontWeight: "800", color: "#0f172a", marginBottom: 6 },
@@ -160,31 +176,49 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     alignItems: "center",
     shadowColor: "#229ED9",
-    shadowOpacity: 0.3,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
     shadowRadius: 8,
     elevation: 3,
   },
-  telegramBtnText: { color: "#ffffff", fontSize: 15, fontWeight: "700" },
-  benefitList: { marginTop: 24, width: "100%", borderTopWidth: 1, borderTopColor: "#f1f5f9", paddingTop: 16 },
-  benefitItem: { fontSize: 12.5, color: "#475569", marginBottom: 8, fontWeight: "500" },
+  telegramBtnText: { color: "#ffffff", fontSize: 15, fontWeight: "800" },
+  benefitList: { marginTop: 20, width: "100%", borderTopWidth: 1, borderTopColor: "#f1f5f9", paddingTop: 14 },
+  benefitItem: { fontSize: 12, color: "#475569", marginBottom: 6, fontWeight: "500" },
   waitingBox: { alignItems: "center", paddingVertical: 10, width: "100%" },
   waitingTitle: { fontSize: 15, fontWeight: "700", color: "#0284c7", marginBottom: 4 },
-  waitingDesc: { fontSize: 13, color: "#64748b", textAlign: "center", marginBottom: 12 },
+  waitingDesc: { fontSize: 13, color: "#64748b", textAlign: "center", marginBottom: 12, lineHeight: 18 },
   reopenBtn: { backgroundColor: "#e0f2fe", paddingHorizontal: 16, paddingVertical: 8, borderRadius: 10, marginBottom: 10 },
   reopenBtnText: { color: "#0284c7", fontWeight: "700", fontSize: 13 },
   cancelText: { color: "#94a3b8", fontSize: 13 },
-  profileCard: { backgroundColor: "#ffffff", borderRadius: 24, padding: 24, alignItems: "center", borderWidth: 1, borderColor: "#e2e8f0", marginTop: 20 },
+  profileCard: {
+    backgroundColor: "#ffffff",
+    borderRadius: 24,
+    padding: 24,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    marginBottom: 16,
+  },
   avatarWrap: { width: 72, height: 72, borderRadius: 36, backgroundColor: "#0284c7", justifyContent: "center", alignItems: "center", marginBottom: 12 },
   avatarText: { fontSize: 28, color: "#ffffff", fontWeight: "800" },
   userName: { fontSize: 20, fontWeight: "800", color: "#0f172a", marginBottom: 4 },
   userPhone: { fontSize: 14, color: "#64748b", fontWeight: "500" },
   orgBadge: { backgroundColor: "#f1f5f9", paddingHorizontal: 12, paddingVertical: 4, borderRadius: 8, marginTop: 8 },
   orgText: { fontSize: 12, color: "#334155", fontWeight: "600" },
-  infoBox: { width: "100%", marginTop: 24, backgroundColor: "#f8fafc", borderRadius: 14, padding: 14 },
-  infoTitle: { fontSize: 14, fontWeight: "700", color: "#334155", marginBottom: 8 },
+  infoBox: { width: "100%", marginTop: 20, backgroundColor: "#f8fafc", borderRadius: 14, padding: 14, borderWidth: 1, borderColor: "#e2e8f0" },
+  infoTitle: { fontSize: 13.5, fontWeight: "700", color: "#334155", marginBottom: 8 },
   infoRow: { flexDirection: "row", justifyContent: "space-between" },
   infoLabel: { fontSize: 13, color: "#64748b" },
-  infoValue: { fontSize: 13, color: "#059669", fontWeight: "600" },
+  infoValue: { fontSize: 13, color: "#059669", fontWeight: "700" },
   logoutBtn: { width: "100%", marginTop: 20, backgroundColor: "#fee2e2", paddingVertical: 12, borderRadius: 12, alignItems: "center" },
   logoutBtnText: { color: "#dc2626", fontWeight: "700", fontSize: 14 },
+  contactCard: {
+    backgroundColor: "#ffffff",
+    borderRadius: 18,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+  },
+  contactCardTitle: { fontSize: 14, fontWeight: "800", color: "#0f172a", marginBottom: 8 },
+  contactItem: { fontSize: 12.5, color: "#475569", marginBottom: 4 },
 });

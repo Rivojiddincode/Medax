@@ -8,22 +8,34 @@ import {
   FlatList,
   Image,
   ActivityIndicator,
+  Dimensions,
 } from "react-native";
-import { Category, fetchCategories, fetchProducts, Product } from "../api";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Category, fetchCategories, fetchProducts, Product, getImageUrl, formatPrice } from "../api";
 import { useCart } from "../context/CartContext";
 
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+
 export function CatalogScreen({ navigation, route }: any) {
+  const insets = useSafeAreaInsets();
   const initialCategory = route?.params?.categoryId;
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedCat, setSelectedCat] = useState<number | undefined>(initialCategory);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [addedId, setAddedId] = useState<number | null>(null);
   const { addToCart } = useCart();
 
   useEffect(() => {
     fetchCategories().then(setCategories);
   }, []);
+
+  useEffect(() => {
+    if (route?.params?.categoryId !== undefined) {
+      setSelectedCat(route.params.categoryId);
+    }
+  }, [route?.params?.categoryId]);
 
   useEffect(() => {
     setLoading(true);
@@ -33,22 +45,31 @@ export function CatalogScreen({ navigation, route }: any) {
     });
   }, [selectedCat, search]);
 
+  const handleAddToCart = (product: Product) => {
+    addToCart(product, 1);
+    setAddedId(product.id);
+    setTimeout(() => setAddedId(null), 1200);
+  };
+
   return (
     <View style={styles.container}>
-      {/* Search Header */}
-      <View style={styles.searchWrap}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Uskuna nomini qidiring..."
-          value={search}
-          onChangeText={setSearch}
-          placeholderTextColor="#94a3b8"
-        />
-        {search.length > 0 && (
-          <TouchableOpacity onPress={() => setSearch("")} style={styles.clearBtn}>
-            <Text style={{ color: "#94a3b8", fontSize: 13 }}>✕</Text>
-          </TouchableOpacity>
-        )}
+      {/* Search Header with Safe Area */}
+      <View style={[styles.searchWrap, { paddingTop: insets.top + 8 }]}>
+        <View style={styles.searchInputRow}>
+          <Text style={{ fontSize: 14, marginRight: 8 }}>🔍</Text>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Uskuna nomini qidiring..."
+            value={search}
+            onChangeText={setSearch}
+            placeholderTextColor="#94a3b8"
+          />
+          {search.length > 0 && (
+            <TouchableOpacity onPress={() => setSearch("")} style={styles.clearBtn}>
+              <Text style={{ color: "#94a3b8", fontSize: 14 }}>✕</Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
       {/* Category Pills */}
@@ -58,6 +79,7 @@ export function CatalogScreen({ navigation, route }: any) {
           showsHorizontalScrollIndicator={false}
           data={[{ id: 0, name: "Barchasi", slug: "all" }, ...categories]}
           keyExtractor={(item) => String(item.id)}
+          contentContainerStyle={{ paddingRight: 16 }}
           renderItem={({ item }) => {
             const active = (!selectedCat && item.id === 0) || selectedCat === item.id;
             return (
@@ -77,8 +99,9 @@ export function CatalogScreen({ navigation, route }: any) {
         <ActivityIndicator size="large" color="#0284c7" style={{ marginTop: 40 }} />
       ) : products.length === 0 ? (
         <View style={styles.emptyWrap}>
+          <Text style={{ fontSize: 40, marginBottom: 12 }}>🔎</Text>
           <Text style={styles.emptyTitle}>Uskuna topilmadi</Text>
-          <Text style={styles.emptySub}>Boshqa kalit so'z bilan qidirib ko'ring</Text>
+          <Text style={styles.emptySub}>Boshqa kategoriya yoki kalit so'z bilan qidirib ko'ring</Text>
         </View>
       ) : (
         <FlatList
@@ -89,29 +112,50 @@ export function CatalogScreen({ navigation, route }: any) {
           columnWrapperStyle={styles.columnWrapper}
           showsVerticalScrollIndicator={false}
           renderItem={({ item }) => {
-            const imgUrl = item.images?.[0]?.url || "https://medax.uz/logo.png";
+            const imgUrl = getImageUrl(item.images?.[0]?.url);
+            const isAdded = addedId === item.id;
             return (
               <TouchableOpacity
                 style={styles.productCard}
+                activeOpacity={0.9}
                 onPress={() => navigation.navigate("ProductDetail", { slug: item.slug })}
               >
-                <Image source={{ uri: imgUrl }} style={styles.productImg} resizeMode="cover" />
-                <Text style={styles.productName} numberOfLines={2}>
-                  {item.name}
-                </Text>
-                {item.priceFrom ? (
-                  <Text style={styles.productPrice}>
-                    {Number(item.priceFrom).toLocaleString()} so'm
+                <View style={styles.productImgWrap}>
+                  <Image source={{ uri: imgUrl }} style={styles.productImg} resizeMode="contain" />
+                  {item.isHit && (
+                    <View style={styles.hitBadge}>
+                      <Text style={styles.hitBadgeText}>XIT</Text>
+                    </View>
+                  )}
+                  {item.isNew && !item.isHit && (
+                    <View style={styles.newBadge}>
+                      <Text style={styles.newBadgeText}>YANGI</Text>
+                    </View>
+                  )}
+                </View>
+
+                <View style={styles.productBody}>
+                  {item.category?.name && (
+                    <Text style={styles.productCatName} numberOfLines={1}>
+                      {item.category.name}
+                    </Text>
+                  )}
+                  <Text style={styles.productName} numberOfLines={2}>
+                    {item.name}
                   </Text>
-                ) : (
-                  <Text style={styles.productPriceMuted}>Narx so'rov bo'yicha</Text>
-                )}
-                <TouchableOpacity
-                  style={styles.addCartBtn}
-                  onPress={() => addToCart(item)}
-                >
-                  <Text style={styles.addCartText}>+ Savatchaga</Text>
-                </TouchableOpacity>
+                  {item.country && (
+                    <Text style={styles.productCountry}>🌍 {item.country}</Text>
+                  )}
+                  <Text style={styles.productPrice}>{formatPrice(item.priceFrom)}</Text>
+                  <TouchableOpacity
+                    style={[styles.addCartBtn, isAdded && styles.addCartBtnDone]}
+                    onPress={() => handleAddToCart(item)}
+                  >
+                    <Text style={[styles.addCartText, isAdded && styles.addCartTextDone]}>
+                      {isAdded ? "✓ Qo'shildi" : "🛒 Savatchaga"}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </TouchableOpacity>
             );
           }}
@@ -124,55 +168,102 @@ export function CatalogScreen({ navigation, route }: any) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f8fafc" },
   searchWrap: {
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingBottom: 10,
     backgroundColor: "#ffffff",
     borderBottomWidth: 1,
     borderBottomColor: "#f1f5f9",
-    position: "relative",
   },
-  searchInput: {
+  searchInputRow: {
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: "#f1f5f9",
     borderRadius: 14,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 14,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+  },
+  searchInput: {
+    flex: 1,
+    paddingVertical: 10,
+    fontSize: 13.5,
     color: "#0f172a",
   },
-  clearBtn: { position: "absolute", right: 30, top: 28 },
-  pillsWrap: { backgroundColor: "#ffffff", paddingVertical: 10, paddingLeft: 16, borderBottomWidth: 1, borderBottomColor: "#f1f5f9" },
+  clearBtn: { padding: 4 },
+  pillsWrap: {
+    backgroundColor: "#ffffff",
+    paddingVertical: 10,
+    paddingLeft: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f1f5f9",
+  },
   pill: {
     paddingHorizontal: 14,
-    paddingVertical: 8,
+    paddingVertical: 7,
     borderRadius: 20,
     backgroundColor: "#f1f5f9",
     marginRight: 8,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
   },
-  pillActive: { backgroundColor: "#0284c7" },
-  pillText: { fontSize: 13, fontWeight: "600", color: "#475569" },
-  pillTextActive: { color: "#ffffff" },
-  listContent: { padding: 16 },
+  pillActive: { backgroundColor: "#0284c7", borderColor: "#0284c7" },
+  pillText: { fontSize: 12.5, fontWeight: "600", color: "#475569" },
+  pillTextActive: { color: "#ffffff", fontWeight: "700" },
+  listContent: { padding: 14, paddingBottom: 24 },
   columnWrapper: { justifyContent: "space-between" },
   productCard: {
-    width: "48%",
+    width: (SCREEN_WIDTH - 40) / 2,
     backgroundColor: "#ffffff",
-    borderRadius: 16,
-    padding: 12,
-    marginBottom: 14,
+    borderRadius: 18,
+    marginBottom: 12,
     borderWidth: 1,
-    borderColor: "#f1f5f9",
+    borderColor: "#e2e8f0",
+    overflow: "hidden",
   },
-  productImg: { width: "100%", height: 130, borderRadius: 12, backgroundColor: "#f8fafc", marginBottom: 10 },
-  productName: { fontSize: 13, fontWeight: "600", color: "#1e293b", minHeight: 34, marginBottom: 6 },
-  productPrice: { fontSize: 14, fontWeight: "800", color: "#0284c7", marginBottom: 10 },
-  productPriceMuted: { fontSize: 12, fontWeight: "500", color: "#64748b", marginBottom: 10 },
+  productImgWrap: {
+    height: 140,
+    backgroundColor: "#f8fafc",
+    position: "relative",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 8,
+  },
+  productImg: { width: "100%", height: "100%" },
+  hitBadge: {
+    position: "absolute",
+    top: 8,
+    left: 8,
+    backgroundColor: "#ef4444",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 5,
+  },
+  hitBadgeText: { color: "#ffffff", fontSize: 9.5, fontWeight: "900" },
+  newBadge: {
+    position: "absolute",
+    top: 8,
+    left: 8,
+    backgroundColor: "#10b981",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 5,
+  },
+  newBadgeText: { color: "#ffffff", fontSize: 9.5, fontWeight: "900" },
+  productBody: { padding: 10 },
+  productCatName: { fontSize: 9.5, fontWeight: "700", color: "#0284c7", textTransform: "uppercase", marginBottom: 3 },
+  productName: { fontSize: 12.5, fontWeight: "700", color: "#0f172a", minHeight: 34, marginBottom: 4, lineHeight: 17 },
+  productCountry: { fontSize: 10, color: "#64748b", marginBottom: 6 },
+  productPrice: { fontSize: 13.5, fontWeight: "900", color: "#0284c7", marginBottom: 8 },
   addCartBtn: {
-    backgroundColor: "#e0f2fe",
+    backgroundColor: "rgba(2, 132, 199, 0.09)",
     paddingVertical: 8,
     borderRadius: 10,
     alignItems: "center",
   },
-  addCartText: { color: "#0284c7", fontWeight: "700", fontSize: 12 },
-  emptyWrap: { alignItems: "center", justifyContent: "center", marginTop: 60 },
-  emptyTitle: { fontSize: 16, fontWeight: "700", color: "#334155" },
-  emptySub: { fontSize: 13, color: "#94a3b8", marginTop: 4 },
+  addCartBtnDone: { backgroundColor: "#10b981" },
+  addCartText: { color: "#0284c7", fontWeight: "800", fontSize: 11.5 },
+  addCartTextDone: { color: "#ffffff" },
+  emptyWrap: { alignItems: "center", justifyContent: "center", marginTop: 60, paddingHorizontal: 30 },
+  emptyTitle: { fontSize: 16, fontWeight: "800", color: "#1e293b", marginBottom: 4 },
+  emptySub: { fontSize: 12.5, color: "#94a3b8", textAlign: "center" },
 });

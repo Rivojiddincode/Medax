@@ -8,10 +8,12 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
-import { fetchProductDetail, Product } from "../api";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { fetchProductDetail, Product, getImageUrl, formatPrice } from "../api";
 import { useCart } from "../context/CartContext";
 
 export function ProductDetailScreen({ route, navigation }: any) {
+  const insets = useSafeAreaInsets();
   const { slug } = route.params;
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
@@ -41,12 +43,23 @@ export function ProductDetailScreen({ route, navigation }: any) {
     );
   }
 
-  const imgUrl = product.images?.[0]?.url || "https://medax.uz/logo.png";
+  const imgUrl = getImageUrl(product.images?.[0]?.url);
 
   return (
     <View style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
-        <Image source={{ uri: imgUrl }} style={styles.mainImg} resizeMode="contain" />
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={[styles.scroll, { paddingBottom: 120 + insets.bottom }]}
+      >
+        {/* Main Product Image */}
+        <View style={styles.mainImgWrap}>
+          <Image source={{ uri: imgUrl }} style={styles.mainImg} resizeMode="contain" />
+          {product.isHit && (
+            <View style={styles.hitBadge}>
+              <Text style={styles.hitBadgeText}>XIT MAHSULOT</Text>
+            </View>
+          )}
+        </View>
 
         <View style={styles.body}>
           {product.category && (
@@ -56,13 +69,7 @@ export function ProductDetailScreen({ route, navigation }: any) {
           <Text style={styles.title}>{product.name}</Text>
 
           <View style={styles.priceRow}>
-            {product.priceFrom ? (
-              <Text style={styles.price}>
-                {Number(product.priceFrom).toLocaleString()} so'm
-              </Text>
-            ) : (
-              <Text style={styles.priceMuted}>Narx so'rov bo'yicha</Text>
-            )}
+            <Text style={styles.price}>{formatPrice(product.priceFrom)}</Text>
             {product.country && (
               <View style={styles.countryBadge}>
                 <Text style={styles.countryText}>🌍 {product.country}</Text>
@@ -70,25 +77,41 @@ export function ProductDetailScreen({ route, navigation }: any) {
             )}
           </View>
 
+          {/* Description */}
           {product.description ? (
             <View style={styles.section}>
-              <Text style={styles.sectionHeader}>Tavsif</Text>
+              <Text style={styles.sectionHeader}>Tavsif va ma'lumot</Text>
               <Text style={styles.desc}>{product.description}</Text>
             </View>
           ) : null}
 
-          {/* Kafolat va yetkazib berish */}
+          {/* Specs Table */}
+          {Array.isArray(product.specs) && product.specs.length > 0 && (
+            <View style={styles.section}>
+              <Text style={styles.sectionHeader}>Xususiyatlari</Text>
+              <View style={styles.specsWrap}>
+                {product.specs.map((spec: any, idx: number) => (
+                  <View key={idx} style={[styles.specRow, idx % 2 === 1 && styles.specRowAlt]}>
+                    <Text style={styles.specName}>{spec.name || spec.key}:</Text>
+                    <Text style={styles.specValue}>{spec.value}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+          )}
+
+          {/* Kafolat va yetkazib berish (Web sayt kabi) */}
           <View style={styles.guaranteeBox}>
             <Text style={styles.guaranteeTitle}>🛡️ Medax Rasmiy Kafolati</Text>
             <Text style={styles.guaranteeDesc}>
-              Barcha uskunalarimiz sertifikatlangan, rasmiy zavod kafolatiga ega va O'zbekiston bo'ylab o'rnatib beriladi.
+              Barcha uskunalarimiz 100% sertifikatlangan, rasmiy zavod kafolatiga ega va butun O'zbekiston bo'ylab mutaxassislarimiz tomonidan yetkazib o'rnatiladi.
             </Text>
           </View>
         </View>
       </ScrollView>
 
       {/* Bottom Bar: Quantity & Add to Cart */}
-      <View style={styles.bottomBar}>
+      <View style={[styles.bottomBar, { paddingBottom: Math.max(insets.bottom, 12) }]}>
         <View style={styles.qtyControl}>
           <TouchableOpacity
             style={styles.qtyBtn}
@@ -112,7 +135,7 @@ export function ProductDetailScreen({ route, navigation }: any) {
             navigation.navigate("Savatcha");
           }}
         >
-          <Text style={styles.addToCartText}>Savatchaga qo'shish</Text>
+          <Text style={styles.addToCartText}>Savatchaga qo'shish 🛒</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -123,29 +146,54 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#ffffff" },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
   notFound: { fontSize: 16, color: "#64748b" },
-  scroll: { paddingBottom: 100 },
-  mainImg: { width: "100%", height: 300, backgroundColor: "#f8fafc" },
-  body: { padding: 20 },
-  catName: { fontSize: 12, fontWeight: "700", color: "#0284c7", textTransform: "uppercase", marginBottom: 6 },
+  scroll: { backgroundColor: "#ffffff" },
+  mainImgWrap: {
+    width: "100%",
+    height: 300,
+    backgroundColor: "#f8fafc",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 16,
+    position: "relative",
+    borderBottomWidth: 1,
+    borderBottomColor: "#f1f5f9",
+  },
+  mainImg: { width: "100%", height: "100%" },
+  hitBadge: {
+    position: "absolute",
+    top: 14,
+    left: 14,
+    backgroundColor: "#ef4444",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  hitBadgeText: { color: "#ffffff", fontSize: 10, fontWeight: "900" },
+  body: { padding: 18 },
+  catName: { fontSize: 11.5, fontWeight: "800", color: "#0284c7", textTransform: "uppercase", marginBottom: 6 },
   title: { fontSize: 20, fontWeight: "800", color: "#0f172a", lineHeight: 28, marginBottom: 12 },
-  priceRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 20 },
+  priceRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 16 },
   price: { fontSize: 22, fontWeight: "900", color: "#0284c7" },
-  priceMuted: { fontSize: 16, fontWeight: "700", color: "#64748b" },
   countryBadge: { backgroundColor: "#f1f5f9", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
   countryText: { fontSize: 12, fontWeight: "600", color: "#334155" },
-  section: { marginTop: 10, borderTopWidth: 1, borderTopColor: "#f1f5f9", paddingTop: 16 },
-  sectionHeader: { fontSize: 16, fontWeight: "700", color: "#0f172a", marginBottom: 8 },
-  desc: { fontSize: 14, color: "#334155", lineHeight: 22 },
+  section: { marginTop: 14, borderTopWidth: 1, borderTopColor: "#f1f5f9", paddingTop: 14 },
+  sectionHeader: { fontSize: 15, fontWeight: "800", color: "#0f172a", marginBottom: 8 },
+  desc: { fontSize: 13.5, color: "#334155", lineHeight: 21 },
+  specsWrap: { backgroundColor: "#f8fafc", borderRadius: 12, overflow: "hidden", borderWidth: 1, borderColor: "#e2e8f0" },
+  specRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 9, paddingHorizontal: 12 },
+  specRowAlt: { backgroundColor: "#f1f5f9" },
+  specName: { fontSize: 12, color: "#64748b", fontWeight: "600", flex: 1 },
+  specValue: { fontSize: 12, color: "#0f172a", fontWeight: "700", flex: 1, textAlign: "right" },
   guaranteeBox: {
-    marginTop: 20,
-    backgroundColor: "#f0fdf4",
+    marginTop: 18,
+    backgroundColor: "rgba(16, 185, 129, 0.08)",
     borderWidth: 1,
-    borderColor: "#bbf7d0",
+    borderColor: "rgba(16, 185, 129, 0.25)",
     borderRadius: 14,
     padding: 14,
   },
-  guaranteeTitle: { fontSize: 14, fontWeight: "700", color: "#166534", marginBottom: 4 },
-  guaranteeDesc: { fontSize: 12.5, color: "#15803d", lineHeight: 18 },
+  guaranteeTitle: { fontSize: 13.5, fontWeight: "800", color: "#065f46", marginBottom: 4 },
+  guaranteeDesc: { fontSize: 12, color: "#047857", lineHeight: 17 },
   bottomBar: {
     position: "absolute",
     bottom: 0,
@@ -153,12 +201,17 @@ const styles = StyleSheet.create({
     right: 0,
     backgroundColor: "#ffffff",
     borderTopWidth: 1,
-    borderTopColor: "#f1f5f9",
-    paddingHorizontal: 20,
-    paddingVertical: 14,
+    borderTopColor: "#e2e8f0",
+    paddingHorizontal: 16,
+    paddingTop: 12,
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
+    shadowColor: "#0f172a",
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    elevation: 8,
   },
   qtyControl: {
     flexDirection: "row",
@@ -166,16 +219,18 @@ const styles = StyleSheet.create({
     backgroundColor: "#f1f5f9",
     borderRadius: 12,
     padding: 4,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
   },
-  qtyBtn: { width: 36, height: 36, borderRadius: 8, backgroundColor: "#ffffff", justifyContent: "center", alignItems: "center" },
+  qtyBtn: { width: 34, height: 34, borderRadius: 8, backgroundColor: "#ffffff", justifyContent: "center", alignItems: "center" },
   qtyBtnText: { fontSize: 18, fontWeight: "700", color: "#0f172a" },
-  qtyText: { marginHorizontal: 12, fontSize: 16, fontWeight: "700", color: "#0f172a" },
+  qtyText: { marginHorizontal: 12, fontSize: 15, fontWeight: "800", color: "#0f172a" },
   addToCartBtn: {
     flex: 1,
     backgroundColor: "#0284c7",
-    paddingVertical: 14,
+    paddingVertical: 13,
     borderRadius: 14,
     alignItems: "center",
   },
-  addToCartText: { color: "#ffffff", fontSize: 15, fontWeight: "700" },
+  addToCartText: { color: "#ffffff", fontSize: 14.5, fontWeight: "800" },
 });
