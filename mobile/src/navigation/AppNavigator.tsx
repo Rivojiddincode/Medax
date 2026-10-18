@@ -75,7 +75,6 @@ export function AppNavigator() {
       screenOptions={{
         headerTintColor: "#0284c7",
         headerTitleStyle: { fontWeight: "700", color: "#0f172a" },
-        headerBackTitleVisible: false,
       }}
     >
       <Stack.Screen
