@@ -74,8 +74,8 @@ export const config = {
 
   // Telegram Bot sozlamalari
   telegram: {
-    botToken: process.env.TELEGRAM_BOT_TOKEN || "",
-    botUsername: process.env.TELEGRAM_BOT_USERNAME || "medax_auth_bot",
+    botToken: process.env.TELEGRAM_BOT_TOKEN || "8439993196:AAHH06kgRE_lMZmfIhfsNrOfSbDnjBcSnMo",
+    botUsername: process.env.TELEGRAM_BOT_USERNAME || "MedaxAuthbot",
   },
 };
 

@@ -20,6 +20,8 @@ import {
   createTelegramSession,
   getTelegramSession,
   confirmTelegramSession,
+  bindChatToSession,
+  getSessionByChatId,
   verifyTelegramAuth,
   sendTelegramMessage,
 } from "../telegram";
@@ -310,7 +312,7 @@ customerRouter.post("/auth/telegram-webhook", async (req, res) => {
       return;
     }
 
-    (session as any).chatId = chatId;
+    bindChatToSession(chatId, sessionId);
 
     await sendTelegramMessage(
       chatId,
@@ -357,24 +359,19 @@ customerRouter.post("/auth/telegram-webhook", async (req, res) => {
       hasPassword: Boolean(customer.passwordHash),
     };
 
-    // Pending sessionni tasdiqlaymiz
-    let s = (message.reply_to_message?.text && (message as any).sessionId) ? getTelegramSession((message as any).sessionId) : null;
-    if (!s) {
-      // ChatId bo'yicha yoki oxirgi faol sessionni topamiz
-      // telegram.ts dagi confirmTelegramSession orqali
-      const session = getTelegramSession(message.chat?.id ? String(message.chat.id) : "");
-      if (session) s = session;
+    const session = getSessionByChatId(chatId);
+    if (session) {
+      confirmTelegramSession(session.sessionId, {
+        phone,
+        name: customer.name,
+        customerToken: token,
+        customer: customerData,
+      });
     }
-
-    // Sessiyani tasdiqlash
-    confirmTelegramSession(
-      (s && s.sessionId) || "any",
-      { phone, name: customer.name, customerToken: token, customer: customerData }
-    );
 
     await sendTelegramMessage(
       chatId,
-      `✅ <b>Muvaffaqiyatli tasdiqlandi!</b>\n\nSiz Medax tizimiga kirdingiz. Saytga qaytib davom etishingiz mumkin!`,
+      `✅ <b>Muvaffaqiyatli tasdiqlandi!</b>\n\nSiz Medax tizimiga kirdingiz. Sayt sahifasiga qaytib davom etishingiz mumkin!`,
       { remove_keyboard: true }
     );
     return;

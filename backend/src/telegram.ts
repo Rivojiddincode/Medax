@@ -52,6 +52,18 @@ export function getTelegramSession(sessionId: string): TelegramSession | null {
   return s;
 }
 
+const chatToSession = new Map<string, string>();
+
+export function bindChatToSession(chatId: string | number, sessionId: string) {
+  chatToSession.set(String(chatId), sessionId);
+}
+
+export function getSessionByChatId(chatId: string | number): TelegramSession | null {
+  const sessionId = chatToSession.get(String(chatId));
+  if (!sessionId) return null;
+  return getTelegramSession(sessionId);
+}
+
 export function confirmTelegramSession(
   sessionId: string,
   data: { phone: string; name: string; customerToken: string; customer: any }
