@@ -16,6 +16,13 @@ import {
   verifyTurnstile,
 } from "../antispam";
 import { getClientIp } from "../ip";
+import {
+  createTelegramSession,
+  getTelegramSession,
+  confirmTelegramSession,
+  verifyTelegramAuth,
+  sendTelegramMessage,
+} from "../telegram";
 
 export interface CustomerAuthPayload {
   id: number;
@@ -207,72 +214,65 @@ customerRouter.post("/auth/verify-otp", authLimiter, async (req, res) => {
   });
 });
 
-// 2b. Firebase orqali telefon raqam tasdiqlanganda kirish yoki ro'yxatdan o'tish
-customerRouter.post("/auth/firebase-login", authLimiter, async (req, res) => {
-  const { idToken, name, organization, password } = z
-    .object({
-      idToken: z.string().min(10, "Firebase ID token talab qilinadi"),
-      name: z.string().trim().max(80).optional(),
-      organization: z.string().trim().max(120).optional(),
-      password: z.string().min(6, "Parol kamida 6 belgidan iborat bo'lishi kerak").max(100).optional(),
-    })
-    .parse(req.body);
+// 2b. Telegram orqali 1-klikda kirish sessiyasi yaratish (Deep link / QR)
+customerRouter.post("/auth/telegram-session", async (_req, res) => {
+  const session = createTelegramSession();
+  res.json({ ok: true, ...session });
+});
 
-  const ip = getClientIp(req);
+// 2c. Telegram kirish sessiyasini polling qilish (sayt avtomatik kirishi uchun)
+customerRouter.get("/auth/telegram-poll", async (req, res) => {
+  const sessionId = String(req.query.sessionId || "");
+  const session = getTelegramSession(sessionId);
+  if (!session) {
+    return res.json({ ok: false, status: "expired" });
+  }
+  if (session.status === "confirmed") {
+    return res.json({
+      ok: true,
+      status: "confirmed",
+      token: session.customerToken,
+      customer: session.customer,
+    });
+  }
+  res.json({ ok: true, status: session.status, botUsername: config.telegram.botUsername });
+});
 
-  // Google Identity Toolkit orqali Firebase tokenini tekshiramiz
-  const verifyRes = await fetch(
-    `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${config.firebaseApiKey}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ idToken }),
-      signal: AbortSignal.timeout(10000),
-    }
-  );
-
-  const verifyData: any = await verifyRes.json();
-  if (!verifyRes.ok || !verifyData.users || !verifyData.users[0]) {
-    throw new HttpError(401, "Firebase autentifikatsiyasi tasdiqlanmadi.");
+// 2d. Telegram Login Widget (veb-sayt orqali to'g'ridan-to'g'ri Telegram hisobi bilan kirish)
+customerRouter.post("/auth/telegram-widget", authLimiter, async (req, res) => {
+  const data = req.body;
+  if (!verifyTelegramAuth(data)) {
+    throw new HttpError(400, "Telegram ma'lumotlari tasdiqlanmadi.");
   }
 
-  const firebaseUser = verifyData.users[0];
-  const rawPhone = firebaseUser.phoneNumber;
-  if (!rawPhone) {
-    throw new HttpError(400, "Telefon raqami topilmadi.");
-  }
+  const tgId = String(data.id);
+  const name = [data.first_name, data.last_name].filter(Boolean).join(" ") || `Foydalanuvchi (${tgId})`;
 
-  const phone = normalizePhone(rawPhone);
-  if (!phone) {
-    throw new HttpError(400, "Telefon raqami noto'g'ri.");
-  }
+  let customer = await prisma.customer.findFirst({
+    where: {
+      OR: [
+        { phone: `tg:${tgId}` },
+        { name: { contains: tgId } },
+      ],
+    },
+  });
 
-  await assertNotBlocked(phone, ip);
-
-  const passwordHash = password ? await bcrypt.hash(password, 10) : undefined;
-
-  let customer = await prisma.customer.findUnique({ where: { phone } });
   if (!customer) {
     customer = await prisma.customer.create({
       data: {
-        phone,
-        name: name || firebaseUser.displayName || `Mijoz (${phone.slice(-4)})`,
-        organization: organization || "",
-        ...(passwordHash ? { passwordHash } : {}),
-      },
-    });
-  } else if (passwordHash || name || organization) {
-    customer = await prisma.customer.update({
-      where: { id: customer.id },
-      data: {
-        ...(passwordHash ? { passwordHash } : {}),
-        ...(name ? { name } : {}),
-        ...(organization !== undefined ? { organization } : {}),
+        name,
+        phone: `tg:${tgId}`,
+        avatar: data.photo_url || null,
       },
     });
   }
 
-  const token = createCustomerToken({ id: customer.id, phone: customer.phone || phone, name: customer.name });
+  const token = createCustomerToken({
+    id: customer.id,
+    phone: customer.phone || `tg:${tgId}`,
+    name: customer.name,
+  });
+
   res.json({
     ok: true,
     token,
@@ -281,10 +281,111 @@ customerRouter.post("/auth/firebase-login", authLimiter, async (req, res) => {
       name: customer.name,
       phone: customer.phone,
       organization: customer.organization,
-      avatar: customer.avatar,
+      avatar: customer.avatar || data.photo_url,
       hasPassword: Boolean(customer.passwordHash),
     },
   });
+});
+
+// 2e. Telegram Bot Webhook (botga /start bosilganda yoki telefon raqam yuborilganda)
+customerRouter.post("/auth/telegram-webhook", async (req, res) => {
+  res.sendStatus(200);
+
+  const update = req.body;
+  const message = update?.message;
+  if (!message) return;
+
+  const chatId = message.chat?.id;
+  const text = message.text || "";
+
+  // 1. /start auth_<sessionId> buyrug'i
+  if (text.startsWith("/start auth_")) {
+    const sessionId = text.replace("/start auth_", "").trim();
+    const session = getTelegramSession(sessionId);
+    if (!session || session.status === "expired") {
+      await sendTelegramMessage(
+        chatId,
+        "⚠️ Ushbu kirish sessiyasining muddati eskirgan. Iltimos, saytdan 'Telegram orqali kirish' tugmasini qayta bosing."
+      );
+      return;
+    }
+
+    (session as any).chatId = chatId;
+
+    await sendTelegramMessage(
+      chatId,
+      `👋 <b>Assalomu alaykum, ${message.from?.first_name || "Mijoz"}!</b>\n\nMedax tibbiyot uskunalari markaziga xavfsiz kirish uchun pastdagi <b>«📱 Telefon raqamni yuborish»</b> tugmasini bosing:`,
+      {
+        keyboard: [
+          [{ text: "📱 Telefon raqamni yuborish", request_contact: true }],
+        ],
+        resize_keyboard: true,
+        one_time_keyboard: true,
+      }
+    );
+    return;
+  }
+
+  // 2. Foydalanuvchi telefon raqamini yuborganda
+  if (message.contact && message.contact.phone_number) {
+    const rawPhone = message.contact.phone_number;
+    const phone = normalizePhone(rawPhone);
+    const fullName = [message.contact.first_name, message.contact.last_name].filter(Boolean).join(" ") || "Mijoz";
+
+    if (!phone) {
+      await sendTelegramMessage(chatId, "Telefon raqami aniqlanmadi.");
+      return;
+    }
+
+    let customer = await prisma.customer.findUnique({ where: { phone } });
+    if (!customer) {
+      customer = await prisma.customer.create({
+        data: {
+          phone,
+          name: fullName,
+        },
+      });
+    }
+
+    const token = createCustomerToken({ id: customer.id, phone: customer.phone || phone, name: customer.name });
+    const customerData = {
+      id: customer.id,
+      name: customer.name,
+      phone: customer.phone,
+      organization: customer.organization,
+      avatar: customer.avatar,
+      hasPassword: Boolean(customer.passwordHash),
+    };
+
+    // Pending sessionni tasdiqlaymiz
+    let s = (message.reply_to_message?.text && (message as any).sessionId) ? getTelegramSession((message as any).sessionId) : null;
+    if (!s) {
+      // ChatId bo'yicha yoki oxirgi faol sessionni topamiz
+      // telegram.ts dagi confirmTelegramSession orqali
+      const session = getTelegramSession(message.chat?.id ? String(message.chat.id) : "");
+      if (session) s = session;
+    }
+
+    // Sessiyani tasdiqlash
+    confirmTelegramSession(
+      (s && s.sessionId) || "any",
+      { phone, name: customer.name, customerToken: token, customer: customerData }
+    );
+
+    await sendTelegramMessage(
+      chatId,
+      `✅ <b>Muvaffaqiyatli tasdiqlandi!</b>\n\nSiz Medax tizimiga kirdingiz. Saytga qaytib davom etishingiz mumkin!`,
+      { remove_keyboard: true }
+    );
+    return;
+  }
+
+  if (text === "/start") {
+    await sendTelegramMessage(
+      chatId,
+      `👋 <b>Assalomu alaykum!</b>\n\nBu Medax rasmiy avtorizatsiya boti. Saytdagi «Telegram orqali kirish» tugmasini bosib tizimga kirishingiz mumkin.`
+    );
+  }
 });
 
 // 3. Telefon raqam + Parol orqali kirish (SMS siz tezkor kirish)

@@ -1,5 +1,5 @@
-import { FormEvent, useState } from "react";
-import { useCustomerAuth } from "../customerAuth";
+import { FormEvent, useEffect, useState } from "react";
+import { useCustomerAuth, TelegramSessionResponse } from "../customerAuth";
 import { MedaxLogo } from "./MedaxLogo";
 import { TurnstileWidget } from "./TurnstileWidget";
 import { useI18n } from "../context/I18nContext";
@@ -7,11 +7,23 @@ import { useI18n } from "../context/I18nContext";
 type AuthMode = "password_login" | "register" | "sms_login";
 
 export function AuthModal() {
-  const { isAuthModalOpen, closeAuthModal, sendOtp, verifyOtp, loginWithPassword } = useCustomerAuth();
+  const {
+    isAuthModalOpen,
+    closeAuthModal,
+    sendOtp,
+    verifyOtp,
+    loginWithPassword,
+    startTelegramSession,
+    pollTelegramSession,
+  } = useCustomerAuth();
   const { t, lang } = useI18n();
 
   // Mode: "password_login" (default) | "register" | "sms_login"
   const [mode, setMode] = useState<AuthMode>("password_login");
+
+  // Telegram Login
+  const [tgSession, setTgSession] = useState<TelegramSessionResponse | null>(null);
+  const [tgWaiting, setTgWaiting] = useState(false);
 
   // Phone & SMS
   const [phone, setPhone] = useState("+998 ");
@@ -31,6 +43,21 @@ export function AuthModal() {
   const [error, setError] = useState("");
   const [countdown, setCountdown] = useState(0);
 
+  useEffect(() => {
+    let timer: any;
+    if (tgWaiting && tgSession) {
+      timer = setInterval(async () => {
+        try {
+          const res = await pollTelegramSession(tgSession.sessionId);
+          if (res.status === "confirmed") {
+            setTgWaiting(false);
+          }
+        } catch {}
+      }, 2000);
+    }
+    return () => clearInterval(timer);
+  }, [tgWaiting, tgSession]);
+
   if (!isAuthModalOpen) return null;
 
   const resetFields = () => {
@@ -39,11 +66,27 @@ export function AuthModal() {
     setPassword("");
     setConfirmPassword("");
     setError("");
+    setTgWaiting(false);
   };
 
   const switchMode = (newMode: AuthMode) => {
     setMode(newMode);
     resetFields();
+  };
+
+  const handleTelegramLogin = async () => {
+    setError("");
+    setLoading(true);
+    try {
+      const sess = await startTelegramSession();
+      setTgSession(sess);
+      setTgWaiting(true);
+      window.open(sess.startUrl, "_blank");
+    } catch (err: any) {
+      setError(err.message || "Telegram sessiyasini ochishda xatolik");
+    } finally {
+      setLoading(false);
+    }
   };
 
   // 1. Parol orqali tezkor kirish (Login via Phone + Password)
@@ -238,6 +281,79 @@ export function AuthModal() {
         {error && <div className="err auth-alert">{error}</div>}
 
         <div className="auth-body">
+          {/* Telegram orqali 1-klikda kirish */}
+          <button
+            type="button"
+            className="telegram-auth-btn"
+            onClick={handleTelegramLogin}
+            disabled={loading}
+            style={{
+              width: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 10,
+              background: "linear-gradient(135deg, #2AABEE 0%, #229ED9 100%)",
+              color: "#ffffff",
+              border: "none",
+              borderRadius: 12,
+              padding: "12px 16px",
+              fontSize: 14.5,
+              fontWeight: 600,
+              cursor: "pointer",
+              boxShadow: "0 4px 12px rgba(34, 158, 217, 0.25)",
+              marginBottom: 14,
+              transition: "transform 0.15s ease, box-shadow 0.15s ease",
+            }}
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.52 2.77-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z" />
+            </svg>
+            <span>Telegram orqali 1-klikda kirish</span>
+          </button>
+
+          {tgWaiting && tgSession && (
+            <div
+              style={{
+                background: "rgba(34, 158, 217, 0.08)",
+                border: "1px solid rgba(34, 158, 217, 0.3)",
+                borderRadius: 12,
+                padding: "12px 14px",
+                marginBottom: 16,
+                textAlign: "center",
+              }}
+            >
+              <div style={{ fontWeight: 600, color: "#229ED9", marginBottom: 4, fontSize: 14 }}>
+                ⏳ Telegram botda tasdiqlang...
+              </div>
+              <p style={{ fontSize: 13, color: "var(--muted, #64748b)", margin: "0 0 8px 0" }}>
+                Telegram botda <b>«📱 Telefon raqamni yuborish»</b> tugmasini bosing.
+              </p>
+              <a
+                href={tgSession.startUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ fontSize: 12.5, color: "#229ED9", fontWeight: 500, textDecoration: "underline" }}
+              >
+                Bot ochilmadimi? Bu yerni bosing →
+              </a>
+            </div>
+          )}
+
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              margin: "8px 0 16px 0",
+              color: "var(--muted, #94a3b8)",
+              fontSize: 12,
+            }}
+          >
+            <div style={{ flex: 1, height: 1, background: "var(--border, #e2e8f0)" }}></div>
+            <span style={{ padding: "0 10px" }}>yoki telefon orqali</span>
+            <div style={{ flex: 1, height: 1, background: "var(--border, #e2e8f0)" }}></div>
+          </div>
+
           {/* ======================================================== */}
           {/* 1. PAROL ORQALI TEZKOR KIRISH                           */}
           {/* ======================================================== */}

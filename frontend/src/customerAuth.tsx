@@ -1,6 +1,4 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { ConfirmationResult } from "firebase/auth";
-import { sendFirebasePhoneOtp, translateFirebaseError } from "./firebase";
 
 export interface Customer {
   id: number;
@@ -11,6 +9,13 @@ export interface Customer {
   hasPassword?: boolean;
 }
 
+export interface TelegramSessionResponse {
+  sessionId: string;
+  code: string;
+  botUsername: string;
+  startUrl: string;
+}
+
 interface CustomerAuthContextType {
   customer: Customer | null;
   token: string | null;
@@ -19,10 +24,11 @@ interface CustomerAuthContextType {
   openAuthModal: () => void;
   closeAuthModal: () => void;
   refreshCustomer: () => Promise<void>;
+  startTelegramSession: () => Promise<TelegramSessionResponse>;
+  pollTelegramSession: (sessionId: string) => Promise<{ ok: boolean; status: string; token?: string; customer?: Customer }>;
+  loginWithTelegramWidget: (userData: any) => Promise<{ ok: boolean; token: string; customer: Customer }>;
   sendOtp: (phone: string, captchaToken?: string) => Promise<{ ok: boolean; resendIn: number }>;
   verifyOtp: (data: { phone: string; code: string; name?: string; organization?: string; password?: string }) => Promise<{ ok: boolean; token: string; customer: Customer }>;
-  sendFirebaseOtp: (phone: string, containerId?: string) => Promise<{ ok: boolean; resendIn: number }>;
-  verifyFirebaseOtp: (data: { code: string; name?: string; organization?: string; password?: string }) => Promise<{ ok: boolean; token: string; customer: Customer }>;
   loginWithPassword: (phone: string, password: string) => Promise<{ ok: boolean; token: string; customer: Customer }>;
   changePassword: (data: { currentPassword?: string; newPassword: string }) => Promise<void>;
   updateProfile: (data: { name: string; organization?: string }) => Promise<void>;
@@ -38,7 +44,6 @@ export function CustomerAuthProvider({ children }: { children: React.ReactNode }
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [firebaseConfirmation, setFirebaseConfirmation] = useState<ConfirmationResult | null>(null);
 
   const saveToken = (newToken: string | null) => {
     setToken(newToken);
@@ -86,67 +91,63 @@ export function CustomerAuthProvider({ children }: { children: React.ReactNode }
   const openAuthModal = () => setIsAuthModalOpen(true);
   const closeAuthModal = () => setIsAuthModalOpen(false);
 
-  // Firebase orqali telefon raqamga SMS kod jo'natish
-  const sendFirebaseOtp = async (phone: string, containerId?: string) => {
-    try {
-      const cr = await sendFirebasePhoneOtp(phone, containerId || "firebase-recaptcha-container");
-      setFirebaseConfirmation(cr);
-      return { ok: true, resendIn: 60 };
-    } catch (fbErr: any) {
-      console.error("Firebase SMS yuborishda xatolik:", fbErr);
-      const friendly = translateFirebaseError(fbErr);
-      throw new Error(friendly);
+  // Telegram orqali 1-klikda kirish sessiyasi ochish
+  const startTelegramSession = async (): Promise<TelegramSessionResponse> => {
+    const res = await fetch("/api/customer/auth/telegram-session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || "Telegram sessiyasini yaratishda xatolik");
     }
+    return data;
   };
 
-  // Firebase SMS tasdiqlash kodi orqali autentifikatsiya
-  const verifyFirebaseOtp = async (params: {
-    code: string;
-    name?: string;
-    organization?: string;
-    password?: string;
-  }) => {
-    if (!firebaseConfirmation) {
-      throw new Error("Tasdiqlash kodi topilmadi yoki muddati eskirgan. Qaytadan kod oling.");
-    }
-
-    try {
-      const cred = await firebaseConfirmation.confirm(params.code);
-      const idToken = await cred.user.getIdToken();
-
-      const res = await fetch("/api/customer/auth/firebase-login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          idToken,
-          name: params.name,
-          organization: params.organization,
-          password: params.password,
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || "Firebase orqali tasdiqlashda server xatoligi yuz berdi");
-      }
-
+  // Telegram botda tasdiqlanganini tekshirish (polling)
+  const pollTelegramSession = async (sessionId: string) => {
+    const res = await fetch(`/api/customer/auth/telegram-poll?sessionId=${encodeURIComponent(sessionId)}`);
+    const data = await res.json();
+    if (data.status === "confirmed" && data.token && data.customer) {
       saveToken(data.token);
       setCustomer(data.customer);
       closeAuthModal();
-      return data;
-    } catch (err: any) {
-      console.error("Firebase verify xatosi:", err);
-      const friendly = translateFirebaseError(err);
-      throw new Error(friendly);
     }
+    return data;
   };
 
-  // Umumiy SMS yuborish (Firebase Phone Auth)
-  const sendOtp = async (phone: string, _captchaToken?: string) => {
-    return await sendFirebaseOtp(phone);
+  // Telegram Login Widget orqali to'g'ridan-to'g'ri kirish
+  const loginWithTelegramWidget = async (userData: any) => {
+    const res = await fetch("/api/customer/auth/telegram-widget", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(userData),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || "Telegram orqali kirishda xatolik");
+    }
+    saveToken(data.token);
+    setCustomer(data.customer);
+    closeAuthModal();
+    return data;
   };
 
-  // Umumiy kodni tasdiqlash
+  // SMS orqali kod yuborish
+  const sendOtp = async (phone: string, captchaToken?: string) => {
+    const res = await fetch("/api/customer/auth/send-otp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone, captchaToken }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || "Kod yuborishda xatolik yuz berdi");
+    }
+    return data;
+  };
+
+  // SMS orqali kodni tasdiqlash
   const verifyOtp = async (params: {
     phone: string;
     code: string;
@@ -154,15 +155,6 @@ export function CustomerAuthProvider({ children }: { children: React.ReactNode }
     organization?: string;
     password?: string;
   }) => {
-    if (firebaseConfirmation) {
-      return await verifyFirebaseOtp({
-        code: params.code,
-        name: params.name,
-        organization: params.organization,
-        password: params.password,
-      });
-    }
-
     const res = await fetch("/api/customer/auth/verify-otp", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -170,7 +162,7 @@ export function CustomerAuthProvider({ children }: { children: React.ReactNode }
     });
     const data = await res.json();
     if (!res.ok) {
-      throw new Error(data.error || "Kodni tasdiqlashda xatolik");
+      throw new Error(data.error || "Tasdiqlash kodi noto'g'ri");
     }
     saveToken(data.token);
     setCustomer(data.customer);
@@ -239,10 +231,11 @@ export function CustomerAuthProvider({ children }: { children: React.ReactNode }
         openAuthModal,
         closeAuthModal,
         refreshCustomer,
+        startTelegramSession,
+        pollTelegramSession,
+        loginWithTelegramWidget,
         sendOtp,
         verifyOtp,
-        sendFirebaseOtp,
-        verifyFirebaseOtp,
         loginWithPassword,
         changePassword,
         updateProfile,
