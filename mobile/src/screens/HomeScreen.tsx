@@ -12,21 +12,30 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Category, fetchCategories, fetchProducts, Product, getImageUrl, formatPrice } from "../api";
 import { useCart } from "../context/CartContext";
+import {
+  MedaxHeaderBrand,
+  SearchIcon,
+  TruckIcon,
+  ShieldIcon,
+  CertificateIcon,
+  BoltIcon,
+  CartIcon,
+} from "../components/Icons";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
-// Web saytdagi karusel slaydlari
+// Web saytdagi 4 ta asosiy banner rasmlari va matnlari
 const BANNER_SLIDES = [
   {
     id: 1,
     tag: "NOGIRONLAR ARAVACHALARI",
-    title1: "Zamonaviy elektr",
-    title2: "aravachalar Medax’da",
+    title1: "Pultli nogironlar",
+    title2: "aravachasi Medax’da",
     desc: "Yengil akkumulyatorli, qulay va xavfsiz boshqaruv",
-    badges: ["✓ Original", "🛡 2 yil kafolat"],
+    badges: ["✓ Original", "🛡 1 yil kafolat"],
+    img: "https://medax.uz/banners/wheelchair-remote.png",
     bg: "#0f172a",
     accent: "#38bdf8",
-    btnColor: "#0284c7",
   },
   {
     id: 2,
@@ -35,9 +44,9 @@ const BANNER_SLIDES = [
     title2: "apparatlari Medax’da",
     desc: "Yuqori aniqlikdagi 4D datchiklar va rangli doppler",
     badges: ["✓ Original", "🛡 Rasmiy servis"],
+    img: "https://medax.uz/banners/medical-diag.jpg",
     bg: "#0369a1",
     accent: "#bae6fd",
-    btnColor: "#0284c7",
   },
   {
     id: 3,
@@ -45,10 +54,10 @@ const BANNER_SLIDES = [
     title1: "Reanimatsiya va",
     title2: "IVL jihozlari Medax’da",
     desc: "O'pkani sun'iy shamollatish va hayotiy monitoring",
-    badges: ["✓ Sertifikatlangan", "🛡 Tezkor yetkazish"],
+    badges: ["✓ Sertifikatlangan", "🛡 24/7 servis"],
+    img: "https://medax.uz/banners/medical-surgery.jpg",
     bg: "#065f46",
     accent: "#6ee7b7",
-    btnColor: "#059669",
   },
   {
     id: 4,
@@ -56,24 +65,12 @@ const BANNER_SLIDES = [
     title1: "Funksional tibbiy",
     title2: "kravatlar Medax’da",
     desc: "Elektroprivodli boshqaruv va bemor uchun maksimal qulaylik",
-    badges: ["✓ Kafolatlangan", "🛡 O'rnatib berish"],
+    badges: ["✓ Kafolatlangan", "🛡 1 yil kafolat"],
+    img: "https://medax.uz/banners/medical-bed.jpg",
     bg: "#1e1b4b",
     accent: "#c7d2fe",
-    btnColor: "#4f46e5",
   },
 ];
-
-// Kategoriya emojilari
-function getCategoryEmoji(name: string): string {
-  const lower = name.toLowerCase();
-  if (lower.includes("laboratoriya") || lower.includes("reagent")) return "🔬";
-  if (lower.includes("uzi") || lower.includes("rentgen") || lower.includes("diagnostika")) return "🩻";
-  if (lower.includes("aravacha") || lower.includes("ortoped")) return "🦽";
-  if (lower.includes("kravat") || lower.includes("mebel")) return "🛏";
-  if (lower.includes("reanimatsiya") || lower.includes("ivl")) return "🏥";
-  if (lower.includes("jarroh") || lower.includes("xirurg")) return "🩺";
-  return "📦";
-}
 
 export function HomeScreen({ navigation }: any) {
   const insets = useSafeAreaInsets();
@@ -110,42 +107,27 @@ export function HomeScreen({ navigation }: any) {
 
   return (
     <View style={styles.screen}>
-      {/* 1. Medax Brand Header (Web sayt kabi) */}
+      {/* 1. Medax Asl Logotipi Header (Web sayt kabi) */}
       <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
-        <View style={styles.brandRow}>
-          {/* Medax Emblem */}
-          <View style={styles.logoBadge}>
-            <Text style={styles.logoEmblem}>✚</Text>
-          </View>
-          <View style={styles.brandTextWrap}>
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <Text style={styles.brandMed}>Med</Text>
-              <Text style={styles.brandAx}>ax</Text>
-            </View>
-            <View style={styles.officialStoreBadge}>
-              <Text style={styles.officialStoreText}>OFFICIAL STORE</Text>
-            </View>
-          </View>
-        </View>
+        <MedaxHeaderBrand />
 
-        {/* Tezkor Savatcha / Telefon tugmasi */}
         <TouchableOpacity
           style={styles.headerPhoneBtn}
           onPress={() => navigation.navigate("Profil")}
         >
-          <Text style={{ fontSize: 13, color: "#0284c7", fontWeight: "700" }}>👤 Kabinet</Text>
+          <Text style={{ fontSize: 12.5, color: "#0284c7", fontWeight: "800" }}>Kabinet 👤</Text>
         </TouchableOpacity>
       </View>
 
-      {/* 2. Qidiruv paneli (Web qidiruv uslubida) */}
+      {/* 2. Original Vektor Qidiruv paneli */}
       <View style={styles.searchContainer}>
         <TouchableOpacity
           style={styles.searchBar}
           activeOpacity={0.8}
           onPress={() => navigation.navigate("Katalog")}
         >
-          <Text style={styles.searchIcon}>🔍</Text>
-          <Text style={styles.searchPlaceholder}>Uskuna va sarflov materiallarini qidirish...</Text>
+          <SearchIcon size={18} color="#0284c7" />
+          <Text style={styles.searchPlaceholder}>Uskunalar va sarflov materiallarini qidirish...</Text>
         </TouchableOpacity>
       </View>
 
@@ -154,40 +136,50 @@ export function HomeScreen({ navigation }: any) {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 24 }}
       >
-        {/* 3. Hero Banner Karusel (Web saytdagi bannerlar) */}
+        {/* 3. Hero Banner Karusel (Web saytdagi original rasmlari bilan) */}
         <View style={styles.bannerContainer}>
           <View style={[styles.bannerCard, { backgroundColor: activeSlide.bg }]}>
-            <View style={styles.bannerTagRow}>
-              <Text style={[styles.bannerTag, { color: activeSlide.accent }]}>
-                {activeSlide.tag}
-              </Text>
-            </View>
+            <View style={styles.bannerInner}>
+              {/* Chap matn qismi */}
+              <View style={styles.bannerLeftText}>
+                <Text style={[styles.bannerTag, { color: activeSlide.accent }]}>
+                  {activeSlide.tag}
+                </Text>
 
-            <Text style={styles.bannerTitle1}>{activeSlide.title1}</Text>
-            <Text style={[styles.bannerTitle2, { color: activeSlide.accent }]}>
-              {activeSlide.title2}
-            </Text>
+                <Text style={styles.bannerTitle1}>{activeSlide.title1}</Text>
+                <Text style={[styles.bannerTitle2, { color: activeSlide.accent }]}>
+                  {activeSlide.title2}
+                </Text>
 
-            <Text style={styles.bannerDesc}>{activeSlide.desc}</Text>
-
-            {/* Badges */}
-            <View style={styles.bannerBadgesRow}>
-              {activeSlide.badges.map((b, idx) => (
-                <View key={idx} style={styles.bannerPill}>
-                  <Text style={styles.bannerPillText}>{b}</Text>
+                {/* Badges */}
+                <View style={styles.bannerBadgesRow}>
+                  {activeSlide.badges.map((b, idx) => (
+                    <View key={idx} style={styles.bannerPill}>
+                      <Text style={styles.bannerPillText}>{b}</Text>
+                    </View>
+                  ))}
                 </View>
-              ))}
-            </View>
 
-            {/* Action button */}
-            <TouchableOpacity
-              style={[styles.bannerBtn, { backgroundColor: "#ffffff" }]}
-              onPress={() => navigation.navigate("Katalog")}
-            >
-              <Text style={[styles.bannerBtnText, { color: activeSlide.bg }]}>
-                Katalogni ko'rish →
-              </Text>
-            </TouchableOpacity>
+                {/* Action button */}
+                <TouchableOpacity
+                  style={styles.bannerBtn}
+                  onPress={() => navigation.navigate("Katalog")}
+                >
+                  <Text style={[styles.bannerBtnText, { color: activeSlide.bg }]}>
+                    Katalog →
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* O'ng rasm qismi (Web saytdagi original banner rasmlari) */}
+              <View style={styles.bannerRightImgWrap}>
+                <Image
+                  source={{ uri: activeSlide.img }}
+                  style={styles.bannerImg}
+                  resizeMode="contain"
+                />
+              </View>
+            </View>
           </View>
 
           {/* Dots Indicator */}
@@ -205,25 +197,33 @@ export function HomeScreen({ navigation }: any) {
           </View>
         </View>
 
-        {/* 4. Medax Afzalliklari (Trust Badges) */}
+        {/* 4. Medax Afzalliklari (Original Vektor Belgilar) */}
         <View style={styles.trustBadgesRow}>
           <View style={styles.trustItem}>
-            <Text style={styles.trustIcon}>🚚</Text>
+            <View style={styles.trustIconWrap}>
+              <TruckIcon size={19} color="#0284c7" />
+            </View>
             <Text style={styles.trustTitle}>Tezkor yetkazish</Text>
             <Text style={styles.trustSub}>Butun O'zbekiston</Text>
           </View>
           <View style={styles.trustItem}>
-            <Text style={styles.trustIcon}>🛡️</Text>
+            <View style={styles.trustIconWrap}>
+              <ShieldIcon size={19} color="#0d9488" />
+            </View>
             <Text style={styles.trustTitle}>Rasmiy kafolat</Text>
             <Text style={styles.trustSub}>Zavod servisi</Text>
           </View>
           <View style={styles.trustItem}>
-            <Text style={styles.trustIcon}>🩺</Text>
+            <View style={styles.trustIconWrap}>
+              <CertificateIcon size={19} color="#4f46e5" />
+            </View>
             <Text style={styles.trustTitle}>Sertifikat</Text>
             <Text style={styles.trustSub}>100% asl uskunalar</Text>
           </View>
           <View style={styles.trustItem}>
-            <Text style={styles.trustIcon}>⚡</Text>
+            <View style={styles.trustIconWrap}>
+              <BoltIcon size={19} color="#eab308" />
+            </View>
             <Text style={styles.trustTitle}>24/7 Muhandis</Text>
             <Text style={styles.trustSub}>O'rnatib berish</Text>
           </View>
@@ -248,8 +248,8 @@ export function HomeScreen({ navigation }: any) {
               style={styles.categoryCard}
               onPress={() => navigation.navigate("Katalog", { categoryId: cat.id })}
             >
-              <View style={styles.catEmojiWrap}>
-                <Text style={styles.catEmoji}>{getCategoryEmoji(cat.name)}</Text>
+              <View style={styles.catIconWrap}>
+                <ShieldIcon size={20} color="#0284c7" />
               </View>
               <Text style={styles.categoryName} numberOfLines={2}>
                 {cat.name}
@@ -326,14 +326,17 @@ export function HomeScreen({ navigation }: any) {
                       <Text style={styles.productPrice}>{formatPrice(item.priceFrom)}</Text>
                     </View>
 
-                    {/* Add to Cart Button */}
+                    {/* Add to Cart Button with SVG Icon */}
                     <TouchableOpacity
                       style={[styles.addBtn, isAdded && styles.addBtnDone]}
                       onPress={() => handleAddToCart(item)}
                     >
-                      <Text style={[styles.addBtnText, isAdded && styles.addBtnTextDone]}>
-                        {isAdded ? "✓ Qo'shildi" : "🛒 Savatchaga"}
-                      </Text>
+                      <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
+                        <CartIcon size={14} color={isAdded ? "#ffffff" : "#0284c7"} />
+                        <Text style={[styles.addBtnText, isAdded && styles.addBtnTextDone]}>
+                          {isAdded ? "Qo'shildi" : "Savatchaga"}
+                        </Text>
+                      </View>
                     </TouchableOpacity>
                   </View>
                 </TouchableOpacity>
@@ -373,38 +376,13 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#f1f5f9",
   },
-  brandRow: { flexDirection: "row", alignItems: "center", gap: 10 },
-  logoBadge: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: "#0284c7",
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#0284c7",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  logoEmblem: { color: "#ffffff", fontSize: 20, fontWeight: "900", lineHeight: 22 },
-  brandTextWrap: { flexDirection: "column" },
-  brandMed: { fontSize: 20, fontWeight: "900", color: "#0284c7", letterSpacing: -0.5 },
-  brandAx: { fontSize: 20, fontWeight: "900", color: "#0f172a", letterSpacing: -0.5 },
-  officialStoreBadge: {
-    backgroundColor: "rgba(2, 132, 199, 0.08)",
-    paddingHorizontal: 5,
-    paddingVertical: 1,
-    borderRadius: 4,
-    alignSelf: "flex-start",
-    marginTop: -2,
-  },
-  officialStoreText: { fontSize: 8, fontWeight: "800", color: "#0284c7", letterSpacing: 0.8 },
   headerPhoneBtn: {
     backgroundColor: "#f1f5f9",
     paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingVertical: 7,
     borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
   },
 
   // Search
@@ -416,45 +394,49 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: 10,
     borderWidth: 1,
     borderColor: "#e2e8f0",
   },
-  searchIcon: { fontSize: 14 },
-  searchPlaceholder: { fontSize: 13, color: "#64748b", fontWeight: "500" },
+  searchPlaceholder: { fontSize: 13, color: "#64748b", fontWeight: "500", flex: 1 },
 
   // Banner
   bannerContainer: { paddingHorizontal: 16, marginTop: 14 },
   bannerCard: {
     borderRadius: 20,
-    padding: 20,
-    minHeight: 180,
+    padding: 16,
+    minHeight: 185,
     shadowColor: "#0f172a",
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.15,
     shadowRadius: 12,
     elevation: 5,
+    overflow: "hidden",
   },
-  bannerTagRow: { marginBottom: 6 },
-  bannerTag: { fontSize: 10, fontWeight: "900", letterSpacing: 1, textTransform: "uppercase" },
-  bannerTitle1: { fontSize: 21, fontWeight: "800", color: "#ffffff", lineHeight: 26 },
-  bannerTitle2: { fontSize: 21, fontWeight: "900", lineHeight: 26, marginBottom: 6 },
-  bannerDesc: { color: "rgba(255, 255, 255, 0.8)", fontSize: 12.5, lineHeight: 17, marginBottom: 12 },
-  bannerBadgesRow: { flexDirection: "row", gap: 8, marginBottom: 14 },
+  bannerInner: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  bannerLeftText: { flex: 1.1, paddingRight: 8 },
+  bannerRightImgWrap: { flex: 0.9, height: 140, alignItems: "center", justifyContent: "center" },
+  bannerImg: { width: "100%", height: "100%" },
+
+  bannerTag: { fontSize: 9.5, fontWeight: "900", letterSpacing: 0.8, textTransform: "uppercase", marginBottom: 4 },
+  bannerTitle1: { fontSize: 17, fontWeight: "800", color: "#ffffff", lineHeight: 22 },
+  bannerTitle2: { fontSize: 17, fontWeight: "900", lineHeight: 22, marginBottom: 8 },
+  bannerBadgesRow: { flexDirection: "row", flexWrap: "wrap", gap: 5, marginBottom: 12 },
   bannerPill: {
-    backgroundColor: "rgba(255, 255, 255, 0.14)",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
   },
-  bannerPillText: { color: "#ffffff", fontSize: 11, fontWeight: "700" },
+  bannerPillText: { color: "#ffffff", fontSize: 10, fontWeight: "700" },
   bannerBtn: {
     alignSelf: "flex-start",
-    paddingHorizontal: 16,
-    paddingVertical: 9,
-    borderRadius: 12,
+    backgroundColor: "#ffffff",
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 10,
   },
-  bannerBtnText: { fontWeight: "800", fontSize: 12.5 },
+  bannerBtnText: { fontWeight: "800", fontSize: 12 },
   dotsRow: { flexDirection: "row", justifyContent: "center", gap: 6, marginTop: 10 },
   dot: { width: 7, height: 7, borderRadius: 3.5, backgroundColor: "#cbd5e1" },
   dotActive: { width: 22, backgroundColor: "#0284c7" },
@@ -467,15 +449,23 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginTop: 14,
     paddingVertical: 12,
-    paddingHorizontal: 8,
+    paddingHorizontal: 6,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: "#f1f5f9",
+    borderColor: "#e2e8f0",
   },
   trustItem: { flex: 1, alignItems: "center" },
-  trustIcon: { fontSize: 18, marginBottom: 2 },
-  trustTitle: { fontSize: 10.5, fontWeight: "700", color: "#0f172a", textAlign: "center" },
-  trustSub: { fontSize: 9, color: "#64748b", textAlign: "center", marginTop: 1 },
+  trustIconWrap: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    backgroundColor: "#f1f5f9",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 4,
+  },
+  trustTitle: { fontSize: 10, fontWeight: "800", color: "#0f172a", textAlign: "center" },
+  trustSub: { fontSize: 8.5, color: "#64748b", textAlign: "center", marginTop: 1 },
 
   // Sections
   sectionHeaderWrap: {
@@ -501,16 +491,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#e2e8f0",
   },
-  catEmojiWrap: {
-    width: 44,
-    height: 44,
+  catIconWrap: {
+    width: 40,
+    height: 40,
     borderRadius: 12,
     backgroundColor: "rgba(2, 132, 199, 0.08)",
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 8,
   },
-  catEmoji: { fontSize: 22 },
   categoryName: { fontSize: 11, fontWeight: "700", color: "#1e293b", textAlign: "center", lineHeight: 14 },
 
   // Products Grid
@@ -560,19 +549,20 @@ const styles = StyleSheet.create({
   newBadgeText: { color: "#ffffff", fontSize: 9.5, fontWeight: "900" },
 
   productBody: { padding: 10 },
-  productCatName: { fontSize: 10, fontWeight: "700", color: "#0284c7", textTransform: "uppercase", marginBottom: 3 },
+  productCatName: { fontSize: 9.5, fontWeight: "700", color: "#0284c7", textTransform: "uppercase", marginBottom: 3 },
   productTitle: { fontSize: 12.5, fontWeight: "700", color: "#0f172a", lineHeight: 17, minHeight: 34, marginBottom: 4 },
   productCountry: { fontSize: 10, color: "#64748b", marginBottom: 6 },
   priceRow: { marginBottom: 8 },
-  productPrice: { fontSize: 14, fontWeight: "900", color: "#0284c7" },
+  productPrice: { fontSize: 13.5, fontWeight: "900", color: "#0284c7" },
   addBtn: {
     backgroundColor: "rgba(2, 132, 199, 0.09)",
     paddingVertical: 8,
     borderRadius: 10,
     alignItems: "center",
+    justifyContent: "center",
   },
   addBtnDone: { backgroundColor: "#10b981" },
-  addBtnText: { color: "#0284c7", fontWeight: "800", fontSize: 11.5 },
+  addBtnText: { color: "#0284c7", fontWeight: "800", fontSize: 11 },
   addBtnTextDone: { color: "#ffffff" },
 
   emptyWrap: { padding: 30, alignItems: "center" },

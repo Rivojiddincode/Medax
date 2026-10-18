@@ -13,6 +13,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Category, fetchCategories, fetchProducts, Product, getImageUrl, formatPrice } from "../api";
 import { useCart } from "../context/CartContext";
+import { SearchIcon, CloseIcon, CartIcon } from "../components/Icons";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -56,7 +57,7 @@ export function CatalogScreen({ navigation, route }: any) {
       {/* Search Header with Safe Area */}
       <View style={[styles.searchWrap, { paddingTop: insets.top + 8 }]}>
         <View style={styles.searchInputRow}>
-          <Text style={{ fontSize: 14, marginRight: 8 }}>🔍</Text>
+          <SearchIcon size={18} color="#0284c7" />
           <TextInput
             style={styles.searchInput}
             placeholder="Uskuna nomini qidiring..."
@@ -66,7 +67,7 @@ export function CatalogScreen({ navigation, route }: any) {
           />
           {search.length > 0 && (
             <TouchableOpacity onPress={() => setSearch("")} style={styles.clearBtn}>
-              <Text style={{ color: "#94a3b8", fontSize: 14 }}>✕</Text>
+              <CloseIcon size={16} color="#94a3b8" />
             </TouchableOpacity>
           )}
         </View>
@@ -151,9 +152,12 @@ export function CatalogScreen({ navigation, route }: any) {
                     style={[styles.addCartBtn, isAdded && styles.addCartBtnDone]}
                     onPress={() => handleAddToCart(item)}
                   >
-                    <Text style={[styles.addCartText, isAdded && styles.addCartTextDone]}>
-                      {isAdded ? "✓ Qo'shildi" : "🛒 Savatchaga"}
-                    </Text>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
+                      <CartIcon size={14} color={isAdded ? "#ffffff" : "#0284c7"} />
+                      <Text style={[styles.addCartText, isAdded && styles.addCartTextDone]}>
+                        {isAdded ? "Qo'shildi" : "Savatchaga"}
+                      </Text>
+                    </View>
                   </TouchableOpacity>
                 </View>
               </TouchableOpacity>

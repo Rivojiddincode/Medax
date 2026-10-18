@@ -10,6 +10,8 @@ import { CartScreen } from "../screens/CartScreen";
 import { ProfileScreen } from "../screens/ProfileScreen";
 import { useCart } from "../context/CartContext";
 
+import { HomeIcon, CatalogIcon, CartIcon, UserIcon } from "../components/Icons";
+
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
@@ -49,9 +51,7 @@ function MainTabs() {
         component={HomeScreen}
         options={{
           tabBarLabel: "Asosiy",
-          tabBarIcon: ({ color, focused }) => (
-            <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.75 }}>🏠</Text>
-          ),
+          tabBarIcon: ({ color }) => <HomeIcon size={21} color={color} />,
         }}
       />
       <Tab.Screen
@@ -59,9 +59,7 @@ function MainTabs() {
         component={CatalogScreen}
         options={{
           tabBarLabel: "Katalog",
-          tabBarIcon: ({ color, focused }) => (
-            <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.75 }}>📑</Text>
-          ),
+          tabBarIcon: ({ color }) => <CatalogIcon size={21} color={color} />,
         }}
       />
       <Tab.Screen
@@ -80,9 +78,7 @@ function MainTabs() {
             borderRadius: 9,
             lineHeight: 18,
           },
-          tabBarIcon: ({ color, focused }) => (
-            <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.75 }}>🛒</Text>
-          ),
+          tabBarIcon: ({ color }) => <CartIcon size={21} color={color} />,
         }}
       />
       <Tab.Screen
@@ -90,9 +86,7 @@ function MainTabs() {
         component={ProfileScreen}
         options={{
           tabBarLabel: "Profil",
-          tabBarIcon: ({ color, focused }) => (
-            <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.75 }}>👤</Text>
-          ),
+          tabBarIcon: ({ color }) => <UserIcon size={21} color={color} />,
         }}
       />
     </Tab.Navigator>

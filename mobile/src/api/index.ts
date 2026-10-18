@@ -119,22 +119,41 @@ export async function fetchCustomerProfile(): Promise<Customer | null> {
 export async function submitOrder(orderData: {
   customerName: string;
   phone: string;
-  deliveryAddress: string;
+  deliveryAddress?: string;
+  organization?: string;
+  paymentMethod?: "inpay" | "cash" | string;
   comment?: string;
   items: { productId: number; quantity: number }[];
-}): Promise<{ ok: boolean; orderId?: number; code?: string; error?: string }> {
+}): Promise<{ ok: boolean; orderId?: number; code?: string; payUrl?: string; error?: string }> {
   try {
     const token = await AsyncStorage.getItem(TOKEN_KEY);
     const headers: Record<string, string> = { "Content-Type": "application/json" };
     if (token) headers.Authorization = `Bearer ${token}`;
 
+    const cleanPhone = orderData.phone.replace(/[^\d+]/g, "");
+
+    const payload = {
+      name: orderData.customerName,
+      phone: cleanPhone,
+      deliveryAddress: orderData.deliveryAddress || "Yetkazib berish (Mobil ilova)",
+      organization: orderData.organization || "",
+      paymentMethod: orderData.paymentMethod || "inpay",
+      comment: orderData.comment || "",
+      items: orderData.items,
+      elapsedMs: 3000,
+    };
+
     const res = await fetch(`${API_BASE}/orders`, {
       method: "POST",
       headers,
-      body: JSON.stringify(orderData),
+      body: JSON.stringify(payload),
     });
-    return await res.json();
+    const data = await res.json();
+    if (!res.ok) {
+      return { ok: false, error: data.error || data.message || "Buyurtma berishda xatolik" };
+    }
+    return data;
   } catch (err: any) {
-    return { ok: false, error: err.message || "Buyurtma berishda xatolik" };
+    return { ok: false, error: err.message || "Tarmoqda xatolik yuz berdi" };
   }
 }

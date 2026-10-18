@@ -9,36 +9,44 @@ import {
   TextInput,
   Alert,
   ActivityIndicator,
+  Linking,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { submitOrder, getImageUrl, formatPrice } from "../api";
+import { CartIcon, CloseIcon, ShieldIcon, BoltIcon, TelegramIcon } from "../components/Icons";
 
 export function CartScreen({ navigation }: any) {
   const insets = useSafeAreaInsets();
   const { items, updateQuantity, removeFromCart, clearCart, totalPrice, totalItems } = useCart();
-  const { customer } = useAuth();
+  const { customer, token } = useAuth();
 
   const [customerName, setCustomerName] = useState(customer?.name || "");
   const [phone, setPhone] = useState(customer?.phone || "+998 ");
   const [address, setAddress] = useState("");
   const [comment, setComment] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState<"inpay" | "cash">("inpay");
   const [loading, setLoading] = useState(false);
+
+  const hasUnpriced = items.some((i) => !i.product.priceFrom || Number(i.product.priceFrom) <= 0);
 
   const handleCheckout = async () => {
     if (!customerName.trim()) {
-      Alert.alert("Xatolik", "Iltimos, ismingizni kiriting.");
+      Alert.alert("Diqqat", "Iltimos, to'liq ismingizni kiriting.");
       return;
     }
-    if (phone.replace(/\D/g, "").length < 9) {
-      Alert.alert("Xatolik", "Iltimos, telefon raqamingizni to'liq kiriting.");
+    const cleanPhone = phone.replace(/\D/g, "");
+    if (cleanPhone.length < 9) {
+      Alert.alert("Diqqat", "Iltimos, to'g'ri telefon raqamini kiriting (+998 __ ___ __ __).");
       return;
     }
     if (!address.trim()) {
-      Alert.alert("Xatolik", "Iltimos, yetkazib berish manzilini kiriting.");
+      Alert.alert("Diqqat", "Iltimos, yetkazib berish yoki olib ketish manzilini kiriting.");
       return;
     }
+
+    const selectedMethod = hasUnpriced ? "cash" : paymentMethod;
 
     setLoading(true);
     const orderItems = items.map((i) => ({
@@ -51,6 +59,7 @@ export function CartScreen({ navigation }: any) {
       phone: phone.trim(),
       deliveryAddress: address.trim(),
       comment: comment.trim(),
+      paymentMethod: selectedMethod,
       items: orderItems,
     });
 
@@ -58,11 +67,37 @@ export function CartScreen({ navigation }: any) {
 
     if (res.ok) {
       clearCart();
-      Alert.alert(
-        "Buyurtma qabul qilindi!",
-        `Buyurtma raqami: #${res.orderId || res.code || "yangi"}.\nTez orada mutaxassisimiz siz bilan bog'lanadi.`,
-        [{ text: "OK", onPress: () => navigation.navigate("Asosiy") }]
-      );
+
+      if (res.payUrl) {
+        Alert.alert(
+          "Buyurtma qabul qilindi! 🎉",
+          `Buyurtma kodi: ${res.code || ""}\n\ninPAY xavfsiz to'lov sahifasiga o'tasizmi? (Click, Payme, Uzcard, Humo)`,
+          [
+            {
+              text: "To'lovga o'tish",
+              onPress: async () => {
+                try {
+                  await Linking.openURL(res.payUrl!);
+                } catch {
+                  Alert.alert("Xatolik", "To'lov havolasini ochishda muammo yuz berdi.");
+                }
+                navigation.navigate("Asosiy");
+              },
+            },
+            {
+              text: "Keyinroq",
+              style: "cancel",
+              onPress: () => navigation.navigate("Asosiy"),
+            },
+          ]
+        );
+      } else {
+        Alert.alert(
+          "Buyurtmangiz qabul qilindi! 🎉",
+          `Buyurtma raqami: #${res.code || res.orderId || "yangi"}.\nTez orada mutaxassisimiz siz bilan bog'lanadi.`,
+          [{ text: "Tushunarli", onPress: () => navigation.navigate("Asosiy") }]
+        );
+      }
     } else {
       Alert.alert("Xatolik", res.error || "Buyurtma yuborishda xatolik yuz berdi");
     }
@@ -71,14 +106,17 @@ export function CartScreen({ navigation }: any) {
   if (items.length === 0) {
     return (
       <View style={[styles.emptyContainer, { paddingTop: insets.top + 20 }]}>
-        <Text style={styles.emptyIcon}>🛒</Text>
+        <View style={styles.emptyIconCircle}>
+          <CartIcon size={46} color="#0284c7" />
+        </View>
         <Text style={styles.emptyTitle}>Savatchangiz bo'sh</Text>
         <Text style={styles.emptyDesc}>
-          Katalogimizdan tibbiy uskunalar va sarflov materiallarini tanlang
+          Katalogimizdan tibbiyot uskunalari va asbob-uskunalarni tanlang
         </Text>
         <TouchableOpacity
           style={styles.shopBtn}
           onPress={() => navigation.navigate("Katalog")}
+          activeOpacity={0.85}
         >
           <Text style={styles.shopBtnText}>Katalogni ko'rish →</Text>
         </TouchableOpacity>
@@ -88,17 +126,20 @@ export function CartScreen({ navigation }: any) {
 
   return (
     <View style={styles.container}>
-      {/* Header with Safe Area */}
-      <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
-        <Text style={styles.headerTitle}>Savatcha ({totalItems})</Text>
-        <TouchableOpacity onPress={clearCart}>
+      {/* Header */}
+      <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+          <CartIcon size={22} color="#0284c7" />
+          <Text style={styles.headerTitle}>Savat ({totalItems})</Text>
+        </View>
+        <TouchableOpacity onPress={clearCart} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
           <Text style={styles.clearAll}>Tozalash</Text>
         </TouchableOpacity>
       </View>
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
+        contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
       >
         {/* Cart Items */}
         <View style={styles.itemList}>
@@ -122,7 +163,7 @@ export function CartScreen({ navigation }: any) {
                         style={styles.qtyBtn}
                         onPress={() => updateQuantity(product.id, quantity - 1)}
                       >
-                        <Text style={styles.qtyBtnText}>-</Text>
+                        <Text style={styles.qtyBtnText}>−</Text>
                       </TouchableOpacity>
                       <Text style={styles.qtyNumber}>{quantity}</Text>
                       <TouchableOpacity
@@ -133,7 +174,11 @@ export function CartScreen({ navigation }: any) {
                       </TouchableOpacity>
                     </View>
 
-                    <TouchableOpacity onPress={() => removeFromCart(product.id)}>
+                    <TouchableOpacity
+                      onPress={() => removeFromCart(product.id)}
+                      style={styles.removeBtn}
+                    >
+                      <CloseIcon size={14} color="#ef4444" />
                       <Text style={styles.removeText}>O'chirish</Text>
                     </TouchableOpacity>
                   </View>
@@ -143,15 +188,25 @@ export function CartScreen({ navigation }: any) {
           })}
         </View>
 
+        {/* Telegram Verified info or guest tip */}
+        {customer ? (
+          <View style={styles.authBadge}>
+            <TelegramIcon size={18} color="#0284c7" />
+            <Text style={styles.authBadgeText}>
+              Tasdiqlangan hisob: <Text style={{ fontWeight: "800", color: "#0f172a" }}>{customer.name}</Text>
+            </Text>
+          </View>
+        ) : null}
+
         {/* Checkout Form */}
         <View style={styles.checkoutBox}>
           <Text style={styles.checkoutTitle}>Buyurtmani rasmiylashtirish</Text>
-          <Text style={styles.checkoutSub}>Ma'lumotlaringizni to'ldiring, menejerimiz bog'lanadi</Text>
+          <Text style={styles.checkoutSub}>Ma'lumotlarni to'ldiring va to'lov usulini tanlang</Text>
 
-          <Text style={styles.label}>Ismingiz *</Text>
+          <Text style={styles.label}>Ism va Familiya *</Text>
           <TextInput
             style={styles.input}
-            placeholder="To'liq ismingiz"
+            placeholder="Masalan: Azizbek Karimov"
             value={customerName}
             onChangeText={setCustomerName}
             placeholderTextColor="#94a3b8"
@@ -167,10 +222,10 @@ export function CartScreen({ navigation }: any) {
             placeholderTextColor="#94a3b8"
           />
 
-          <Text style={styles.label}>Yetkazib berish manzili *</Text>
+          <Text style={styles.label}>Yetkazib berish / Olib ketish manzili *</Text>
           <TextInput
             style={styles.input}
-            placeholder="Viloyat, shahar, ko'cha, bino"
+            placeholder="Viloyat, shahar, ko'cha, klinika yoki bino"
             value={address}
             onChangeText={setAddress}
             placeholderTextColor="#94a3b8"
@@ -178,30 +233,111 @@ export function CartScreen({ navigation }: any) {
 
           <Text style={styles.label}>Qo'shimcha izoh (ixtiyoriy)</Text>
           <TextInput
-            style={[styles.input, { height: 70 }]}
-            placeholder="Klinika nomi yoki qo'shimcha talablar"
+            style={[styles.input, { height: 64, textAlignVertical: "top" }]}
+            placeholder="Klinika nomi, o'rnatish yoki yetkazish vaqti"
             value={comment}
             onChangeText={setComment}
             multiline
             placeholderTextColor="#94a3b8"
           />
 
+          {/* Payment Method Selection */}
+          <Text style={[styles.label, { marginTop: 8, marginBottom: 8 }]}>To'lov usuli *</Text>
+
+          {/* Option 1: inPAY */}
+          <TouchableOpacity
+            style={[
+              styles.payOption,
+              paymentMethod === "inpay" && !hasUnpriced && styles.payOptionActive,
+              hasUnpriced && styles.payOptionDisabled,
+            ]}
+            onPress={() => !hasUnpriced && setPaymentMethod("inpay")}
+            activeOpacity={hasUnpriced ? 1 : 0.8}
+          >
+            <View style={styles.radioCircle}>
+              {paymentMethod === "inpay" && !hasUnpriced && <View style={styles.radioDot} />}
+            </View>
+            <View style={{ flex: 1 }}>
+              <View style={styles.payOptionHeader}>
+                <Text style={styles.payTitle}>💳 inPAY — Onlayn to'lov</Text>
+              </View>
+              <Text style={styles.payDesc}>
+                {hasUnpriced
+                  ? "Savatda narxi kelishiladigan tovarlar bo'lgani sababli faqat qabul qilishda to'lash mumkin."
+                  : "Click, Payme, Uzcard, Humo kartalari orqali xavfsiz va tezkor onlayn to'lov."}
+              </Text>
+              {!hasUnpriced && (
+                <View style={styles.payBadgesRow}>
+                  <View style={[styles.payPill, { backgroundColor: "#00a0e3" }]}>
+                    <Text style={styles.payPillText}>Click</Text>
+                  </View>
+                  <View style={[styles.payPill, { backgroundColor: "#00cccc" }]}>
+                    <Text style={[styles.payPillText, { color: "#003b3e" }]}>Payme</Text>
+                  </View>
+                  <View style={[styles.payPill, { backgroundColor: "#1e3a8a" }]}>
+                    <Text style={styles.payPillText}>Uzcard</Text>
+                  </View>
+                  <View style={[styles.payPill, { backgroundColor: "#ea580c" }]}>
+                    <Text style={styles.payPillText}>Humo</Text>
+                  </View>
+                </View>
+              )}
+            </View>
+          </TouchableOpacity>
+
+          {/* Option 2: Cash / Store pickup */}
+          <TouchableOpacity
+            style={[
+              styles.payOption,
+              (paymentMethod === "cash" || hasUnpriced) && styles.payOptionActive,
+              { marginTop: 8 },
+            ]}
+            onPress={() => setPaymentMethod("cash")}
+            activeOpacity={0.8}
+          >
+            <View style={styles.radioCircle}>
+              {(paymentMethod === "cash" || hasUnpriced) && <View style={styles.radioDot} />}
+            </View>
+            <View style={{ flex: 1 }}>
+              <View style={styles.payOptionHeader}>
+                <Text style={styles.payTitle}>💵 Qabul qilishda to'lash</Text>
+              </View>
+              <Text style={styles.payDesc}>
+                Do'kondan olib ketishda yoki topshirilganda naqd / terminal / bank o'tkazmasi orqali to'lov.
+              </Text>
+            </View>
+          </TouchableOpacity>
+
+          {/* Total Row */}
           <View style={styles.totalRow}>
-            <Text style={styles.totalLabel}>Jami summa:</Text>
+            <Text style={styles.totalLabel}>Jami to'lov:</Text>
             <Text style={styles.totalValue}>
               {totalPrice > 0 ? `${totalPrice.toLocaleString()} UZS` : "Kelishuv asosida"}
             </Text>
           </View>
 
+          {/* Security note */}
+          <View style={styles.secNote}>
+            <ShieldIcon size={14} color="#059669" />
+            <Text style={styles.secNoteText}>
+              Barcha to'lovlar va ma'lumotlar 256-bit shifrlangan
+            </Text>
+          </View>
+
           <TouchableOpacity
-            style={styles.orderBtn}
+            style={[styles.orderBtn, loading && { opacity: 0.7 }]}
             onPress={handleCheckout}
             disabled={loading}
+            activeOpacity={0.88}
           >
             {loading ? (
               <ActivityIndicator color="#ffffff" />
             ) : (
-              <Text style={styles.orderBtnText}>Buyurtma berish →</Text>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                <Text style={styles.orderBtnText}>
+                  {paymentMethod === "inpay" && !hasUnpriced ? "inPAY orqali to'lash →" : "Buyurtmani tasdiqlash →"}
+                </Text>
+              </View>
             )}
           </TouchableOpacity>
         </View>
@@ -214,7 +350,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f8fafc" },
   header: {
     paddingHorizontal: 20,
-    paddingBottom: 12,
+    paddingBottom: 14,
     backgroundColor: "#ffffff",
     flexDirection: "row",
     justifyContent: "space-between",
@@ -222,9 +358,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#f1f5f9",
   },
-  headerTitle: { fontSize: 19, fontWeight: "800", color: "#0f172a" },
-  clearAll: { fontSize: 13, color: "#ef4444", fontWeight: "600" },
-  itemList: { marginBottom: 16 },
+  headerTitle: { fontSize: 19, fontWeight: "900", color: "#0f172a" },
+  clearAll: { fontSize: 13, color: "#ef4444", fontWeight: "700" },
+  itemList: { marginBottom: 14 },
   card: {
     flexDirection: "row",
     backgroundColor: "#ffffff",
@@ -236,8 +372,8 @@ const styles = StyleSheet.create({
   },
   cardImg: { width: 75, height: 75, borderRadius: 10, backgroundColor: "#f8fafc", marginRight: 12 },
   cardInfo: { flex: 1, justifyContent: "space-between" },
-  cardName: { fontSize: 13, fontWeight: "700", color: "#0f172a", lineHeight: 17 },
-  cardPrice: { fontSize: 14, fontWeight: "800", color: "#0284c7", marginVertical: 4 },
+  cardName: { fontSize: 13.5, fontWeight: "700", color: "#0f172a", lineHeight: 18 },
+  cardPrice: { fontSize: 14.5, fontWeight: "900", color: "#0284c7", marginVertical: 4 },
   cardActions: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   qtyBox: {
     flexDirection: "row",
@@ -249,17 +385,32 @@ const styles = StyleSheet.create({
   qtyBtn: { width: 28, height: 28, borderRadius: 6, backgroundColor: "#ffffff", alignItems: "center", justifyContent: "center" },
   qtyBtnText: { fontSize: 16, fontWeight: "700", color: "#0f172a" },
   qtyNumber: { marginHorizontal: 10, fontSize: 13, fontWeight: "700", color: "#0f172a" },
+  removeBtn: { flexDirection: "row", alignItems: "center", gap: 3 },
   removeText: { fontSize: 12, color: "#ef4444", fontWeight: "600" },
+
+  authBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: "#e0f2fe",
+    borderWidth: 1,
+    borderColor: "#bae6fd",
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 12,
+    marginBottom: 14,
+  },
+  authBadgeText: { fontSize: 12.5, color: "#0369a1" },
 
   checkoutBox: {
     backgroundColor: "#ffffff",
-    borderRadius: 18,
-    padding: 16,
+    borderRadius: 20,
+    padding: 18,
     borderWidth: 1,
     borderColor: "#e2e8f0",
   },
-  checkoutTitle: { fontSize: 16, fontWeight: "800", color: "#0f172a" },
-  checkoutSub: { fontSize: 11.5, color: "#64748b", marginTop: 2, marginBottom: 14 },
+  checkoutTitle: { fontSize: 17, fontWeight: "900", color: "#0f172a" },
+  checkoutSub: { fontSize: 12, color: "#64748b", marginTop: 2, marginBottom: 14 },
   label: { fontSize: 12, fontWeight: "700", color: "#334155", marginBottom: 5 },
   input: {
     backgroundColor: "#f8fafc",
@@ -272,30 +423,101 @@ const styles = StyleSheet.create({
     color: "#0f172a",
     marginBottom: 12,
   },
+
+  payOption: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
+    padding: 12,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: "#e2e8f0",
+    backgroundColor: "#ffffff",
+  },
+  payOptionActive: {
+    borderColor: "#0284c7",
+    backgroundColor: "#f0f9ff",
+  },
+  payOptionDisabled: {
+    opacity: 0.5,
+  },
+  radioCircle: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: "#0284c7",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 2,
+  },
+  radioDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: "#0284c7",
+  },
+  payOptionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  payTitle: { fontSize: 13.5, fontWeight: "800", color: "#0f172a" },
+  payDesc: { fontSize: 11.5, color: "#64748b", marginTop: 3, lineHeight: 16 },
+  payBadgesRow: {
+    flexDirection: "row",
+    gap: 5,
+    marginTop: 6,
+  },
+  payPill: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  payPillText: { fontSize: 10, fontWeight: "800", color: "#ffffff" },
+
   totalRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 12,
+    paddingVertical: 14,
     borderTopWidth: 1,
     borderTopColor: "#f1f5f9",
-    marginTop: 4,
-    marginBottom: 12,
+    marginTop: 14,
+    marginBottom: 8,
   },
   totalLabel: { fontSize: 14, fontWeight: "700", color: "#64748b" },
-  totalValue: { fontSize: 17, fontWeight: "900", color: "#0284c7" },
+  totalValue: { fontSize: 18, fontWeight: "900", color: "#0284c7" },
+  secNote: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    marginBottom: 14,
+  },
+  secNoteText: { fontSize: 11, color: "#059669", fontWeight: "600" },
+
   orderBtn: {
     backgroundColor: "#0284c7",
     paddingVertical: 14,
     borderRadius: 14,
     alignItems: "center",
+    justifyContent: "center",
   },
   orderBtnText: { color: "#ffffff", fontSize: 14.5, fontWeight: "800" },
 
   emptyContainer: { flex: 1, alignItems: "center", justifyContent: "center", padding: 30, backgroundColor: "#ffffff" },
-  emptyIcon: { fontSize: 50, marginBottom: 14 },
-  emptyTitle: { fontSize: 18, fontWeight: "800", color: "#0f172a", marginBottom: 6 },
-  emptyDesc: { fontSize: 13, color: "#64748b", textAlign: "center", marginBottom: 20 },
-  shopBtn: { backgroundColor: "#0284c7", paddingHorizontal: 22, paddingVertical: 12, borderRadius: 14 },
-  shopBtnText: { color: "#ffffff", fontWeight: "700", fontSize: 13.5 },
+  emptyIconCircle: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    backgroundColor: "#e0f2fe",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 16,
+  },
+  emptyTitle: { fontSize: 19, fontWeight: "900", color: "#0f172a", marginBottom: 6 },
+  emptyDesc: { fontSize: 13, color: "#64748b", textAlign: "center", marginBottom: 24, lineHeight: 18 },
+  shopBtn: { backgroundColor: "#0284c7", paddingHorizontal: 24, paddingVertical: 12, borderRadius: 14 },
+  shopBtnText: { color: "#ffffff", fontWeight: "800", fontSize: 14 },
 });

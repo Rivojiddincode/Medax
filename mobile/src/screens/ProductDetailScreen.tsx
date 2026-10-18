@@ -11,6 +11,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { fetchProductDetail, Product, getImageUrl, formatPrice } from "../api";
 import { useCart } from "../context/CartContext";
+import { ShieldIcon, CartIcon } from "../components/Icons";
 
 export function ProductDetailScreen({ route, navigation }: any) {
   const insets = useSafeAreaInsets();
@@ -102,7 +103,10 @@ export function ProductDetailScreen({ route, navigation }: any) {
 
           {/* Kafolat va yetkazib berish (Web sayt kabi) */}
           <View style={styles.guaranteeBox}>
-            <Text style={styles.guaranteeTitle}>🛡️ Medax Rasmiy Kafolati</Text>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 4 }}>
+              <ShieldIcon size={17} color="#065f46" />
+              <Text style={styles.guaranteeTitle}>Medax Rasmiy Kafolati</Text>
+            </View>
             <Text style={styles.guaranteeDesc}>
               Barcha uskunalarimiz 100% sertifikatlangan, rasmiy zavod kafolatiga ega va butun O'zbekiston bo'ylab mutaxassislarimiz tomonidan yetkazib o'rnatiladi.
             </Text>
@@ -135,7 +139,10 @@ export function ProductDetailScreen({ route, navigation }: any) {
             navigation.navigate("Savatcha");
           }}
         >
-          <Text style={styles.addToCartText}>Savatchaga qo'shish 🛒</Text>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+            <CartIcon size={18} color="#ffffff" />
+            <Text style={styles.addToCartText}>Savatchaga qo'shish</Text>
+          </View>
         </TouchableOpacity>
       </View>
     </View>
