@@ -197,40 +197,77 @@ export function Layout() {
         {/* Uzum-style Mega Catalog Dropdown Modal */}
         <UzumCatalogModal isOpen={isCatalogOpen} onClose={() => setIsCatalogOpen(false)} />
 
-        {/* Tier 3: Category Strip (Quick access navigation like Uzum) */}
-        <div className="uz-catstrip">
-          <div className="wrap uz-catstrip-wrap">
-            <Link to="/catalog?flag=discount" className="uz-catstrip-pill highlight-green">
-              <img src="/icons/guarantee.png" alt="" className="uz-catstrip-icon-img" />
-              <b>{t("strip_guaranteed_prices")}</b>
-            </Link>
-            <Link to="/catalog?flag=new" className="uz-catstrip-pill highlight-red">
-              <img src="/icons/new.png" alt="" className="uz-catstrip-icon-img" />
-              <b>{t("strip_new_models")}</b>
-            </Link>
-            <Link to="/catalog?category=tibbiy-buyumlar" className="uz-catstrip-pill standard">
-              <img src="/icons/consumables.png" alt="" className="uz-catstrip-icon-img" />
-              <span>{t("strip_consumables")}</span>
-            </Link>
-            <Link to="/catalog?category=tibbiy-apparaturalar" className="uz-catstrip-pill standard">
-              <img src="/icons/surgery.png" alt="" className="uz-catstrip-icon-img" />
-              <span>{t("strip_surgery")}</span>
-            </Link>
-            <Link to="/catalog?category=tibbiy-jihozlar" className="uz-catstrip-pill standard">
-              <img src="/icons/furniture.png" alt="" className="uz-catstrip-icon-img" />
-              <span>{t("strip_furniture")}</span>
-            </Link>
-            <Link to="/catalog?category=laboratoriya-reagentlari" className="uz-catstrip-pill standard">
-              <img src="/icons/lab.png" alt="" className="uz-catstrip-icon-img" />
-              <span>{t("strip_laboratory")}</span>
-            </Link>
-            <Link to="/catalog?category=ortopedik-mahsulotlar" className="uz-catstrip-pill standard">
-              <img src="/icons/wheelchair.png" alt="" className="uz-catstrip-icon-img" />
-              <span>{t("strip_wheelchairs")}</span>
-            </Link>
-            <Link to="/catalog" className="uz-catstrip-more">
-              {t("strip_all")}
-            </Link>
+        {/* Tier 3: Category Strip (Quick access navigation - auto-moving ticker on mobile) */}
+        <div className="uz-catstrip" aria-label="Kategoriyalar lentasi">
+          <div className="uz-catstrip-track">
+            <div className="wrap uz-catstrip-wrap">
+              <Link to="/catalog?flag=discount" className="uz-catstrip-pill highlight-green">
+                <img src="/icons/guarantee.png" alt="" className="uz-catstrip-icon-img" />
+                <b>{t("strip_guaranteed_prices")}</b>
+              </Link>
+              <Link to="/catalog?flag=new" className="uz-catstrip-pill highlight-red">
+                <img src="/icons/new.png" alt="" className="uz-catstrip-icon-img" />
+                <b>{t("strip_new_models")}</b>
+              </Link>
+              <Link to="/catalog?category=tibbiy-buyumlar" className="uz-catstrip-pill standard">
+                <img src="/icons/consumables.png" alt="" className="uz-catstrip-icon-img" />
+                <span>{t("strip_consumables")}</span>
+              </Link>
+              <Link to="/catalog?category=tibbiy-apparaturalar" className="uz-catstrip-pill standard">
+                <img src="/icons/surgery.png" alt="" className="uz-catstrip-icon-img" />
+                <span>{t("strip_surgery")}</span>
+              </Link>
+              <Link to="/catalog?category=tibbiy-jihozlar" className="uz-catstrip-pill standard">
+                <img src="/icons/furniture.png" alt="" className="uz-catstrip-icon-img" />
+                <span>{t("strip_furniture")}</span>
+              </Link>
+              <Link to="/catalog?category=laboratoriya-reagentlari" className="uz-catstrip-pill standard">
+                <img src="/icons/lab.png" alt="" className="uz-catstrip-icon-img" />
+                <span>{t("strip_laboratory")}</span>
+              </Link>
+              <Link to="/catalog?category=ortopedik-mahsulotlar" className="uz-catstrip-pill standard">
+                <img src="/icons/wheelchair.png" alt="" className="uz-catstrip-icon-img" />
+                <span>{t("strip_wheelchairs")}</span>
+              </Link>
+              <Link to="/catalog" className="uz-catstrip-more">
+                {t("strip_all")}
+              </Link>
+            </div>
+
+            {/* Cloned strip for seamless infinite loop on mobile */}
+            <div className="wrap uz-catstrip-wrap uz-catstrip-clone" aria-hidden="true">
+              <Link to="/catalog?flag=discount" className="uz-catstrip-pill highlight-green" tabIndex={-1}>
+                <img src="/icons/guarantee.png" alt="" className="uz-catstrip-icon-img" />
+                <b>{t("strip_guaranteed_prices")}</b>
+              </Link>
+              <Link to="/catalog?flag=new" className="uz-catstrip-pill highlight-red" tabIndex={-1}>
+                <img src="/icons/new.png" alt="" className="uz-catstrip-icon-img" />
+                <b>{t("strip_new_models")}</b>
+              </Link>
+              <Link to="/catalog?category=tibbiy-buyumlar" className="uz-catstrip-pill standard" tabIndex={-1}>
+                <img src="/icons/consumables.png" alt="" className="uz-catstrip-icon-img" />
+                <span>{t("strip_consumables")}</span>
+              </Link>
+              <Link to="/catalog?category=tibbiy-apparaturalar" className="uz-catstrip-pill standard" tabIndex={-1}>
+                <img src="/icons/surgery.png" alt="" className="uz-catstrip-icon-img" />
+                <span>{t("strip_surgery")}</span>
+              </Link>
+              <Link to="/catalog?category=tibbiy-jihozlar" className="uz-catstrip-pill standard" tabIndex={-1}>
+                <img src="/icons/furniture.png" alt="" className="uz-catstrip-icon-img" />
+                <span>{t("strip_furniture")}</span>
+              </Link>
+              <Link to="/catalog?category=laboratoriya-reagentlari" className="uz-catstrip-pill standard" tabIndex={-1}>
+                <img src="/icons/lab.png" alt="" className="uz-catstrip-icon-img" />
+                <span>{t("strip_laboratory")}</span>
+              </Link>
+              <Link to="/catalog?category=ortopedik-mahsulotlar" className="uz-catstrip-pill standard" tabIndex={-1}>
+                <img src="/icons/wheelchair.png" alt="" className="uz-catstrip-icon-img" />
+                <span>{t("strip_wheelchairs")}</span>
+              </Link>
+              <Link to="/catalog" className="uz-catstrip-more" tabIndex={-1}>
+                {t("strip_all")}
+              </Link>
+            </div>
           </div>
         </div>
       </header>
