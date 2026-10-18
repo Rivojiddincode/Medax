@@ -201,7 +201,7 @@ export function Layout() {
         {/* Tier 3: Category Strip (Quick access navigation - auto-moving ticker on mobile) */}
         <div className="uz-catstrip" aria-label="Kategoriyalar lentasi">
           <div className="uz-catstrip-track">
-            <div className="wrap uz-catstrip-wrap">
+            <div className="uz-catstrip-wrap">
               <Link to="/catalog?flag=discount" className="uz-catstrip-pill highlight-green">
                 <img src="/icons/guarantee.png" alt="" className="uz-catstrip-icon-img" />
                 <b>{t("strip_guaranteed_prices")}</b>
@@ -236,7 +236,7 @@ export function Layout() {
             </div>
 
             {/* Cloned strip for seamless infinite loop on mobile */}
-            <div className="wrap uz-catstrip-wrap uz-catstrip-clone" aria-hidden="true">
+            <div className="uz-catstrip-wrap uz-catstrip-clone" aria-hidden="true">
               <Link to="/catalog?flag=discount" className="uz-catstrip-pill highlight-green" tabIndex={-1}>
                 <img src="/icons/guarantee.png" alt="" className="uz-catstrip-icon-img" />
                 <b>{t("strip_guaranteed_prices")}</b>

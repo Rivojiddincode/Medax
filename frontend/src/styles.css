@@ -890,13 +890,23 @@ input:focus,select:focus,textarea:focus{
   display: flex;
   width: 100%;
 }
+@media (min-width: 769px) {
+  .uz-catstrip-track {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    box-sizing: border-box;
+  }
+}
 .uz-catstrip-wrap {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding-top: 8px;
-  padding-bottom: 8px;
+  gap: 8px;
+  padding: 8px 12px;
   white-space: nowrap;
+  flex-shrink: 0;
+  width: max-content;
+  box-sizing: border-box;
 }
 .uz-catstrip-clone {
   display: none !important;
@@ -907,25 +917,34 @@ input:focus,select:focus,textarea:focus{
     overflow: hidden !important;
     position: relative !important;
     width: 100% !important;
-    -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,1) 4%, rgba(0,0,0,1) 96%, transparent 100%);
-    mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,1) 4%, rgba(0,0,0,1) 96%, transparent 100%);
+    -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,1) 3%, rgba(0,0,0,1) 97%, transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,1) 3%, rgba(0,0,0,1) 97%, transparent 100%);
   }
   .uz-catstrip-track {
     display: flex !important;
     width: max-content !important;
-    animation: uzCatTicker 32s linear infinite !important;
+    animation: uzCatTicker 36s linear infinite !important;
     will-change: transform;
   }
   .uz-catstrip:hover .uz-catstrip-track,
   .uz-catstrip:active .uz-catstrip-track {
     animation-play-state: paused !important;
   }
+  .uz-catstrip-wrap {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 8px 10px !important;
+    width: max-content !important;
+    flex-shrink: 0 !important;
+  }
   .uz-catstrip-clone {
     display: flex !important;
+    margin-left: 12px !important;
   }
   @keyframes uzCatTicker {
     0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
+    100% { transform: translateX(calc(-50% - 6px)); }
   }
 }
 .uz-catstrip-pill {
@@ -5079,13 +5098,60 @@ table.tbl {
 .account-avatar img{width:100%;height:100%;object-fit:cover}
 .account-meta{display:flex;gap:16px;font-size:13.5px;color:var(--ink2);margin-top:6px;flex-wrap:wrap}
 .meta-item{display:inline-flex;align-items:center;gap:6px}
-.account-tabs{display:flex;gap:8px;margin-bottom:22px;border-bottom:1px solid var(--line);padding-bottom:12px}
-.account-tabs .tab-btn{
-  border:0;background:transparent;padding:10px 20px;border-radius:12px;font-weight:600;font-size:15px;
-  color:var(--ink2);cursor:pointer;transition:all .2s ease;
-  display:inline-flex;align-items:center;gap:8px
+.account-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 22px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 12px;
 }
-.account-tabs .tab-btn.active{background:var(--sea);color:var(--med-blue);font-weight:700}
+.account-tabs .tab-btn {
+  border: 0;
+  background: transparent;
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 14.5px;
+  color: var(--ink2);
+  cursor: pointer;
+  transition: all .2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+.account-tabs .tab-btn span {
+  white-space: nowrap;
+}
+.account-tabs .tab-btn.active {
+  background: var(--sea);
+  color: var(--med-blue);
+  font-weight: 700;
+}
+
+@media (max-width: 640px) {
+  .account-tabs {
+    gap: 6px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .account-tabs .tab-btn {
+    flex: 1;
+    padding: 10px 8px;
+    font-size: 12px;
+    gap: 6px;
+    white-space: nowrap;
+  }
+  .account-tabs .tab-btn span {
+    white-space: nowrap;
+  }
+  .account-tabs .tab-btn svg {
+    flex-shrink: 0;
+    width: 15px;
+    height: 15px;
+  }
+}
 .empty-orders-card{
   text-align:center;padding:64px 20px;background:var(--card);border:1px solid var(--line);
   border-radius:22px;display:flex;flex-direction:column;align-items:center;gap:14px

@@ -17,10 +17,16 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ className = 
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Outside click for desktop dropdown
+  // Outside click for desktop dropdown and mobile sheet
   useEffect(() => {
-    const handleOutsideClick = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+    const handleOutsideClick = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (!target) return;
+      // Do not close if clicking inside the mobile portal sheet or container
+      if (target.closest(".lang-portal-sheet") || target.closest(".lang-portal-container")) {
+        return;
+      }
+      if (containerRef.current && !containerRef.current.contains(target)) {
         setOpen(false);
       }
     };
@@ -30,10 +36,12 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ className = 
 
     if (open) {
       document.addEventListener("mousedown", handleOutsideClick);
+      document.addEventListener("touchstart", handleOutsideClick, { passive: true });
       document.addEventListener("keydown", handleKeyDown);
     }
     return () => {
       document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("touchstart", handleOutsideClick);
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, [open]);
@@ -182,6 +190,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ className = 
                     type="button"
                     className={`lang-portal-btn ${isSelected ? "selected" : ""}`}
                     onClick={(e) => handleSelect(item.code, e)}
+                    onPointerUp={(e) => handleSelect(item.code, e)}
                     role="option"
                     aria-selected={isSelected}
                   >
