@@ -70,7 +70,7 @@ app.use(express.json({ limit: "1mb" }));
 fs.mkdirSync(config.uploadDir, { recursive: true });
 app.use("/uploads", express.static(config.uploadDir, { maxAge: "30d", immutable: true }));
 
-app.get("/api/health", (_req, res) => res.json({ ok: true, timestamp: new Date().toISOString() }));
+app.get("/api/health", (_req, res) => res.json({ ok: true, version: "2.4.2", timestamp: new Date().toISOString() }));
 app.use("/api/auth", authRouter);
 app.use("/api/customer", customerRouter);
 app.use("/api/orders", ordersRouter);
