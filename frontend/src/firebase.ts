@@ -93,9 +93,13 @@ export function translateFirebaseError(error: any): string {
     case "auth/network-request-failed":
       return "Internet bilan aloqa yo'q yoki tarmoq xatosi yuz berdi.";
     case "auth/operation-not-allowed":
-      return "Firebase konsolida Telefon orqali kirish yoqilmagan. Firebase Console -> Authentication -> Sign-in method bo'limida Phone providerini yoqing.";
+      return "Firebase konsolida Telefon orqali kirish (Phone Auth) yoqilmagan. Firebase Console -> Authentication -> Sign-in method bo'limida Phone providerini yoqing.";
+    case "auth/unauthorized-domain":
+      return "Sayt domeni Firebase ruxsatnomalariga qo'shilmagan! Firebase Console -> Authentication -> Settings -> Authorized domains bo'limiga ushbu sayt domenini qo'shing.";
     case "auth/invalid-app-credential":
       return "Firebase domen ruxsatida xatolik. Firebase Console -> Authentication -> Settings -> Authorized domains bo'limiga domen qo'shilganligini tekshiring.";
+    case "auth/billing-not-enabled":
+      return "Firebase bepul tarifida haqiqiy SMS yuborish uchun Blaze tarifi yoki Test raqam qo'shish kerak.";
     default:
       return error?.message || "SMS orqali kirishda xatolik yuz berdi.";
   }

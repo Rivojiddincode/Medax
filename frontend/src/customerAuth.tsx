@@ -141,31 +141,9 @@ export function CustomerAuthProvider({ children }: { children: React.ReactNode }
     }
   };
 
-  // Umumiy SMS yuborish (Avval Firebase, muammo bo'lsa zaxira tizim)
-  const sendOtp = async (phone: string, captchaToken?: string) => {
-    try {
-      return await sendFirebaseOtp(phone);
-    } catch (fbErr: any) {
-      console.warn("Firebase Phone Auth xatosi, server SMS zaxirasiga o'tilmoqda:", fbErr);
-      // Agar Firebase xato bersa, serverdagi zaxira SMS tizimiga o'tishga urinib ko'rish
-      try {
-        const res = await fetch("/api/customer/auth/send-otp", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ phone, captchaToken }),
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data.error || "SMS yuborishda xatolik yuz berdi");
-        }
-        setFirebaseConfirmation(null);
-        return data;
-      } catch (srvErr: any) {
-        // Agar ikkalasi ham xato bersa, Firebase'ning tushunarli xabarini ko'rsatamiz
-        const friendly = translateFirebaseError(fbErr);
-        throw new Error(friendly || srvErr.message || "SMS kod yuborishda xatolik");
-      }
-    }
+  // Umumiy SMS yuborish (Firebase Phone Auth)
+  const sendOtp = async (phone: string, _captchaToken?: string) => {
+    return await sendFirebaseOtp(phone);
   };
 
   // Umumiy kodni tasdiqlash
