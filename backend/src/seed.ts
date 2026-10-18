@@ -139,13 +139,18 @@ export async function syncCategories(): Promise<Record<string, number>> {
 }
 
 export async function seedDatabase() {
-  const email = (process.env.ADMIN_EMAIL || "admin@medax.uz").toLowerCase();
+  const primaryEmail = (process.env.ADMIN_EMAIL || "admin@medax.uz").toLowerCase();
   const password = process.env.ADMIN_PASSWORD || "ChangeMe123!";
-  await prisma.user.upsert({
-    where: { email },
-    create: { email, name: "Administrator", role: "ADMIN", passwordHash: await bcrypt.hash(password, 10) },
-    update: {},
-  });
+  const hash = await bcrypt.hash(password, 10);
+
+  const adminEmails = Array.from(new Set([primaryEmail, "admin@medax.uz", "admin@medtex.uz"]));
+  for (const email of adminEmails) {
+    await prisma.user.upsert({
+      where: { email },
+      create: { email, name: "Administrator", role: "ADMIN", passwordHash: hash },
+      update: { passwordHash: hash, role: "ADMIN" },
+    });
+  }
 
   // 1. Kategoriyalarni har doim 5 ta yo'nalishga sinxronlashtiramiz
   const catMap = await syncCategories();
