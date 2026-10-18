@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api, Brand, Category, Product } from "../api";
 import { ProductCard } from "../components/Shell";
@@ -22,7 +22,7 @@ export interface BannerBadge {
 
 export interface HeroSlide {
   id: number;
-  titleLines: Record<"uz" | "ru" | "en", [string, string, string]>;
+  titleLines: Record<"uz" | "ru" | "en", [string, string]>;
   badges: BannerBadge[];
   img: string;
   alt: string;
@@ -35,9 +35,9 @@ export const HERO_SLIDES: HeroSlide[] = [
   {
     id: 1,
     titleLines: {
-      uz: ["Pultli nogironlar", "aravachasi Endi", "Medax’da"],
-      ru: ["Коляски с пультом", "управления Теперь", "в Medax"],
-      en: ["Powered Wheelchairs", "with Remote Now", "at Medax"]
+      uz: ["Pultli nogironlar aravachasi", "Endi Medax’da"],
+      ru: ["Коляски с электроприводом", "Теперь в Medax"],
+      en: ["Powered Wheelchairs", "Now at Medax"],
     },
     badges: [
       { type: "original", label: { uz: "Original", ru: "Оригинал", en: "Original" } },
@@ -52,9 +52,9 @@ export const HERO_SLIDES: HeroSlide[] = [
   {
     id: 2,
     titleLines: {
-      uz: ["Zamonaviy UZI", "apparatlari Endi", "Medax’da"],
-      ru: ["Современные аппараты", "УЗИ Теперь", "в Medax"],
-      en: ["Advanced Ultrasound", "Systems Now", "at Medax"]
+      uz: ["Zamonaviy UZI apparatlari", "Endi Medax’da"],
+      ru: ["Современные аппараты УЗИ", "Теперь в Medax"],
+      en: ["Advanced Ultrasound Systems", "Now at Medax"],
     },
     badges: [
       { type: "original", label: { uz: "Original", ru: "Оригинал", en: "Original" } },
@@ -69,9 +69,9 @@ export const HERO_SLIDES: HeroSlide[] = [
   {
     id: 3,
     titleLines: {
-      uz: ["Reanimatsiya va", "IVL jihozlari Endi", "Medax’da"],
-      ru: ["Оборудование ИВЛ", "и реанимации Теперь", "в Medax"],
-      en: ["ICU & Ventilators", "Equipment Now", "at Medax"]
+      uz: ["Reanimatsiya va IVL jihozlari", "Endi Medax’da"],
+      ru: ["Оборудование ИВЛ и реанимации", "Теперь в Medax"],
+      en: ["ICU & Ventilators", "Now at Medax"],
     },
     badges: [
       { type: "original", label: { uz: "Original", ru: "Оригинал", en: "Original" } },
@@ -86,9 +86,9 @@ export const HERO_SLIDES: HeroSlide[] = [
   {
     id: 4,
     titleLines: {
-      uz: ["Funksional tibbiy", "kravatlar Endi", "Medax’da"],
-      ru: ["Функциональные койки", "и кровати Теперь", "в Medax"],
-      en: ["Functional Hospital", "Beds Now", "at Medax"]
+      uz: ["Funksional tibbiy kravatlar", "Endi Medax’da"],
+      ru: ["Функциональные койки и кровати", "Теперь в Medax"],
+      en: ["Functional Hospital Beds", "Now at Medax"],
     },
     badges: [
       { type: "original", label: { uz: "Original", ru: "Оригинал", en: "Original" } },
@@ -113,7 +113,52 @@ export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isCarouselPaused, setIsCarouselPaused] = useState(false);
 
-  // Carousel autoplay timer (every 5 seconds, pauses on hover)
+  // Touch swipe support for mobile
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+  const touchEndX = useRef<number | null>(null);
+  const touchEndY = useRef<number | null>(null);
+  const didSwipe = useRef(false);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    didSwipe.current = false;
+    touchEndX.current = null;
+    touchEndY.current = null;
+    touchStartX.current = e.targetTouches[0].clientX;
+    touchStartY.current = e.targetTouches[0].clientY;
+    setIsCarouselPaused(true);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    touchEndX.current = e.targetTouches[0].clientX;
+    touchEndY.current = e.targetTouches[0].clientY;
+  };
+
+  const handleTouchEnd = () => {
+    setIsCarouselPaused(false);
+    if (touchStartX.current === null || touchEndX.current === null) return;
+    const diffX = touchStartX.current - touchEndX.current;
+    const diffY = (touchStartY.current || 0) - (touchEndY.current || 0);
+
+    // If swipe was horizontal (> 40px and dominant over vertical)
+    if (Math.abs(diffX) > 40 && Math.abs(diffX) > Math.abs(diffY)) {
+      didSwipe.current = true;
+      if (diffX > 0) {
+        // Swiped Left -> Next slide
+        setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
+      } else {
+        // Swiped Right -> Previous slide
+        setCurrentSlide((prev) => (prev === 0 ? HERO_SLIDES.length - 1 : prev - 1));
+      }
+    }
+
+    touchStartX.current = null;
+    touchStartY.current = null;
+    touchEndX.current = null;
+    touchEndY.current = null;
+  };
+
+  // Carousel autoplay timer (every 5 seconds, pauses on hover/touch)
   useEffect(() => {
     if (isCarouselPaused) return;
     const timer = setInterval(() => {
@@ -158,6 +203,9 @@ export default function Home() {
             className="uz-banner-carousel"
             onMouseEnter={() => setIsCarouselPaused(true)}
             onMouseLeave={() => setIsCarouselPaused(false)}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
           >
             {/* Prev arrow button */}
             <button
@@ -176,11 +224,17 @@ export default function Home() {
               to={HERO_SLIDES[currentSlide].link}
               className="uz-carousel-slide active"
               key={HERO_SLIDES[currentSlide].id}
+              onClick={(e) => {
+                if (didSwipe.current) {
+                  e.preventDefault();
+                  didSwipe.current = false;
+                }
+              }}
               style={{ background: theme === "dark" ? HERO_SLIDES[currentSlide].darkBg : HERO_SLIDES[currentSlide].bg }}
             >
               <div className="uz-slide-content">
                 <div className="uzum-banner-brand">
-                  <MedaxEmblem size={22} />
+                  <MedaxEmblem size={20} />
                   <span className="uzum-banner-brand-name">
                     <span className="brand-med">Med</span>
                     <span className="brand-ax">ax</span>
@@ -189,25 +243,20 @@ export default function Home() {
                 </div>
 
                 <h1 className="uzum-banner-title">
-                  <span>{HERO_SLIDES[currentSlide].titleLines[lang][0]}</span>
-                  <span>{HERO_SLIDES[currentSlide].titleLines[lang][1]}</span>
-                  <span>{HERO_SLIDES[currentSlide].titleLines[lang][2]}</span>
+                  <span className="title-primary">{HERO_SLIDES[currentSlide].titleLines[lang][0]}</span>
+                  <span className="title-secondary">{HERO_SLIDES[currentSlide].titleLines[lang][1]}</span>
                 </h1>
 
                 <div className="uzum-banner-badges">
-                  <div className="uzum-badge-pill uzum-badge-pill--medax">
-                    <MedaxEmblem size={18} />
-                    <span>Medax</span>
-                  </div>
                   {HERO_SLIDES[currentSlide].badges.map((b, idx) => (
                     <div key={idx} className="uzum-badge-pill">
                       {b.type === "original" ? (
-                        <svg className="uzum-badge-icon" width="22" height="22" viewBox="0 0 24 24" fill="none">
+                        <svg className="uzum-badge-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
                           <path d="M10.41 1.76a2.25 2.25 0 0 1 3.18 0l1.24 1.25a2.25 2.25 0 0 0 1.95.63l1.74-.29a2.25 2.25 0 0 1 2.57 1.86l.28 1.74a2.25 2.25 0 0 0 1.21 1.67l1.58.8a2.25 2.25 0 0 1 1.13 2.87l-.66 1.63a2.25 2.25 0 0 0 0 2.06l.66 1.63a2.25 2.25 0 0 1-1.13 2.87l-1.58.8a2.25 2.25 0 0 0-1.21 1.67l-.28 1.74a2.25 2.25 0 0 1-2.57 1.86l-1.74-.29a2.25 2.25 0 0 0-1.95.63l-1.24 1.25a2.25 2.25 0 0 1-3.18 0l-1.24-1.25a2.25 2.25 0 0 0-1.95-.63l-1.74.29a2.25 2.25 0 0 1-2.57-1.86l-.28-1.74a2.25 2.25 0 0 0-1.21-1.67l-1.58-.8a2.25 2.25 0 0 1-1.13-2.87l.66-1.63a2.25 2.25 0 0 0 0-2.06l-.66-1.63a2.25 2.25 0 0 1 1.13-2.87l1.58-.8a2.25 2.25 0 0 0 1.21-1.67l.28-1.74a2.25 2.25 0 0 1 2.57-1.86l1.74.29a2.25 2.25 0 0 0 1.95-.63l1.24-1.25z" fill="#00c853" />
                           <path d="M9 12.5l2 2 4.5-4.5" stroke="#ffffff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                       ) : (
-                        <svg className="uzum-badge-icon" width="20" height="20" viewBox="0 0 24 24" fill="#0b0f19">
+                        <svg className="uzum-badge-icon" width="18" height="18" viewBox="0 0 24 24" fill="#0b0f19">
                           <path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3z" />
                         </svg>
                       )}
