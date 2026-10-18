@@ -25,6 +25,7 @@ import {
   verifyTelegramAuth,
   sendTelegramMessage,
 } from "../telegram";
+import { memoryUpload, saveAvatar } from "../upload";
 
 export interface CustomerAuthPayload {
   id: number;
@@ -449,12 +450,13 @@ customerRouter.get("/auth/me", requireCustomerAuth, async (req, res) => {
   res.json({ customer: { ...rest, hasPassword: Boolean(passwordHash) } });
 });
 
-// 5. Profilni tahrirlash (Ism va tashkilot)
+// 5. Profilni tahrirlash (Ism, tashkilot, avatar)
 customerRouter.put("/auth/profile", requireCustomerAuth, async (req, res) => {
-  const { name, organization } = z
+  const { name, organization, avatar } = z
     .object({
       name: z.string().trim().min(2, "Ismni kiriting").max(80),
       organization: z.string().trim().max(120).optional(),
+      avatar: z.string().max(2000000).optional(),
     })
     .parse(req.body);
 
@@ -463,12 +465,25 @@ customerRouter.put("/auth/profile", requireCustomerAuth, async (req, res) => {
     data: {
       name,
       organization: organization || "",
+      ...(avatar !== undefined ? { avatar: avatar || null } : {}),
     },
     select: { id: true, name: true, phone: true, organization: true, avatar: true, passwordHash: true },
   });
 
   const { passwordHash, ...rest } = updated;
   res.json({ ok: true, customer: { ...rest, hasPassword: Boolean(passwordHash) } });
+});
+
+// 5b. Profil rasmini (avatar) yuklash
+customerRouter.post("/auth/avatar", requireCustomerAuth, memoryUpload.single("avatar"), async (req, res) => {
+  if (!req.file) throw new HttpError(400, "Rasm tanlanmagan");
+  const avatarUrl = await saveAvatar(req.file.buffer);
+  const updated = await prisma.customer.update({
+    where: { id: req.customer!.id },
+    data: { avatar: avatarUrl },
+    select: { id: true, name: true, phone: true, organization: true, avatar: true },
+  });
+  res.json({ ok: true, avatar: avatarUrl, customer: updated });
 });
 
 // 6. Parolni o'zgartirish yoki yangi parol o'rnatish

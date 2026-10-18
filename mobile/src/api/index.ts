@@ -116,6 +116,56 @@ export async function fetchCustomerProfile(): Promise<Customer | null> {
   }
 }
 
+export async function uploadCustomerAvatar(imageUri: string): Promise<{ ok: boolean; avatar?: string; error?: string }> {
+  try {
+    const token = await AsyncStorage.getItem(TOKEN_KEY);
+    if (!token) return { ok: false, error: "Tizimga kirilmagan" };
+
+    const filename = imageUri.split("/").pop() || "avatar.jpg";
+    const match = /\.(\w+)$/.exec(filename);
+    const type = match ? `image/${match[1]}` : `image/jpeg`;
+
+    const formData = new FormData();
+    formData.append("avatar", {
+      uri: imageUri,
+      name: filename,
+      type,
+    } as any);
+
+    const res = await fetch(`${API_BASE}/customer/auth/avatar`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    });
+    const data = await res.json();
+    return data;
+  } catch (err: any) {
+    return { ok: false, error: err.message || "Rasm yuklashda xatolik" };
+  }
+}
+
+export async function updateCustomerProfile(payload: { name?: string; organization?: string; avatar?: string }): Promise<{ ok: boolean; customer?: Customer; error?: string }> {
+  try {
+    const token = await AsyncStorage.getItem(TOKEN_KEY);
+    if (!token) return { ok: false, error: "Tizimga kirilmagan" };
+
+    const res = await fetch(`${API_BASE}/customer/auth/profile`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    return data;
+  } catch (err: any) {
+    return { ok: false, error: err.message || "Profilni yangilashda xatolik" };
+  }
+}
+
 export async function submitOrder(orderData: {
   customerName: string;
   phone: string;

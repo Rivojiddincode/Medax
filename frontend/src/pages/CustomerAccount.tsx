@@ -77,12 +77,44 @@ export default function CustomerAccount() {
   const [cancelReasonText, setCancelReasonText] = useState("");
   const [cancelBusy, setCancelBusy] = useState(false);
 
+  // Avatar upload state
+  const [avatarUploading, setAvatarUploading] = useState(false);
+
   useEffect(() => {
     if (customer) {
       setName(customer.name || "");
       setOrg(customer.organization || "");
     }
   }, [customer]);
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !token) return;
+
+    setAvatarUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("avatar", file);
+
+      const res = await fetch("/api/customer/auth/avatar", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Rasm yuklashda xatolik");
+      }
+
+      await refreshCustomer();
+    } catch (err: any) {
+      alert(err.message || "Rasm yuklashda xatolik yuz berdi");
+    } finally {
+      setAvatarUploading(false);
+      e.target.value = "";
+    }
+  };
 
   const loadOrders = () => {
     if (!token) return;
@@ -216,16 +248,46 @@ export default function CustomerAccount() {
     <main className="wrap account-page">
       <div className="account-hero-bar">
         <div className="account-user-info">
-          <div className="account-avatar">
-            {customer?.avatar ? (
-              <img src={customer.avatar} alt="" />
-            ) : (
-              <span>{customer?.name?.charAt(0) || "M"}</span>
-            )}
+          <div style={{ position: "relative" }}>
+            <div className="account-avatar">
+              {customer?.avatar ? (
+                <img src={customer.avatar} alt="" />
+              ) : (
+                <span>{customer?.name && customer.name !== "*" ? customer.name.charAt(0).toUpperCase() : "M"}</span>
+              )}
+            </div>
+            <label
+              title="Rasmni o'zgartirish"
+              style={{
+                position: "absolute",
+                bottom: 2,
+                right: 2,
+                width: 26,
+                height: 26,
+                borderRadius: "50%",
+                background: "var(--med-blue, #0284c7)",
+                color: "#ffffff",
+                display: "grid",
+                placeItems: "center",
+                cursor: "pointer",
+                boxShadow: "0 2px 6px rgba(0,0,0,0.25)",
+                border: "2px solid var(--paper, #ffffff)",
+                fontSize: 12,
+              }}
+            >
+              <input
+                type="file"
+                accept="image/*"
+                style={{ display: "none" }}
+                onChange={handleAvatarUpload}
+                disabled={avatarUploading}
+              />
+              <span>📷</span>
+            </label>
           </div>
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-              <h1>{customer?.name}</h1>
+              <h1>{customer?.name && customer.name !== "*" ? customer.name : "Mijoz"}</h1>
             </div>
             <div className="account-meta">
               {customer?.organization && (
@@ -435,6 +497,53 @@ export default function CustomerAccount() {
             {profileErr && <div className="err">{profileErr}</div>}
 
             <form onSubmit={handleSaveProfile}>
+              <div className="field" style={{ marginBottom: 20 }}>
+                <label style={{ display: "block", marginBottom: 8, fontWeight: 600 }}>
+                  Profil rasmi
+                </label>
+                <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                  <div
+                    style={{
+                      width: 64,
+                      height: 64,
+                      borderRadius: "50%",
+                      overflow: "hidden",
+                      background: "var(--sea)",
+                      border: "2px solid var(--med-blue)",
+                      display: "grid",
+                      placeItems: "center",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {customer?.avatar ? (
+                      <img src={customer.avatar} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    ) : (
+                      <span style={{ fontSize: 24, fontWeight: 700, color: "var(--med-blue)" }}>
+                        {customer?.name && customer.name !== "*" ? customer.name.charAt(0).toUpperCase() : "M"}
+                      </span>
+                    )}
+                  </div>
+                  <div>
+                    <label
+                      className="btn btn-primary-sheen sm"
+                      style={{ cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}
+                    >
+                      <input
+                        type="file"
+                        accept="image/*"
+                        style={{ display: "none" }}
+                        onChange={handleAvatarUpload}
+                        disabled={avatarUploading}
+                      />
+                      <span>{avatarUploading ? "Yuklanmoqda..." : "📷 Rasmni yuklash"}</span>
+                    </label>
+                    <small className="field-hint" style={{ display: "block", marginTop: 4 }}>
+                      JPG, PNG yoki WebP formatida kvadrat rasm
+                    </small>
+                  </div>
+                </div>
+              </div>
+
               <div className="field">
                 <label htmlFor="p-name">{t("acc_name_label")}</label>
                 <input

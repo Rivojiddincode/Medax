@@ -9,6 +9,8 @@ import { ProductDetailScreen } from "../screens/ProductDetailScreen";
 import { CartScreen } from "../screens/CartScreen";
 import { ProfileScreen } from "../screens/ProfileScreen";
 import { useCart } from "../context/CartContext";
+import { useTheme } from "../context/ThemeContext";
+import { useI18n } from "../context/I18nContext";
 
 import { HomeIcon, CatalogIcon, CartIcon, UserIcon } from "../components/Icons";
 
@@ -17,6 +19,8 @@ const Stack = createNativeStackNavigator();
 
 function MainTabs() {
   const { totalItems } = useCart();
+  const { colors } = useTheme();
+  const { t } = useI18n();
   const insets = useSafeAreaInsets();
   const bottomPadding = Math.max(insets.bottom, 8);
 
@@ -24,17 +28,17 @@ function MainTabs() {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: "#0284c7",
-        tabBarInactiveTintColor: "#64748b",
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textMuted,
         tabBarStyle: {
-          backgroundColor: "#ffffff",
+          backgroundColor: colors.card,
           borderTopWidth: 1,
-          borderTopColor: "#e2e8f0",
+          borderTopColor: colors.border,
           height: 56 + bottomPadding,
           paddingBottom: bottomPadding,
           paddingTop: 6,
           elevation: 12,
-          shadowColor: "#0f172a",
+          shadowColor: colors.text,
           shadowOffset: { width: 0, height: -3 },
           shadowOpacity: 0.08,
           shadowRadius: 12,
@@ -50,7 +54,7 @@ function MainTabs() {
         name="Asosiy"
         component={HomeScreen}
         options={{
-          tabBarLabel: "Asosiy",
+          tabBarLabel: t("nav_home"),
           tabBarIcon: ({ color }) => <HomeIcon size={21} color={color} />,
         }}
       />
@@ -58,7 +62,7 @@ function MainTabs() {
         name="Katalog"
         component={CatalogScreen}
         options={{
-          tabBarLabel: "Katalog",
+          tabBarLabel: t("nav_catalog"),
           tabBarIcon: ({ color }) => <CatalogIcon size={21} color={color} />,
         }}
       />
@@ -66,7 +70,7 @@ function MainTabs() {
         name="Savatcha"
         component={CartScreen}
         options={{
-          tabBarLabel: "Savatcha",
+          tabBarLabel: t("nav_cart"),
           tabBarBadge: totalItems > 0 ? totalItems : undefined,
           tabBarBadgeStyle: {
             backgroundColor: "#ef4444",
@@ -85,7 +89,7 @@ function MainTabs() {
         name="Profil"
         component={ProfileScreen}
         options={{
-          tabBarLabel: "Profil",
+          tabBarLabel: t("nav_profile"),
           tabBarIcon: ({ color }) => <UserIcon size={21} color={color} />,
         }}
       />
@@ -94,11 +98,15 @@ function MainTabs() {
 }
 
 export function AppNavigator() {
+  const { colors } = useTheme();
+
   return (
     <Stack.Navigator
       screenOptions={{
-        headerTintColor: "#0284c7",
-        headerTitleStyle: { fontWeight: "700", color: "#0f172a" },
+        headerTintColor: colors.primary,
+        headerTitleStyle: { fontWeight: "700", color: colors.text },
+        headerStyle: { backgroundColor: colors.headerBg },
+        contentStyle: { backgroundColor: colors.bg },
       }}
     >
       <Stack.Screen
@@ -109,7 +117,10 @@ export function AppNavigator() {
       <Stack.Screen
         name="ProductDetail"
         component={ProductDetailScreen}
-        options={{ title: "Uskuna ma'lumotlari" }}
+        options={{
+          title: "Mahsulot",
+          headerBackTitle: "",
+        }}
       />
     </Stack.Navigator>
   );

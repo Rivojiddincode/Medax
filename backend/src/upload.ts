@@ -31,6 +31,19 @@ export async function saveImage(buf: Buffer): Promise<{ url: string; thumbUrl: s
   return { url: `/uploads/products/${id}.webp`, thumbUrl: `/uploads/products/${id}-t.webp` };
 }
 
+/** Profil rasmini WebP ga oʻtkazadi (kvadrat 360x360) */
+export async function saveAvatar(buf: Buffer): Promise<string> {
+  const dir = await ensure("avatars");
+  const id = crypto.randomUUID();
+  try {
+    const img = sharp(buf, { failOn: "error" }).rotate();
+    await img.resize({ width: 360, height: 360, fit: "cover" }).webp({ quality: 85 }).toFile(path.join(dir, `${id}.webp`));
+  } catch {
+    throw new HttpError(400, "Rasm fayli yaroqsiz");
+  }
+  return `/uploads/avatars/${id}.webp`;
+}
+
 export async function savePdf(buf: Buffer): Promise<string> {
   if (buf.subarray(0, 4).toString() !== "%PDF") throw new HttpError(400, "Faqat PDF fayl yuklash mumkin");
   const dir = await ensure("docs");
