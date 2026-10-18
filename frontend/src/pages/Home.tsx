@@ -218,11 +218,13 @@ export default function Home() {
               </div>
 
               <div className="uz-slide-visual">
-                <img
-                  src={HERO_SLIDES[currentSlide].img}
-                  alt={HERO_SLIDES[currentSlide].alt}
-                  className="uzum-slide-product-img"
-                />
+                <div className="uz-slide-visual-showcase">
+                  <img
+                    src={HERO_SLIDES[currentSlide].img}
+                    alt={HERO_SLIDES[currentSlide].alt}
+                    className="uzum-slide-product-img"
+                  />
+                </div>
               </div>
             </Link>
 

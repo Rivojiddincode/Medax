@@ -15,6 +15,7 @@ import { UzumSearchBar, useAnimatedPresence } from "./UzumSearchBar";
 import { UzumCatalogModal } from "./UzumCatalogModal";
 import { MobileBottomNav } from "./MobileBottomNav";
 import { SITE_CONFIG } from "../siteConfig";
+import { localizeProductName } from "../utils/localize";
 
 export function Layout() {
   const { count } = useCart();
@@ -483,6 +484,7 @@ export function ProductCard({ p }: { p: Product }) {
   const { lang, t } = useI18n();
   const [added, setAdded] = useState(false);
   const img = p.images?.[0];
+  const localizedName = localizeProductName(p.name, lang);
 
   const onAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -514,7 +516,7 @@ export function ProductCard({ p }: { p: Product }) {
 
   return (
     <article className="p med-product-card">
-      <Link className="img" to={`/product/${p.slug}`} aria-label={p.name}>
+      <Link className="img" to={`/product/${p.slug}`} aria-label={localizedName}>
         {/* Top Badges: Chegirma, Xit, Yangi */}
         <div className="card-badges-top">
           {discountVal && <span className="tag discount-badge">-{discountVal}%</span>}
@@ -532,7 +534,7 @@ export function ProductCard({ p }: { p: Product }) {
             "reabilitatsiya-va-invalit-aravachalari": "/uploads/products/wheelchair.jpg",
           };
           const imgSrc = img?.thumbUrl || img?.url || catImgMap[p.category?.slug || ""] || "/uploads/products/medical-diag.jpg";
-          return <img src={imgSrc} alt={p.name} loading="lazy" width={480} height={360} onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/uploads/products/medical-diag.jpg"; }} />;
+          return <img src={imgSrc} alt={localizedName} loading="lazy" width={480} height={360} onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/uploads/products/medical-diag.jpg"; }} />;
         })()}
       </Link>
 
@@ -540,8 +542,8 @@ export function ProductCard({ p }: { p: Product }) {
         <span className="card-brand-name">{p.brand?.name || "Medax"}</span>
 
         <h3 className="card-product-title">
-          <Link to={`/product/${p.slug}`} title={p.name}>
-            {p.name}
+          <Link to={`/product/${p.slug}`} title={localizedName}>
+            {localizedName}
           </Link>
         </h3>
 

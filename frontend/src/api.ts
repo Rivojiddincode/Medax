@@ -87,8 +87,13 @@ export interface Category { id: number; name: string; slug: string; count: numbe
 export interface Brand { id: number; name: string; slug: string; count: number; country?: string | null }
 export interface Paged<T> { items: T[]; total: number; page: number; pages: number }
 
-export const money = (v?: string | number | null) =>
-  v == null || v === "" ? "Narx so'rang" : `${Number(v).toLocaleString("ru-RU").replace(/,/g, " ")} so'm`;
+export const formatPrice = (v?: string | number | null) =>
+  v == null || v === "" ? "" : Number(v).toLocaleString("ru-RU").replace(/,/g, " ");
+
+export const money = (v?: string | number | null, currency: string = "so'm") => {
+  if (v == null || v === "") return "Narx so'rang";
+  return `${formatPrice(v)} ${currency}`;
+};
 
 export const STATUS_LABEL: Record<string, string> = {
   NEW: "Yangi",

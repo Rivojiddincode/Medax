@@ -4,6 +4,7 @@ import { api, Brand, Category, Paged, Product } from "../api";
 import { Pager, ProductCard } from "../components/Shell";
 import { MedaxEmblem } from "../components/MedaxLogo";
 import { useI18n } from "../context/I18nContext";
+import { localizeCategory } from "../utils/localize";
 
 export default function Catalog() {
   const { lang, t } = useI18n();
@@ -105,7 +106,7 @@ export default function Catalog() {
         <span onClick={resetAllFilters} style={{ cursor: hasAnyFilter ? "pointer" : "default" }}>
           {t("nav_catalog")}
         </span>
-        {activeCat && <span> / {activeCat.name}</span>}
+        {activeCat && <span> / {localizeCategory(activeCat.name || activeCat.slug, lang)}</span>}
         {activeBrand && <span> / {activeBrand.name}</span>}
       </div>
 
@@ -147,9 +148,9 @@ export default function Catalog() {
                       e.preventDefault();
                       set({ category: c.slug });
                     }}
-                    title={c.name}
+                    title={localizeCategory(c.name || c.slug, lang)}
                   >
-                    <span className="cat-name">{c.name}</span>
+                    <span className="cat-name">{localizeCategory(c.name || c.slug, lang)}</span>
                     <span className="cat-count-badge">{c.count}</span>
                   </a>
                 </li>
@@ -327,7 +328,7 @@ export default function Catalog() {
               <span className="active-filters-label">{lang === "ru" ? "Активные фильтры:" : lang === "en" ? "Active filters:" : "Faol filtrlar:"}</span>
               {activeCat && (
                 <span className="active-pill" onClick={() => set({ category: "" })}>
-                  {activeCat.name} <span className="pill-x">✕</span>
+                  {localizeCategory(activeCat.name || activeCat.slug, lang)} <span className="pill-x">✕</span>
                 </span>
               )}
               {activeBrand && (

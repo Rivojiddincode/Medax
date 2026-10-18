@@ -4,6 +4,14 @@ import { api, ApiError, money, Product } from "../api";
 import { useCart } from "../cart";
 import { DeviceIcon, ProductCard } from "../components/Shell";
 import { useI18n } from "../context/I18nContext";
+import {
+  localizeCategory,
+  localizeCountry,
+  localizeProductDescription,
+  localizeProductName,
+  localizeSpecName,
+  localizeSpecValue,
+} from "../utils/localize";
 
 export default function ProductPage() {
   const { lang, t } = useI18n();
@@ -25,7 +33,7 @@ export default function ProductPage() {
     api<Product>(`/products/${slug}`)
       .then((d) => {
         setP(d);
-        document.title = `${d.name} — Medax`;
+        document.title = `${localizeProductName(d.name, lang)} — Medax`;
       })
       .catch((e: ApiError) => setError(e.status === 404 ? (lang === "ru" ? "Товар не найден." : lang === "en" ? "Product not found." : "Mahsulot topilmadi.") : e.message));
     window.scrollTo({ top: 0 });
@@ -41,7 +49,7 @@ export default function ProductPage() {
     <main className="wrap">
       <div className="crumbs">
         <Link to="/">{lang === "ru" ? "Главная" : lang === "en" ? "Home" : "Bosh sahifa"}</Link> / <Link to="/catalog">{t("nav_catalog")}</Link>
-        {p.category && <> / <Link to={`/catalog?category=${p.category.slug}`}>{p.category.name}</Link></>}
+        {p.category && <> / <Link to={`/catalog?category=${p.category.slug}`}>{localizeCategory(p.category.name || p.category.slug, lang)}</Link></>}
       </div>
 
       <div className="pd">
@@ -89,9 +97,9 @@ export default function ProductPage() {
             {p.isNew && <span className="pill n">{lang === "ru" ? "Новая модель" : lang === "en" ? "New Model" : "Yangi model"}</span>}
             {p.isHit && <span className="pill hit">{lang === "ru" ? "Популярный" : lang === "en" ? "Popular" : "Ommabop"}</span>}
             {p.brand && <Link className="pill" to={`/catalog?brand=${p.brand.slug}`}>{p.brand.name}</Link>}
-            {p.country && <span className="pill">{p.country}</span>}
+            {p.country && <span className="pill">{localizeCountry(p.country, lang)}</span>}
           </div>
-          <h1>{p.name}</h1>
+          <h1>{localizeProductName(p.name, lang)}</h1>
           {p.sku && <div className="muted sku-code"><span className="sku-tag">{t("pd_sku")}</span> {p.sku}</div>}
 
           {/* Sana va yaroqlilik ma'lumotlari */}
@@ -113,20 +121,20 @@ export default function ProductPage() {
           <div className="price-detail-wrap">
             {p.oldPrice && p.priceFrom && Number(p.oldPrice) > Number(p.priceFrom) && (
               <span className="price-old-detail">
-                {money(p.oldPrice)} {t("sum_currency")}
+                {money(p.oldPrice, t("sum_currency"))}
               </span>
             )}
             <div className="price">
-              {p.priceFrom ? `${money(p.priceFrom)} ${t("sum_currency")}` : (lang === "ru" ? "По запросу" : lang === "en" ? "On request" : "Narx so'rang")}
+              {p.priceFrom ? money(p.priceFrom, t("sum_currency")) : (lang === "ru" ? "По запросу" : lang === "en" ? "On request" : "Narx so'rang")}
               {p.unit && <span className="price-unit-tag"> / {p.unit}</span>}
             </div>
             {p.priceFrom && p.packageQty && p.packageQty > 1 && (
               <p className="package-piece-hint">
                 💡 {lang === "ru"
-                  ? `В упаковке ${p.packageQty} шт (1 шт ~ ${money(Math.round(Number(p.priceFrom) / p.packageQty))} ${t("sum_currency")})`
+                  ? `В упаковке ${p.packageQty} шт (1 шт ~ ${money(Math.round(Number(p.priceFrom) / p.packageQty), t("sum_currency"))})`
                   : lang === "en"
-                  ? `${p.packageQty} pcs per box (~ ${money(Math.round(Number(p.priceFrom) / p.packageQty))} ${t("sum_currency")} each)`
-                  : `1 qutida ${p.packageQty} ta (1 donasi ~ ${money(Math.round(Number(p.priceFrom) / p.packageQty))} ${t("sum_currency")})`}
+                  ? `${p.packageQty} pcs per box (~ ${money(Math.round(Number(p.priceFrom) / p.packageQty), t("sum_currency"))} each)`
+                  : `1 qutida ${p.packageQty} ta (1 donasi ~ ${money(Math.round(Number(p.priceFrom) / p.packageQty), t("sum_currency"))})`}
               </p>
             )}
           </div>
@@ -176,13 +184,18 @@ export default function ProductPage() {
       <div className="pd" style={{ paddingTop: 0 }}>
         <div>
           <h2 style={{ fontSize: 24, marginBottom: 12 }}>{t("pd_description")}</h2>
-          <p className="prose">{p.description || (lang === "ru" ? "Описание отсутствует." : lang === "en" ? "No description available." : "Tavsif hali kiritilmagan.")}</p>
+          <p className="prose">{localizeProductDescription(p.description, lang, p.name) || (lang === "ru" ? "Описание отсутствует." : lang === "en" ? "No description available." : "Tavsif hali kiritilmagan.")}</p>
         </div>
         <div>
           <h2 style={{ fontSize: 24, marginBottom: 4 }}>{t("pd_specifications")}</h2>
           {p.specs.length ? (
             <table className="specs"><tbody>
-              {p.specs.map((s, i) => <tr key={i}><td>{s.name}</td><td>{s.value}</td></tr>)}
+              {p.specs.map((s, i) => (
+                <tr key={i}>
+                  <td>{localizeSpecName(s.name, lang)}</td>
+                  <td>{localizeSpecValue(s.value, lang)}</td>
+                </tr>
+              ))}
             </tbody></table>
           ) : <p className="muted">{lang === "ru" ? "Характеристики не указаны." : lang === "en" ? "No specifications provided." : "Xususiyatlar kiritilmagan."}</p>}
         </div>

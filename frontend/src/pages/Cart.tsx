@@ -6,6 +6,7 @@ import { DeviceIcon } from "../components/Shell";
 import { useCustomerAuth, CUSTOMER_TOKEN_KEY } from "../customerAuth";
 import { ClinicIcon, OrderBoxIcon } from "../components/Icons";
 import { useI18n } from "../context/I18nContext";
+import { localizeProductName } from "../utils/localize";
 
 type CheckoutStage = "cart" | "checkout" | "done";
 
@@ -248,21 +249,21 @@ export default function Cart() {
                   return (
                     <div className="line cart-table-row" key={i.productId}>
                       <div className="th">
-                        {i.thumb ? <img src={i.thumb} alt={i.name} /> : <DeviceIcon />}
+                        {i.thumb ? <img src={i.thumb} alt={localizeProductName(i.name, lang)} /> : <DeviceIcon />}
                       </div>
 
                       <div className="cart-item-info">
                         <Link to={`/product/${i.slug}`} className="cart-item-title">
-                          {i.name}
+                          {localizeProductName(i.name, lang)}
                         </Link>
                         <div className="cart-item-unit-price">
                           {i.priceFrom ? (
                             <>
-                              <span className="unit-label">Dona narxi:</span>
-                              <strong>{money(i.priceFrom)}</strong>
+                              <span className="unit-label">{lang === "ru" ? "Цена за ед:" : lang === "en" ? "Unit price:" : "Dona narxi:"}</span>
+                              <strong>{money(i.priceFrom, t("sum_currency"))}</strong>
                             </>
                           ) : (
-                            <span className="negotiated-tag">Narx so'rov bo'yicha</span>
+                            <span className="negotiated-tag">{lang === "ru" ? "Цена по запросу" : lang === "en" ? "Price on request" : "Narx so'rov bo'yicha"}</span>
                           )}
                         </div>
                       </div>
@@ -284,7 +285,7 @@ export default function Cart() {
 
                           {itemTotal !== null && (
                             <div className="item-subtotal-price">
-                              {money(itemTotal)}
+                              {money(itemTotal, t("sum_currency"))}
                             </div>
                           )}
                         </div>
@@ -520,8 +521,16 @@ export default function Cart() {
                       </div>
                       <p style={{ margin: "6px 0 0", fontSize: 13, color: "var(--ink2)" }}>
                         {isEveryPriceFixed && totalAmount >= 1000
-                          ? `Buyurtma summasi (${money(totalAmount)}) inPAY xavfsiz to'lov tizimi orqali to'lanadi.`
-                          : "Savatda narxi kelishiladigan mahsulotlar bo'lgani sababli faqat do'konda to'lash mumkin."}
+                          ? (lang === "ru"
+                              ? `Сумма заказа (${money(totalAmount, t("sum_currency"))}) оплачивается через безопасную систему inPAY.`
+                              : lang === "en"
+                              ? `Order total (${money(totalAmount, t("sum_currency"))}) is processed via secure inPAY gateway.`
+                              : `Buyurtma summasi (${money(totalAmount, t("sum_currency"))}) inPAY xavfsiz to'lov tizimi orqali to'lanadi.`)
+                          : (lang === "ru"
+                              ? "В корзине есть товары с договорной ценой, доступна оплата при получении."
+                              : lang === "en"
+                              ? "Items with negotiable prices are present, pay on pickup."
+                              : "Savatda narxi kelishiladigan mahsulotlar bo'lgani sababli faqat do'konda to'lash mumkin.")}
                       </p>
                     </div>
                   </label>
@@ -608,12 +617,12 @@ export default function Cart() {
             <div className="summary-divider" />
 
             <div className="summary-row total-row">
-              <span className="total-label">Jami:</span>
+              <span className="total-label">{lang === "ru" ? "Итого:" : lang === "en" ? "Total:" : "Jami:"}</span>
               <div className="total-amount-box">
                 {hasAnyPrice && totalAmount > 0 ? (
-                  <span className="total-price-val">{money(totalAmount)}</span>
+                  <span className="total-price-val">{money(totalAmount, t("sum_currency"))}</span>
                 ) : (
-                  <span className="total-price-val">Kelishilgan narxda</span>
+                  <span className="total-price-val">{lang === "ru" ? "По согласованию" : lang === "en" ? "Negotiated" : "Kelishilgan narxda"}</span>
                 )}
               </div>
             </div>
@@ -624,7 +633,7 @@ export default function Cart() {
                 className="btn btn-primary-sheen btn-checkout-cta"
                 onClick={handleProceedToCheckout}
               >
-                Buyurtmani rasmiylashtirish →
+                {lang === "ru" ? "Оформить заказ →" : lang === "en" ? "Proceed to checkout →" : "Buyurtmani rasmiylashtirish →"}
               </button>
             )}
 
