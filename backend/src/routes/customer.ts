@@ -207,6 +207,86 @@ customerRouter.post("/auth/verify-otp", authLimiter, async (req, res) => {
   });
 });
 
+// 2b. Firebase orqali telefon raqam tasdiqlanganda kirish yoki ro'yxatdan o'tish
+customerRouter.post("/auth/firebase-login", authLimiter, async (req, res) => {
+  const { idToken, name, organization, password } = z
+    .object({
+      idToken: z.string().min(10, "Firebase ID token talab qilinadi"),
+      name: z.string().trim().max(80).optional(),
+      organization: z.string().trim().max(120).optional(),
+      password: z.string().min(6, "Parol kamida 6 belgidan iborat bo'lishi kerak").max(100).optional(),
+    })
+    .parse(req.body);
+
+  const ip = getClientIp(req);
+
+  // Google Identity Toolkit orqali Firebase tokenini tekshiramiz
+  const verifyRes = await fetch(
+    `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${config.firebaseApiKey}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ idToken }),
+      signal: AbortSignal.timeout(10000),
+    }
+  );
+
+  const verifyData: any = await verifyRes.json();
+  if (!verifyRes.ok || !verifyData.users || !verifyData.users[0]) {
+    throw new HttpError(401, "Firebase autentifikatsiyasi tasdiqlanmadi.");
+  }
+
+  const firebaseUser = verifyData.users[0];
+  const rawPhone = firebaseUser.phoneNumber;
+  if (!rawPhone) {
+    throw new HttpError(400, "Telefon raqami topilmadi.");
+  }
+
+  const phone = normalizePhone(rawPhone);
+  if (!phone) {
+    throw new HttpError(400, "Telefon raqami noto'g'ri.");
+  }
+
+  await assertNotBlocked(phone, ip);
+
+  const passwordHash = password ? await bcrypt.hash(password, 10) : undefined;
+
+  let customer = await prisma.customer.findUnique({ where: { phone } });
+  if (!customer) {
+    customer = await prisma.customer.create({
+      data: {
+        phone,
+        name: name || firebaseUser.displayName || `Mijoz (${phone.slice(-4)})`,
+        organization: organization || "",
+        ...(passwordHash ? { passwordHash } : {}),
+      },
+    });
+  } else if (passwordHash || name || organization) {
+    customer = await prisma.customer.update({
+      where: { id: customer.id },
+      data: {
+        ...(passwordHash ? { passwordHash } : {}),
+        ...(name ? { name } : {}),
+        ...(organization !== undefined ? { organization } : {}),
+      },
+    });
+  }
+
+  const token = createCustomerToken({ id: customer.id, phone: customer.phone || phone, name: customer.name });
+  res.json({
+    ok: true,
+    token,
+    customer: {
+      id: customer.id,
+      name: customer.name,
+      phone: customer.phone,
+      organization: customer.organization,
+      avatar: customer.avatar,
+      hasPassword: Boolean(customer.passwordHash),
+    },
+  });
+});
+
 // 3. Telefon raqam + Parol orqali kirish (SMS siz tezkor kirish)
 customerRouter.post("/auth/login", authLimiter, async (req, res) => {
   const { phone: raw, password } = z

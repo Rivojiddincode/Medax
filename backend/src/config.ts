@@ -71,5 +71,9 @@ export const config = {
     baseUrl: process.env.INPAY_BASE_URL || "https://inpay.uz/api/v1",
     callbackUrl: process.env.INPAY_CALLBACK_URL || "https://medax.uz/api/orders/inpay/callback",
   },
+
+  // Firebase konfiguratsiyasi
+  firebaseApiKey: process.env.FIREBASE_API_KEY || "AIzaSyBgxMhajHuz77_tajcd4BcbgKRFNZAtRZ0",
+  firebaseProjectId: process.env.FIREBASE_PROJECT_ID || "medax-314b8",
 };
 
