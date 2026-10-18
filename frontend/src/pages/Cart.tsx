@@ -4,31 +4,24 @@ import { api, ApiError, money } from "../api";
 import { useCart } from "../cart";
 import { DeviceIcon } from "../components/Shell";
 import { useCustomerAuth, CUSTOMER_TOKEN_KEY } from "../customerAuth";
-import { PhoneSmsIcon, ClinicIcon, OrderBoxIcon } from "../components/Icons";
-import { TurnstileWidget } from "../components/TurnstileWidget";
+import { ClinicIcon, OrderBoxIcon } from "../components/Icons";
 import { useI18n } from "../context/I18nContext";
 
-type CheckoutStage = "cart" | "phone" | "otp" | "checkout" | "done";
+type CheckoutStage = "cart" | "checkout" | "done";
 
 export default function Cart() {
   const { lang, t } = useI18n();
   const cart = useCart();
-  const { customer, token, sendOtp, verifyOtp, refreshCustomer } = useCustomerAuth();
+  const { customer, token, refreshCustomer, openAuthModal } = useCustomerAuth();
   const startedAt = useRef(Date.now());
 
-  // Stages: cart -> (if not logged in: phone -> otp -> checkout) -> (if logged in: checkout) -> done
+  // Stages: cart -> checkout -> done
   const [stage, setStage] = useState<CheckoutStage>("cart");
 
   // Form states
   const [phone, setPhone] = useState("+998 ");
-  const [captchaToken, setCaptchaToken] = useState("");
   const [name, setName] = useState("");
-  const [otpCode, setOtpCode] = useState("");
-  const [countdown, setCountdown] = useState(0);
-
-  // Delivery & payment details
   const [organization, setOrganization] = useState("");
-  const [deliveryAddress, setDeliveryAddress] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<"inpay" | "cash">("inpay");
   const [comment, setComment] = useState("");
   const [website, setWebsite] = useState(""); // honeypot
@@ -46,13 +39,6 @@ export default function Cart() {
       if (customer.organization && !organization) setOrganization(customer.organization);
     }
   }, [customer]);
-
-  // Countdown timer for resend OTP
-  useEffect(() => {
-    if (countdown <= 0) return;
-    const t = setTimeout(() => setCountdown((c) => c - 1), 1000);
-    return () => clearTimeout(t);
-  }, [countdown]);
 
   // Calculate totals and pricing mode
   const isEveryPriceFixed = cart.items.length > 0 && cart.items.every((i) => i.priceFrom && Number(i.priceFrom) > 0);
@@ -74,72 +60,14 @@ export default function Cart() {
 
   const hasAnyPrice = cart.items.some((i) => i.priceFrom);
 
-  // 1. Click "Buyurtmani rasmiylashtirish"
+  // Click "Buyurtmani rasmiylashtirish"
   const handleProceedToCheckout = () => {
     setError("");
-    if (customer) {
-      // Already logged in! Skip phone & OTP, jump straight to delivery & payment
-      setStage("checkout");
-    } else {
-      // Not logged in -> ask for phone number friction-free
-      setStage("phone");
-    }
+    setStage("checkout");
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // 2. Request OTP code
-  const handleSendPhoneOtp = async (e?: FormEvent) => {
-    e?.preventDefault();
-    setError("");
-    const cleanPhone = phone.replace(/[^\d+]/g, "");
-    if (cleanPhone.length < 13) {
-      setError("Iltimos, to'liq telefon raqamingizni kiriting (+998 __ ___ __ __)");
-      return;
-    }
-
-    setBusy(true);
-    try {
-      const res = await sendOtp(phone, captchaToken || undefined);
-      setOtpCode("");
-      setCountdown(res.resendIn || 60);
-      setStage("otp");
-    } catch (err: any) {
-      setError(err.message || "SMS kod yuborishda xatolik yuz berdi");
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  // 3. Verify OTP code
-  const handleVerifyPhoneOtp = async (e: FormEvent) => {
-    e.preventDefault();
-    setError("");
-    if (otpCode.length !== 6) {
-      setError("Iltimos, 6 xonali SMS kodni kiriting");
-      return;
-    }
-
-    setBusy(true);
-    try {
-      const authRes = await verifyOtp({
-        phone,
-        code: otpCode,
-        name: name.trim() || undefined,
-        organization: organization.trim() || undefined,
-      });
-
-      if (authRes?.customer?.name) setName(authRes.customer.name);
-      if (authRes?.customer?.organization) setOrganization(authRes.customer.organization);
-
-      // Verified! Now proceed directly to delivery & payment
-      setStage("checkout");
-    } catch (err: any) {
-      setError(err.message || "Kiritilgan kod noto'g'ri");
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  // 4. Confirm and place the order
+  // Confirm and place the order
   const handleConfirmOrder = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
@@ -151,7 +79,7 @@ export default function Cart() {
 
     const cleanPhone = phone.replace(/[^\d+]/g, "");
     if (cleanPhone.length < 13) {
-      setError("Iltimos, to'g'ri telefon raqami kiriting");
+      setError("Iltimos, to'g'ri telefon raqami kiriting (+998 __ ___ __ __)");
       return;
     }
 
@@ -172,7 +100,6 @@ export default function Cart() {
           comment: comment.trim(),
           website, // honeypot
           elapsedMs: Date.now() - startedAt.current,
-          captchaToken: captchaToken || undefined,
           items: cart.items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
         },
       });
@@ -182,12 +109,12 @@ export default function Cart() {
       refreshCustomer();
 
       if (res.payUrl) {
-        // inPAY to'lov sahifasiga yo'naltirish
         window.location.href = res.payUrl;
         return;
       }
 
       setStage("done");
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
       setError((err as ApiError).message || "Buyurtmani rasmiylashtirishda xatolik yuz berdi");
     } finally {
@@ -195,9 +122,7 @@ export default function Cart() {
     }
   };
 
-  // -------------------------------------------------------------
   // Render: Done state
-  // -------------------------------------------------------------
   if (stage === "done") {
     return (
       <main className="wrap">
@@ -243,10 +168,12 @@ export default function Cart() {
           </div>
 
           <div className="order-actions-bar">
-            <Link className="btn btn-primary-sheen" to="/account">
-              <OrderBoxIcon size={18} />
-              Shaxsiy kabinetda ko'rish
-            </Link>
+            {customer && (
+              <Link className="btn btn-primary-sheen" to="/account">
+                <OrderBoxIcon size={18} />
+                Shaxsiy kabinetda ko'rish
+              </Link>
+            )}
             <Link className="btn ghost" to="/catalog">
               Katalogga qaytish
             </Link>
@@ -256,9 +183,7 @@ export default function Cart() {
     );
   }
 
-  // -------------------------------------------------------------
   // Render: Empty cart
-  // -------------------------------------------------------------
   if (cart.items.length === 0) {
     return (
       <main className="wrap">
@@ -282,18 +207,16 @@ export default function Cart() {
     );
   }
 
-  // -------------------------------------------------------------
   // Main Cart & Checkout Flow
-  // -------------------------------------------------------------
   return (
     <main className="wrap">
-      {/* Breadcrumbs & Flow Progress */}
+      {/* Breadcrumbs */}
       <div className="crumbs">
         <Link to="/">Bosh sahifa</Link> /{" "}
         <span onClick={() => setStage("cart")} style={{ cursor: "pointer", textDecoration: stage !== "cart" ? "underline" : "none" }}>
           Savat
         </span>
-        {stage !== "cart" && <span> / Rasmiylashtirish</span>}
+        {stage === "checkout" && <span> / Rasmiylashtirish</span>}
       </div>
 
       {/* Progress Steps Header */}
@@ -302,20 +225,14 @@ export default function Cart() {
           <span className="pipe-dot">1</span>
           <span className="pipe-title">Savat</span>
         </div>
-        <div className={`pipe-step ${stage === "phone" || stage === "otp" ? "active" : stage === "checkout" ? "completed" : ""}`}>
-          <span className="pipe-dot">2</span>
-          <span className="pipe-title">Telefon / Kirish</span>
-        </div>
         <div className={`pipe-step ${stage === "checkout" ? "active" : ""}`}>
-          <span className="pipe-dot">3</span>
-          <span className="pipe-title">Yetkazib berish & To'lov</span>
+          <span className="pipe-dot">2</span>
+          <span className="pipe-title">Rasmiylashtirish & To'lov</span>
         </div>
       </div>
 
       <div className="cartpage">
-        {/* ======================================================== */}
-        {/* LEFT COLUMN: Stage dependent content                     */}
-        {/* ======================================================== */}
+        {/* LEFT COLUMN */}
         <section className="cart-left-col">
           {/* STEP 1: CART ITEMS VIEW */}
           {stage === "cart" && (
@@ -395,130 +312,7 @@ export default function Cart() {
             </div>
           )}
 
-          {/* STEP 2: PHONE INPUT PROMPT */}
-          {stage === "phone" && (
-            <div className="checkout-step-card">
-              <div className="step-back-link" onClick={() => setStage("cart")}>
-                ← Savatga qaytish
-              </div>
-              <div className="step-card-header">
-                <div className="step-icon-badge">
-                  <PhoneSmsIcon size={24} />
-                </div>
-                <div>
-                  <h2 style={{ fontSize: 24, margin: "0 0 4px" }}>Buyurtmani davom ettirish</h2>
-                  <p className="muted" style={{ margin: 0 }}>
-                    Buyurtmani rasmiylashtirish va holatini kuzatish uchun telefon raqamingizni kiriting.
-                  </p>
-                </div>
-              </div>
-
-              {error && <div className="auth-error-banner">{error}</div>}
-
-              <form onSubmit={handleSendPhoneOtp} className="checkout-auth-form">
-                <div className="field">
-                  <label htmlFor="auth-phone">Telefon raqamingiz</label>
-                  <div className="input-with-icon">
-                    <input
-                      id="auth-phone"
-                      type="tel"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      placeholder="+998 90 123 45 67"
-                      required
-                      autoFocus
-                      className="checkout-phone-input"
-                    />
-                  </div>
-                  <span className="field-hint">Ushbu raqamga bir martalik SMS tasdiqlash kodi yuboriladi.</span>
-                </div>
-
-                <div className="field">
-                  <label htmlFor="auth-name">Ism va familiyangiz (ixtiyoriy)</label>
-                  <input
-                    id="auth-name"
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Masalan: Dr. Sardor Rahimov"
-                    maxLength={80}
-                  />
-                </div>
-
-                <TurnstileWidget onVerify={(t) => setCaptchaToken(t)} onExpire={() => setCaptchaToken("")} />
-
-                <button type="submit" className="btn btn-primary-sheen" style={{ width: "100%", height: 48, fontSize: 16 }} disabled={busy}>
-                  {busy ? "SMS kod yuborilmoqda…" : "Davom etish (SMS kod olish) →"}
-                </button>
-              </form>
-            </div>
-          )}
-
-          {/* STEP 3: OTP VERIFICATION */}
-          {stage === "otp" && (
-            <div className="checkout-step-card">
-              <div className="step-back-link" onClick={() => setStage("phone")}>
-                ← Raqamni o'zgartirish
-              </div>
-              <div className="step-card-header">
-                <div className="step-icon-badge">
-                  <PhoneSmsIcon size={24} />
-                </div>
-                <div>
-                  <h2 style={{ fontSize: 24, margin: "0 0 4px" }}>SMS kodni kiriting</h2>
-                  <p className="muted" style={{ margin: 0 }}>
-                    <b>{phone}</b> raqamiga yuborilgan 6 xonali kodni kiriting.
-                  </p>
-                </div>
-              </div>
-
-              {error && <div className="auth-error-banner">{error}</div>}
-
-              <form onSubmit={handleVerifyPhoneOtp} className="checkout-auth-form">
-                <div className="field">
-                  <label htmlFor="checkout-otp">6 xonali SMS kod</label>
-                  <input
-                    id="checkout-otp"
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={6}
-                    autoComplete="one-time-code"
-                    value={otpCode}
-                    onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
-                    placeholder="123456"
-                    className="otp-digit-input"
-                    required
-                    autoFocus
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="btn btn-primary-sheen"
-                  style={{ width: "100%", height: 48, fontSize: 16 }}
-                  disabled={busy || otpCode.length !== 6}
-                >
-                  {busy ? "Tekshirilmoqda…" : "Kodni tasdiqlash va davom etish →"}
-                </button>
-
-                <div className="otp-resend-row">
-                  <button
-                    type="button"
-                    className="btn ghost sm"
-                    disabled={countdown > 0 || busy}
-                    onClick={() => handleSendPhoneOtp()}
-                  >
-                    {countdown > 0 ? `Qayta yuborish (${countdown}s)` : "Kodni qayta yuborish"}
-                  </button>
-                  <button type="button" className="btn ghost sm" onClick={() => setStage("phone")}>
-                    Boshqa raqam kiritish
-                  </button>
-                </div>
-              </form>
-            </div>
-          )}
-
-          {/* STEP 4: DETAILS, DELIVERY & PAYMENT */}
+          {/* STEP 2: CHECKOUT DETAILS & PAYMENT */}
           {stage === "checkout" && (
             <div className="checkout-step-card">
               <div className="step-back-link" onClick={() => setStage("cart")}>
@@ -532,23 +326,38 @@ export default function Cart() {
                 <div>
                   <h2 style={{ fontSize: 24, margin: "0 0 4px" }}>Buyurtmani rasmiylashtirish</h2>
                   <p className="muted" style={{ margin: 0 }}>
-                    Yetkazib berish manzili va qulay to'lov usulini tanlang.
+                    Ma'lumotlaringizni kiriting va to'lov usulini tanlang.
                   </p>
                 </div>
               </div>
 
-              {/* Logged in badge */}
-              <div className="customer-verified-banner">
-                <div className="ver-dot-wrap">
-                  <span className="live-radar-dot" />
-                </div>
-                <div>
-                  <div className="ver-title">Foydalanuvchi tasdiqlangan</div>
-                  <div className="ver-user">
-                    {name || customer?.name || "Mijoz"} · <b>{phone || customer?.phone}</b>
+              {/* Logged in vs Guest Auth Banner */}
+              {customer ? (
+                <div className="customer-verified-banner">
+                  <div className="ver-dot-wrap">
+                    <span className="live-radar-dot" />
+                  </div>
+                  <div>
+                    <div className="ver-title">Foydalanuvchi tasdiqlangan (Telegram)</div>
+                    <div className="ver-user">
+                      {name || customer?.name || "Mijoz"} · <b>{phone || customer?.phone}</b>
+                    </div>
                   </div>
                 </div>
-              </div>
+              ) : (
+                <div className="cart-auth-callout">
+                  <div className="cart-auth-callout-text">
+                    <strong>Telegram profilingiz bormi?</strong>
+                    <span>1-klikda kiring va buyurtmalaringizni shaxsiy kabinetda qulay kuzatib boring.</span>
+                  </div>
+                  <button type="button" className="btn btn-tg-callout" onClick={() => openAuthModal()}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.52 2.77-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
+                    </svg>
+                    Telegram orqali kirish
+                  </button>
+                </div>
+              )}
 
               {error && <div className="auth-error-banner">{error}</div>}
 
@@ -571,11 +380,10 @@ export default function Cart() {
                     <input
                       id="ord-phone"
                       type="tel"
-                      value={customer?.phone || phone}
+                      value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       required
-                      disabled={!!customer}
-                      style={customer ? { opacity: 0.7, cursor: "not-allowed" } : undefined}
+                      placeholder="+998 90 123 45 67"
                     />
                   </div>
                 </div>
@@ -624,7 +432,7 @@ export default function Cart() {
                     <span>📞 <b>Aloqa:</b> +998 93 211 97 85</span>
                   </div>
 
-                  <div style={{ display: "flex", gap: 12, marginTop: 4 }}>
+                  <div style={{ display: "flex", gap: 12, marginTop: 4, flexWrap: "wrap" }}>
                     <a
                       href="https://yandex.uz/maps/?ll=71.678327,41.008014&z=18&pt=71.678327,41.008014,pm2rdm"
                       target="_blank"
@@ -778,9 +586,7 @@ export default function Cart() {
           )}
         </section>
 
-        {/* ======================================================== */}
-        {/* RIGHT COLUMN: Order Summary Box (Always visible)        */}
-        {/* ======================================================== */}
+        {/* RIGHT COLUMN: Order Summary Box */}
         <aside className="cart-summary-panel">
           <div className="summary-card">
             <h2 className="summary-title">Buyurtma xulosasi</h2>

@@ -13,6 +13,7 @@ import { CartToast } from "./CartToast";
 import { CustomerHeaderMenu } from "./CustomerHeaderMenu";
 import { UzumSearchBar, useAnimatedPresence } from "./UzumSearchBar";
 import { UzumCatalogModal } from "./UzumCatalogModal";
+import { MobileBottomNav } from "./MobileBottomNav";
 import { SITE_CONFIG } from "../siteConfig";
 
 export function Layout() {
@@ -101,6 +102,12 @@ export function Layout() {
             <Link className="logo-link" to="/" aria-label="Medax — Tibbiy uskunalar bozori">
               <MedaxLogo size="md" />
             </Link>
+
+            {/* Mobile-only tools (Language & Theme toggle) */}
+            <div className="uz-mainbar-mobile-tools">
+              <LanguageSwitcher />
+              <ThemeToggle />
+            </div>
 
             {/* Catalog Button */}
             <button
@@ -315,6 +322,7 @@ export function Layout() {
 
       <FloatingContactHub />
       <CartToast />
+      <MobileBottomNav />
     </>
   );
 }
