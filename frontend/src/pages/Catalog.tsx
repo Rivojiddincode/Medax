@@ -65,9 +65,8 @@ export default function Catalog() {
   const set = (patch: Record<string, string>) => {
     const next = new URLSearchParams(sp);
     Object.entries(patch).forEach(([k, v]) => (v ? next.set(k, v) : next.delete(k)));
-    if (!("page" in patch)) next.delete("page");
     setSp(next);
-    if (page !== 1 || "page" in patch) window.scrollTo({ top: 0 });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const submitSearch = (e: FormEvent) => {

@@ -16,6 +16,7 @@ import { Blocklist, ContactMessagesPage, ImportPage, Users } from "./admin/Misc"
 import AdminCustomersPage from "./admin/Customers";
 import { ThemeProvider } from "./context/ThemeContext";
 import { I18nProvider } from "./context/I18nContext";
+import { ScrollToTop } from "./components/ScrollToTop";
 
 function NotFound() {
   return (
@@ -34,6 +35,7 @@ export default function App() {
     <ThemeProvider>
       <I18nProvider>
         <CustomerAuthProvider>
+          <ScrollToTop />
           <Routes>
             <Route element={<Layout />}>
               <Route index element={<Home />} />

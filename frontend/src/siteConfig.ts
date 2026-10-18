@@ -18,4 +18,5 @@ export const SITE_CONFIG = {
   googleMapsUrl: "https://maps.app.goo.gl/Fi3DDmU1kWqHVST4A",
   yandexMapsUrl: "https://yandex.uz/maps/?ll=71.678327,41.008014&z=18&pt=71.678327,41.008014,pm2rdm",
   mapEmbedUrl: "https://maps.google.com/maps?q=41.008014,71.678327&hl=uz&z=18&output=embed",
+  yandexMapEmbedUrl: "https://yandex.uz/map-widget/v1/?ll=71.678327%2C41.008014&z=17&pt=71.678327,41.008014,pm2rdm",
 };

@@ -1,14 +1,41 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { api, ApiError, money } from "../api";
+import { api, ApiError, money, Product } from "../api";
 import { useCart } from "../cart";
-import { DeviceIcon } from "../components/Shell";
+import { DeviceIcon, ProductCard } from "../components/Shell";
 import { useCustomerAuth, CUSTOMER_TOKEN_KEY } from "../customerAuth";
 import { ClinicIcon, OrderBoxIcon } from "../components/Icons";
 import { useI18n } from "../context/I18nContext";
 import { localizeProductName } from "../utils/localize";
+import { SITE_CONFIG } from "../siteConfig";
 
 type CheckoutStage = "cart" | "checkout" | "done";
+
+function formatUzPhone(raw: string): string {
+  const digits = raw.replace(/\D/g, "");
+  if (!digits) return "+998 ";
+
+  let num = digits;
+  if (num.startsWith("998")) {
+    num = num.slice(3);
+  }
+  num = num.slice(0, 9);
+
+  let formatted = "+998";
+  if (num.length > 0) {
+    formatted += " " + num.slice(0, 2);
+  }
+  if (num.length > 2) {
+    formatted += " " + num.slice(2, 5);
+  }
+  if (num.length > 5) {
+    formatted += " " + num.slice(5, 7);
+  }
+  if (num.length > 7) {
+    formatted += " " + num.slice(7, 9);
+  }
+  return formatted;
+}
 
 export default function Cart() {
   const { lang, t } = useI18n();
@@ -27,6 +54,26 @@ export default function Cart() {
   const [comment, setComment] = useState("");
   const [website, setWebsite] = useState(""); // honeypot
 
+  // Validation states
+  const [nameTouched, setNameTouched] = useState(false);
+  const [phoneTouched, setPhoneTouched] = useState(false);
+
+  const cleanDigits = phone.replace(/\D/g, "");
+  const isPhoneValid = cleanDigits.length === 12; // 998 + 9 digits = 12
+  const isNameValid = name.trim().length >= 2;
+
+  // Recommended products
+  const [recommended, setRecommended] = useState<Product[]>([]);
+  useEffect(() => {
+    api<{ items: Product[] }>("/products?limit=8&isActive=true")
+      .then((res) => {
+        const inCart = new Set(cart.items.map((i) => i.productId));
+        const filtered = (res.items || []).filter((p) => !inCart.has(p.id));
+        setRecommended(filtered.slice(0, 4));
+      })
+      .catch(() => {});
+  }, [cart.items]);
+
   // Status
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -36,7 +83,7 @@ export default function Cart() {
   useEffect(() => {
     if (customer) {
       if (customer.name && !name) setName(customer.name);
-      if (customer.phone && (phone === "+998 " || !phone)) setPhone(customer.phone);
+      if (customer.phone && (phone === "+998 " || !phone)) setPhone(formatUzPhone(customer.phone));
       if (customer.organization && !organization) setOrganization(customer.organization);
     }
   }, [customer]);
@@ -72,17 +119,20 @@ export default function Cart() {
   const handleConfirmOrder = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
+    setNameTouched(true);
+    setPhoneTouched(true);
 
-    if (!name.trim()) {
-      setError("Iltimos, ismingizni kiriting");
+    if (!isNameValid) {
+      setError("Iltimos, ism va familiyangizni to'liq kiriting (kamida 2 ta belgi)");
       return;
     }
 
-    const cleanPhone = phone.replace(/[^\d+]/g, "");
-    if (cleanPhone.length < 13) {
-      setError("Iltimos, to'g'ri telefon raqami kiriting (+998 __ ___ __ __)");
+    if (!isPhoneValid) {
+      setError("Iltimos, telefon raqamini to'liq kiriting (+998 __ ___ __ __)");
       return;
     }
+
+    const cleanPhone = "+998" + cleanDigits.slice(3);
 
     setBusy(true);
     try {
@@ -371,10 +421,24 @@ export default function Cart() {
                       id="ord-name"
                       type="text"
                       value={name}
-                      onChange={(e) => setName(e.target.value)}
+                      onBlur={() => setNameTouched(true)}
+                      onChange={(e) => {
+                        setName(e.target.value);
+                        if (error) setError("");
+                      }}
                       required
                       placeholder="Masalan: Azizbek Karimov"
+                      style={
+                        nameTouched && !isNameValid
+                          ? { borderColor: "#ef4444", background: "rgba(239, 68, 68, 0.05)" }
+                          : undefined
+                      }
                     />
+                    {nameTouched && !isNameValid && (
+                      <span style={{ fontSize: 12, color: "#ef4444", marginTop: 4, display: "block" }}>
+                        Iltimos, ism va familiyangizni kiriting (kamida 2 ta harf)
+                      </span>
+                    )}
                   </div>
                   <div className="field">
                     <label htmlFor="ord-phone">Telefon raqam *</label>
@@ -382,10 +446,24 @@ export default function Cart() {
                       id="ord-phone"
                       type="tel"
                       value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
+                      onBlur={() => setPhoneTouched(true)}
+                      onChange={(e) => {
+                        setPhone(formatUzPhone(e.target.value));
+                        if (error) setError("");
+                      }}
                       required
                       placeholder="+998 90 123 45 67"
+                      style={
+                        phoneTouched && !isPhoneValid
+                          ? { borderColor: "#ef4444", background: "rgba(239, 68, 68, 0.05)" }
+                          : undefined
+                      }
                     />
+                    {phoneTouched && !isPhoneValid && (
+                      <span style={{ fontSize: 12, color: "#ef4444", marginTop: 4, display: "block" }}>
+                        Iltimos, to'liq telefon raqamini kiriting: +998 (__) ___-__-__
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -413,7 +491,7 @@ export default function Cart() {
                     borderRadius: 16,
                     padding: "20px 24px",
                     display: "grid",
-                    gap: 12,
+                    gap: 14,
                   }}
                 >
                   <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
@@ -423,32 +501,53 @@ export default function Cart() {
                         Medax do'koni va ombori:
                       </strong>
                       <p style={{ margin: 0, fontSize: 14, color: "var(--ink2, #334155)" }}>
-                        Namangan viloyati, Namangan sh., Ozod MFY, Abu Rayhon Beruniy ko'chasi 2-uy
+                        {SITE_CONFIG.addressUz}
                       </p>
                     </div>
                   </div>
 
                   <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", fontSize: 13, color: "var(--ink2)" }}>
                     <span>🕒 <b>Ish vaqti:</b> Dush - Shanba, 09:00 - 18:00</span>
-                    <span>📞 <b>Aloqa:</b> +998 93 211 97 85</span>
+                    <span>📞 <b>Aloqa:</b> {SITE_CONFIG.phone}</span>
                   </div>
 
-                  <div style={{ display: "flex", gap: 12, marginTop: 4, flexWrap: "wrap" }}>
+                  {/* Interaktiv Yandex Xaritasi */}
+                  <div
+                    style={{
+                      borderRadius: 12,
+                      overflow: "hidden",
+                      border: "1px solid rgba(2, 132, 199, 0.25)",
+                      background: "var(--card)",
+                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
+                    }}
+                  >
+                    <iframe
+                      title="Medax Namangan Xaritasi"
+                      src={SITE_CONFIG.yandexMapEmbedUrl}
+                      width="100%"
+                      height="250"
+                      style={{ border: 0, display: "block" }}
+                      allowFullScreen
+                      loading="lazy"
+                    />
+                  </div>
+
+                  <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                     <a
-                      href="https://yandex.uz/maps/?ll=71.678327,41.008014&z=18&pt=71.678327,41.008014,pm2rdm"
+                      href={SITE_CONFIG.yandexMapsUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="btn sm ghost"
-                      style={{ borderRadius: 8, fontSize: 12 }}
+                      style={{ borderRadius: 8, fontSize: 12, background: "var(--card)" }}
                     >
                       📍 Yandex Xaritada ochish
                     </a>
                     <a
-                      href="https://maps.app.goo.gl/Fi3DDmU1kWqHVST4A"
+                      href={SITE_CONFIG.googleMapsUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="btn sm ghost"
-                      style={{ borderRadius: 8, fontSize: 12 }}
+                      style={{ borderRadius: 8, fontSize: 12, background: "var(--card)" }}
                     >
                       🗺️ Google Maps'da ochish
                     </a>
@@ -654,6 +753,35 @@ export default function Cart() {
           </div>
         </aside>
       </div>
+
+      {/* RECOMMENDED PRODUCTS SECTION */}
+      {stage === "cart" && recommended.length > 0 && (
+        <section className="cart-recommended-section">
+          <div className="cart-rec-header">
+            <div>
+              <h2 className="cart-rec-title">
+                {lang === "ru" ? "Рекомендуемые товары" : lang === "en" ? "Recommended products" : "Tavsiya etiladigan uskunalar"}
+              </h2>
+              <p className="cart-rec-sub">
+                {lang === "ru"
+                  ? "Популярные медицинские аппараты и принадлежности к вашему заказу"
+                  : lang === "en"
+                  ? "Popular medical equipment and accessories for your order"
+                  : "Xaridingizga mos qo'shimcha tibbiy uskunalar va sarflov materiallari"}
+              </p>
+            </div>
+            <Link to="/catalog" className="btn ghost sm">
+              {lang === "ru" ? "Весь каталог →" : lang === "en" ? "Full catalog →" : "Barcha uskunalar →"}
+            </Link>
+          </div>
+
+          <div className="grid cart-rec-grid">
+            {recommended.map((p) => (
+              <ProductCard key={p.id} p={p} />
+            ))}
+          </div>
+        </section>
+      )}
     </main>
   );
 }
