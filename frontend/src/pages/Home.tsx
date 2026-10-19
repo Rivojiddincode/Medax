@@ -251,13 +251,32 @@ export default function Home() {
                   {HERO_SLIDES[currentSlide].badges.map((b, idx) => (
                     <div key={idx} className="uzum-badge-pill">
                       {b.type === "original" ? (
-                        <svg className="uzum-badge-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
-                          <path d="M10.41 1.76a2.25 2.25 0 0 1 3.18 0l1.24 1.25a2.25 2.25 0 0 0 1.95.63l1.74-.29a2.25 2.25 0 0 1 2.57 1.86l.28 1.74a2.25 2.25 0 0 0 1.21 1.67l1.58.8a2.25 2.25 0 0 1 1.13 2.87l-.66 1.63a2.25 2.25 0 0 0 0 2.06l.66 1.63a2.25 2.25 0 0 1-1.13 2.87l-1.58.8a2.25 2.25 0 0 0-1.21 1.67l-.28 1.74a2.25 2.25 0 0 1-2.57 1.86l-1.74-.29a2.25 2.25 0 0 0-1.95.63l-1.24 1.25a2.25 2.25 0 0 1-3.18 0l-1.24-1.25a2.25 2.25 0 0 0-1.95-.63l-1.74.29a2.25 2.25 0 0 1-2.57-1.86l-.28-1.74a2.25 2.25 0 0 0-1.21-1.67l-1.58-.8a2.25 2.25 0 0 1-1.13-2.87l.66-1.63a2.25 2.25 0 0 0 0-2.06l-.66-1.63a2.25 2.25 0 0 1 1.13-2.87l1.58-.8a2.25 2.25 0 0 0 1.21-1.67l.28-1.74a2.25 2.25 0 0 1 2.57-1.86l1.74.29a2.25 2.25 0 0 0 1.95-.63l1.24-1.25z" fill="#00c853" />
-                          <path d="M9 12.5l2 2 4.5-4.5" stroke="#ffffff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                        <svg className="uzum-badge-icon badge-icon-original" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                          <defs>
+                            <linearGradient id="origBadgeGrad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                              <stop stopColor="#10b981" />
+                              <stop offset="1" stopColor="#059669" />
+                            </linearGradient>
+                          </defs>
+                          <path
+                            d="M12 2l2.3 2.1 3.1-.5 1.5 2.7 3 1.1-.3 3.2 2.1 2.4-1.7 2.7.9 3.1-3 1.2-1.3 2.8-3.1-.3L12 22l-2.5-1.7-3.1.3-1.3-2.8-3-1.2.9-3.1-1.7-2.7 2.1-2.4-.3-3.2 3-1.1 1.5-2.7 3.1.5L12 2z"
+                            fill="url(#origBadgeGrad)"
+                          />
+                          <path d="M8.5 12.2l2.4 2.4 4.8-4.8" stroke="#ffffff" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                       ) : (
-                        <svg className="uzum-badge-icon" width="18" height="18" viewBox="0 0 24 24" fill="#0b0f19">
-                          <path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3z" />
+                        <svg className="uzum-badge-icon badge-icon-warranty" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                          <defs>
+                            <linearGradient id="warrBadgeGrad" x1="4" y1="2" x2="20" y2="23" gradientUnits="userSpaceOnUse">
+                              <stop stopColor="#0ea5e9" />
+                              <stop offset="1" stopColor="#0284c7" />
+                            </linearGradient>
+                          </defs>
+                          <path
+                            d="M12 2L4 5.5v5.8c0 5.4 3.4 10.4 8 11.7 4.6-1.3 8-6.3 8-11.7V5.5L12 2z"
+                            fill="url(#warrBadgeGrad)"
+                          />
+                          <path d="M9 12l2 2 4.2-4.2" stroke="#ffffff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                       )}
                       <span>{b.label[lang]}</span>

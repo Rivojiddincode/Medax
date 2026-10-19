@@ -60,7 +60,11 @@ export function CustomerAuthProvider({ children }: { children: React.ReactNode }
 
     setLoading(true);
     fetch("/api/customer/auth/me", {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "X-Authorization": `Bearer ${token}`,
+        "X-Customer-Token": token,
+      },
     })
       .then((res) => {
         const isJson = res.headers.get("content-type")?.includes("application/json");
@@ -79,7 +83,11 @@ export function CustomerAuthProvider({ children }: { children: React.ReactNode }
     if (!token) return;
     try {
       const res = await fetch("/api/customer/auth/me", {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "X-Authorization": `Bearer ${token}`,
+          "X-Customer-Token": token,
+        },
       });
       if (res.ok) {
         const data = await res.json();
@@ -193,6 +201,8 @@ export function CustomerAuthProvider({ children }: { children: React.ReactNode }
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
+        "X-Authorization": `Bearer ${token}`,
+        "X-Customer-Token": token,
       },
       body: JSON.stringify(params),
     });
@@ -208,6 +218,8 @@ export function CustomerAuthProvider({ children }: { children: React.ReactNode }
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
+        "X-Authorization": `Bearer ${token}`,
+        "X-Customer-Token": token,
       },
       body: JSON.stringify(params),
     });

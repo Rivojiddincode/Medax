@@ -41,8 +41,14 @@ declare module "express-serve-static-core" {
 }
 
 export function requireCustomerAuth(req: Request, _res: Response, next: NextFunction) {
-  const h = req.headers.authorization || "";
-  const token = h.startsWith("Bearer ") ? h.slice(7) : "";
+  const h =
+    req.headers.authorization ||
+    (req.headers["x-authorization"] as string) ||
+    (req.headers["x-customer-token"] as string) ||
+    (req.headers["x-access-token"] as string) ||
+    (req.query.token as string) ||
+    "";
+  const token = h.startsWith("Bearer ") ? h.slice(7).trim() : h.trim();
   if (!token) return next(new HttpError(401, "Iltimos, tizimga kiring"));
 
   try {
@@ -56,8 +62,14 @@ export function requireCustomerAuth(req: Request, _res: Response, next: NextFunc
 }
 
 export function optionalCustomerAuth(req: Request, _res: Response, next: NextFunction) {
-  const h = req.headers.authorization || "";
-  const token = h.startsWith("Bearer ") ? h.slice(7) : "";
+  const h =
+    req.headers.authorization ||
+    (req.headers["x-authorization"] as string) ||
+    (req.headers["x-customer-token"] as string) ||
+    (req.headers["x-access-token"] as string) ||
+    (req.query.token as string) ||
+    "";
+  const token = h.startsWith("Bearer ") ? h.slice(7).trim() : h.trim();
   if (token) {
     try {
       const decoded = jwt.verify(token, config.customerJwtSecret) as CustomerAuthPayload;

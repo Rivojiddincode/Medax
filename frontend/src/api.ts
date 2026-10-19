@@ -28,9 +28,17 @@ export async function api<T = any>(path: string, opts: Opts = {}): Promise<T> {
   }
   if (opts.token) {
     headers.Authorization = `Bearer ${opts.token}`;
+    headers["X-Authorization"] = `Bearer ${opts.token}`;
+    headers["X-Admin-Token"] = opts.token;
+    headers["X-Access-Token"] = opts.token;
   } else if (opts.admin) {
     const t = getToken();
-    if (t) headers.Authorization = `Bearer ${t}`;
+    if (t) {
+      headers.Authorization = `Bearer ${t}`;
+      headers["X-Authorization"] = `Bearer ${t}`;
+      headers["X-Admin-Token"] = t;
+      headers["X-Access-Token"] = t;
+    }
   }
 
   let res: Response;

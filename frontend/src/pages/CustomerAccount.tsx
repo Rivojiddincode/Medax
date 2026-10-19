@@ -98,7 +98,11 @@ export default function CustomerAccount() {
 
       const res = await fetch("/api/customer/auth/avatar", {
         method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token || ""}`,
+          "X-Authorization": `Bearer ${token || ""}`,
+          "X-Customer-Token": token || "",
+        },
         body: formData,
       });
 
@@ -120,7 +124,11 @@ export default function CustomerAccount() {
     if (!token) return;
     setLoadingOrders(true);
     fetch("/api/customer/orders", {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: {
+        Authorization: `Bearer ${token || ""}`,
+        "X-Authorization": `Bearer ${token || ""}`,
+        "X-Customer-Token": token || "",
+      },
     })
       .then((res) => {
         if (!res.ok) throw new Error("Yuklab bo'lmadi");
@@ -146,7 +154,9 @@ export default function CustomerAccount() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token || ""}`,
+          "X-Authorization": `Bearer ${token || ""}`,
+          "X-Customer-Token": token || "",
         },
         body: JSON.stringify({ reason: cancelReasonText.trim() }),
       });
